@@ -27,7 +27,7 @@ const LoginPage = () => {
         const authToken = 'auth-token-' + Date.now()
         
         // Set up authentication
-        login(authToken, false, '1.0.0', '1.0.0', 'Augentik Dashboard', 'Audit Intelligence Platform')
+        login(authToken, false, null, null, 'Augentik Dashboard', 'Audit Intelligence Platform')
         
         // Set session flag for version check
         sessionStorage.setItem('VERSION_CHECKED_FROM_LOGIN', 'true')
