@@ -7,9 +7,9 @@
     "system": "System"
   },
   "header": {
-    "documents": "Documents",
-    "knowledgeGraph": "Knowledge Graph",
-    "retrieval": "Retrieval",
+    "documents": "Legal Documents",
+    "knowledgeGraph": "Legal Knowledge Graph",
+    "retrieval": "Legal Research",
     "api": "API",
     "projectRepository": "Project Repository",
     "logout": "Logout",
@@ -160,7 +160,21 @@
       "unknown": "Unknown",
       "object": "Object",
       "group": "Group",
-      "technology": "Technology"
+      "technology": "Technology",
+      "law": "Law/Statute",
+      "case": "Legal Case",
+      "court": "Court",
+      "judge": "Judge",
+      "lawyer": "Lawyer/Attorney",
+      "contract": "Contract",
+      "regulation": "Regulation",
+      "procedure": "Legal Procedure",
+      "right": "Legal Right",
+      "obligation": "Legal Obligation",
+      "penalty": "Penalty/Fine",
+      "jurisdiction": "Jurisdiction",
+      "precedent": "Legal Precedent",
+      "doctrine": "Legal Doctrine"
     },
     "sideBar": {
       "settings": {
@@ -302,10 +316,10 @@
       "copyError": "Failed to copy text to clipboard"
     },
     "retrieval": {
-      "startPrompt": "Start a retrieval by typing your query below",
+      "startPrompt": "Ask your legal question in plain language - I'll help you understand the law",
       "clear": "Clear",
-      "send": "Send",
-      "placeholder": "Enter your query (Support prefix: /<Query Mode>)",
+      "send": "Ask",
+      "placeholder": "Ask a legal question (e.g., 'What are my rights as a tenant?' or 'How do I file a small claims case?')",
       "error": "Error: Failed to get response",
       "queryModeError": "Only supports the following query modes: {{modes}}",
       "queryModePrefixInvalid": "Invalid query mode prefix. Use: /<mode> [space] your query"

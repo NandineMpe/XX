@@ -1,10 +1,11 @@
-import { HashRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/state'
 import { navigationService } from '@/services/navigation'
 import { Toaster } from 'sonner'
 import App from './App'
 import LoginPage from '@/features/LoginPage'
+import LandingPage from '@/pages/LandingPage'
 import ThemeProvider from '@/components/ThemeProvider'
 
 const AppContent = () => {
@@ -52,7 +53,8 @@ const AppContent = () => {
   useEffect(() => {
     if (!initializing && !isAuthenticated) {
       const currentPath = window.location.hash.slice(1);
-      if (currentPath !== '/login') {
+      // Only redirect to login if trying to access protected routes (like /app)
+      if (currentPath.startsWith('/app')) {
         console.log('Not authenticated, redirecting to login');
         navigate('/login');
       }
@@ -61,17 +63,19 @@ const AppContent = () => {
 
   // Show nothing while initializing
   if (initializing) {
-    return null
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/*"
-        element={isAuthenticated ? <App /> : null}
-      />
-    </Routes>
+    <>
+      <Toaster position="top-center" />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/app" />} />
+        <Route path="/app/*" element={isAuthenticated ? <App /> : <Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </>
   )
 }
 

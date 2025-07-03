@@ -70,7 +70,7 @@ export const supportedFileTypes = {
 }
 
 export const SiteInfo = {
-  name: 'LightRAG',
+  name: 'Law for Lawymen - South Africa',
   home: '/',
-  github: 'https://github.com/HKUDS/LightRAG'
+  github: 'https://github.com/NandineMpe/LightRAG'
 }
