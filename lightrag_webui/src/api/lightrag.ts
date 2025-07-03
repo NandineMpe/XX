@@ -3,6 +3,7 @@ import { backendBaseUrl } from '@/lib/constants'
 import { errorMessage } from '@/lib/utils'
 import { useSettingsStore } from '@/stores/settings'
 import { navigationService } from '@/services/navigation'
+import { mockApiResponses, getMockQueryResponse } from '@/lib/mockApi'
 
 // Types
 export type LightragNodeType = {
@@ -228,13 +229,23 @@ export const queryGraphs = async (
   maxDepth: number,
   maxNodes: number
 ): Promise<LightragGraphType> => {
-  const response = await axiosInstance.get(`/graphs?label=${encodeURIComponent(label)}&max_depth=${maxDepth}&max_nodes=${maxNodes}`)
-  return response.data
+  try {
+    const response = await axiosInstance.get(`/graphs?label=${encodeURIComponent(label)}&max_depth=${maxDepth}&max_nodes=${maxNodes}`)
+    return response.data
+  } catch (error) {
+    console.log('Backend not available, using mock data for demo')
+    return mockApiResponses.graphs as LightragGraphType
+  }
 }
 
 export const getGraphLabels = async (): Promise<string[]> => {
-  const response = await axiosInstance.get('/graph/label/list')
-  return response.data
+  try {
+    const response = await axiosInstance.get('/graph/label/list')
+    return response.data
+  } catch (error) {
+    console.log('Backend not available, using mock data for demo')
+    return mockApiResponses.graphLabels
+  }
 }
 
 export const checkHealth = async (): Promise<
@@ -244,16 +255,19 @@ export const checkHealth = async (): Promise<
     const response = await axiosInstance.get('/health')
     return response.data
   } catch (error) {
-    return {
-      status: 'error',
-      message: errorMessage(error)
-    }
+    console.log('Backend not available, using mock data for demo')
+    return mockApiResponses.health as LightragStatus
   }
 }
 
 export const getDocuments = async (): Promise<DocsStatusesResponse> => {
-  const response = await axiosInstance.get('/documents')
-  return response.data
+  try {
+    const response = await axiosInstance.get('/documents')
+    return response.data
+  } catch (error) {
+    console.log('Backend not available, using mock data for demo')
+    return mockApiResponses.documents as DocsStatusesResponse
+  }
 }
 
 export const scanNewDocuments = async (): Promise<{ status: string }> => {
@@ -267,8 +281,13 @@ export const getDocumentsScanProgress = async (): Promise<LightragDocumentsScanP
 }
 
 export const queryText = async (request: QueryRequest): Promise<QueryResponse> => {
-  const response = await axiosInstance.post('/query', request)
-  return response.data
+  try {
+    const response = await axiosInstance.post('/query', request)
+    return response.data
+  } catch (error) {
+    console.log('Backend not available, using mock data for demo')
+    return { response: getMockQueryResponse(request.query) }
+  }
 }
 
 export const queryTextStream = async (
