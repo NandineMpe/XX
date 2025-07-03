@@ -7,9 +7,9 @@
     "system": "System"
   },
   "header": {
-    "documents": "Legal Documents",
-    "knowledgeGraph": "Legal Knowledge Graph",
-    "retrieval": "Legal Research",
+    "documents": "Audit Documents",
+    "knowledgeGraph": "Audit Knowledge Graph",
+    "retrieval": "Audit Research",
     "api": "API",
     "projectRepository": "Project Repository",
     "logout": "Logout",
@@ -161,20 +161,20 @@
       "object": "Object",
       "group": "Group",
       "technology": "Technology",
-      "law": "Law/Statute",
-      "case": "Legal Case",
-      "court": "Court",
-      "judge": "Judge",
-      "lawyer": "Lawyer/Attorney",
-      "contract": "Contract",
-      "regulation": "Regulation",
-      "procedure": "Legal Procedure",
-      "right": "Legal Right",
-      "obligation": "Legal Obligation",
-      "penalty": "Penalty/Fine",
-      "jurisdiction": "Jurisdiction",
-      "precedent": "Legal Precedent",
-      "doctrine": "Legal Doctrine"
+      "standard": "Audit Standard",
+      "procedure": "Audit Procedure",
+      "control": "Internal Control",
+      "risk": "Audit Risk",
+      "auditor": "Auditor",
+      "client": "Client Entity",
+      "assertion": "Management Assertion",
+      "evidence": "Audit Evidence",
+      "testing": "Substantive Testing",
+      "sampling": "Audit Sampling",
+      "materiality": "Materiality",
+      "opinion": "Audit Opinion",
+      "finding": "Audit Finding",
+      "recommendation": "Audit Recommendation"
     },
     "sideBar": {
       "settings": {
@@ -316,10 +316,10 @@
       "copyError": "Failed to copy text to clipboard"
     },
     "retrieval": {
-      "startPrompt": "Ask your legal question in plain language - I'll help you understand the law",
+      "startPrompt": "Ask your audit question in plain language - I'll help you understand audit procedures and standards",
       "clear": "Clear",
       "send": "Ask",
-      "placeholder": "Ask a legal question (e.g., 'What are my rights as a tenant?' or 'How do I file a small claims case?')",
+      "placeholder": "Ask an audit question (e.g., 'What are the key controls for revenue recognition?' or 'How do I test accounts payable?')",
       "error": "Error: Failed to get response",
       "queryModeError": "Only supports the following query modes: {{modes}}",
       "queryModePrefixInvalid": "Invalid query mode prefix. Use: /<mode> [space] your query"

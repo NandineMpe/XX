@@ -70,7 +70,7 @@ export const supportedFileTypes = {
 }
 
 export const SiteInfo = {
-  name: 'Law for Lawymen - South Africa',
+  name: 'Augentik - Audit Intelligence Platform',
   home: '/',
   github: 'https://github.com/NandineMpe/LightRAG'
 }
