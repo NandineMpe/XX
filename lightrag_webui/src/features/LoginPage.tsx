@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/state'
+import { loginToServer } from '@/api/lightrag'
 import { toast } from 'sonner'
 
 const LoginPage = () => {
@@ -18,33 +19,44 @@ const LoginPage = () => {
       return
     }
 
-    // Check hardcoded credentials
-    if (username === 'admin' && password === 'admin123') {
-      try {
-        setLoading(true)
-        
-        // Create a token for the authenticated user
-        const authToken = 'auth-token-' + Date.now()
-        
-        // Set up authentication
-        login(authToken, false, null, null, 'Augentik Dashboard', 'Audit Intelligence Platform')
-        
-        // Set session flag for version check
-        sessionStorage.setItem('VERSION_CHECKED_FROM_LOGIN', 'true')
-        
-        // Show success message
-        toast.success('Login successful! Welcome to Augentik.')
-        
-        // Navigate to dashboard
-        navigate('/app')
-      } catch (error) {
-        console.error('Login failed:', error)
+    try {
+      setLoading(true)
+      
+      // Call the backend login API
+      const response = await loginToServer(username, password)
+      
+      // Set up authentication with the received token
+      login(
+        response.access_token,
+        false, // not guest mode
+        response.core_version || null,
+        response.api_version || null,
+        response.webui_title || 'Augentik',
+        response.webui_description || 'Audit Intelligence Platform'
+      )
+      
+      // Set session flag for version check
+      sessionStorage.setItem('VERSION_CHECKED_FROM_LOGIN', 'true')
+      
+      // Show success message
+      toast.success('Login successful! Welcome to Augentik.')
+      
+      // Navigate to dashboard
+      navigate('/app')
+    } catch (error) {
+      console.error('Login failed:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.'
+      
+      // Handle specific error cases
+      if (errorMessage.includes('401')) {
+        toast.error('Invalid username or password')
+      } else if (errorMessage.includes('Network')) {
+        toast.error('Network error. Please check your connection.')
+      } else {
         toast.error('Login failed. Please try again.')
-      } finally {
-        setLoading(false)
       }
-    } else {
-      toast.error('Invalid credentials. Use admin/admin123')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -194,13 +206,16 @@ const LoginPage = () => {
       <form className="login-form" onSubmit={handleLogin}>
         <div className="login-logo-container">
           <img 
-            src="https://cvjdrblhcif4qupj.public.blob.vercel-storage.com/agentic%20logo-czxgzNbq2lmA1WMRnfeJzd16ZelMFs.png" 
-            alt="Agentic Logo" 
+            src="/augentik-logo.svg" 
+            alt="Augentik Logo" 
             className="login-logo"
           />
         </div>
         
-        <p className="login-heading">Login to Augentik</p>
+        <p className="login-heading">Augentik</p>
+        <p style={{ textAlign: 'center', color: '#888', fontSize: '0.9rem', marginTop: '-1.5em', marginBottom: '1em' }}>
+          Please enter your account and password to log in to the system
+        </p>
         
         <div className="login-field">
           <svg className="login-input-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -253,10 +268,10 @@ const LoginPage = () => {
           className="login-button3" 
           type="button"
           onClick={() => {
-            toast.info('Demo Credentials: admin / admin123')
+            toast.info('Available accounts: admin/admin123 or audit_user/audit456')
           }}
         >
-          Show Demo Credentials
+          Show Available Accounts
         </button>
       </form>
     </div>
