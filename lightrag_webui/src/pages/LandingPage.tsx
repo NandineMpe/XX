@@ -29,7 +29,7 @@ export default function LandingPage() {
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
 
   const handleLoginClick = () => {
-    navigate('/login');
+    window.location.href = 'https://lightrag-production-71c6.up.railway.app/webui/';
   };
 
   const liquidButtonStyle = {
