@@ -145,20 +145,19 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="flex h-screen w-screen items-center justify-center bg-black">
       <div className="absolute top-4 right-4 flex items-center gap-2">
-        <AppSettings className="bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-md" />
+        <AppSettings className="bg-gray-900/50 backdrop-blur-sm rounded-md" />
       </div>
-      <Card className="w-full max-w-[480px] shadow-lg mx-4">
+      <Card className="w-full max-w-[480px] shadow-2xl mx-4 bg-gray-900 border-gray-800">
         <CardHeader className="flex items-center justify-center space-y-2 pb-8 pt-6">
           <div className="flex flex-col items-center space-y-4">
-            <div className="flex items-center gap-3">
-              <img src="logo.svg" alt="LightRAG Logo" className="h-12 w-12" />
-              <ZapIcon className="size-10 text-emerald-400" aria-hidden="true" />
+            <div className="flex items-center justify-center">
+              <img src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png" alt="Augentik Logo" className="h-20 w-20" />
             </div>
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight">LightRAG</h1>
-              <p className="text-muted-foreground text-sm">
+              <h1 className="text-3xl font-bold tracking-tight text-white">Augentik</h1>
+              <p className="text-gray-400 text-sm">
                 {t('login.description')}
               </p>
             </div>
@@ -167,7 +166,7 @@ const LoginPage = () => {
         <CardContent className="px-8 pb-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex items-center gap-4">
-              <label htmlFor="username-input" className="text-sm font-medium w-16 shrink-0">
+              <label htmlFor="username-input" className="text-sm font-medium w-16 shrink-0 text-gray-300">
                 {t('login.username')}
               </label>
               <Input
@@ -176,11 +175,11 @@ const LoginPage = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="h-11 flex-1"
+                className="h-11 flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-orange-500"
               />
             </div>
             <div className="flex items-center gap-4">
-              <label htmlFor="password-input" className="text-sm font-medium w-16 shrink-0">
+              <label htmlFor="password-input" className="text-sm font-medium w-16 shrink-0 text-gray-300">
                 {t('login.password')}
               </label>
               <Input
@@ -190,12 +189,12 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-11 flex-1"
+                className="h-11 flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-orange-500"
               />
             </div>
             <Button
               type="submit"
-              className="w-full h-11 text-base font-medium mt-2"
+              className="w-full h-11 text-base font-medium mt-2 bg-orange-600 hover:bg-orange-700 text-white border-0"
               disabled={loading}
             >
               {loading ? t('login.loggingIn') : t('login.loginButton')}

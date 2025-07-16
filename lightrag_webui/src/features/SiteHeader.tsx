@@ -105,16 +105,6 @@ export default function SiteHeader() {
 
       <nav className="w-[200px] flex items-center justify-end">
         <div className="flex items-center gap-2">
-          {versionDisplay && (
-            <span className="text-xs text-gray-500 dark:text-gray-400 mr-1">
-              v{versionDisplay}
-            </span>
-          )}
-          <Button variant="ghost" size="icon" side="bottom" tooltip={t('header.projectRepository')}>
-            <a href={SiteInfo.github} target="_blank" rel="noopener noreferrer">
-              <GithubIcon className="size-4" aria-hidden="true" />
-            </a>
-          </Button>
           <AppSettings />
           {!isGuestMode && (
             <Button
