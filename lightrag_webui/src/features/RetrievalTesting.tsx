@@ -351,17 +351,7 @@ export default function RetrievalTesting() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex shrink-0 items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={clearMessages}
-            disabled={isLoading}
-            size="sm"
-          >
-            <EraserIcon />
-            {t('retrievePanel.retrieval.clear')}
-          </Button>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
           <div className="flex-1 relative">
             <label htmlFor="query-input" className="sr-only">
               {t('retrievePanel.retrieval.placeholder')}
@@ -379,13 +369,26 @@ export default function RetrievalTesting() {
             />
             {/* Error message below input */}
             {inputError && (
-              <div className="absolute left-0 top-full mt-1 text-xs text-red-500">{inputError}</div>
+              <div className="mt-1 text-xs text-red-500">{inputError}</div>
             )}
           </div>
-          <Button type="submit" variant="default" disabled={isLoading} size="sm">
-            <SendIcon />
-            {t('retrievePanel.retrieval.send')}
-          </Button>
+          <div className="flex gap-2 w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={clearMessages}
+              disabled={isLoading}
+              size="sm"
+              className="flex-1"
+            >
+              <EraserIcon />
+              {t('retrievePanel.retrieval.clear')}
+            </Button>
+            <Button type="submit" variant="default" disabled={isLoading} size="sm" className="flex-1">
+              <SendIcon />
+              {t('retrievePanel.retrieval.send')}
+            </Button>
+          </div>
         </form>
       </div>
       <QuerySettings />

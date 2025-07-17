@@ -7,9 +7,9 @@
     "system": "System"
   },
   "header": {
-    "documents": "Documents",
-    "knowledgeGraph": "Knowledge Graph",
-    "retrieval": "Retrieval",
+    "auditQueries": "Audit Queries",
+    "knowledgeGraphVisualisations": "Knowledge Graph Visualisations",
+    "support": "Support",
     "api": "API",
     "projectRepository": "Project Repository",
     "logout": "Logout",
@@ -302,10 +302,10 @@
       "copyError": "Failed to copy text to clipboard"
     },
     "retrieval": {
-      "startPrompt": "Start a retrieval by typing your query below",
+      "startPrompt": "Start an audit query by typing your question below",
       "clear": "Clear",
       "send": "Send",
-      "placeholder": "Enter your query (Support prefix: /<Query Mode>)",
+      "placeholder": "Enter your audit query (e.g., 'List all transactions over $10,000')",
       "error": "Error: Failed to get response",
       "queryModeError": "Only supports the following query modes: {{modes}}",
       "queryModePrefixInvalid": "Invalid query mode prefix. Use: /<mode> [space] your query"

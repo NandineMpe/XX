@@ -184,7 +184,7 @@ const axiosInstance = axios.create({
 // Interceptor: add api key and check authentication
 axiosInstance.interceptors.request.use((config) => {
   const apiKey = useSettingsStore.getState().apiKey
-  const token = localStorage.getItem('LIGHTRAG-API-TOKEN');
+  const token = localStorage.getItem('AUGENTIK-API-TOKEN');
 
   // Always include token if it exists, regardless of path
   if (token) {
@@ -277,7 +277,7 @@ export const queryTextStream = async (
   onError?: (error: string) => void
 ) => {
   const apiKey = useSettingsStore.getState().apiKey;
-  const token = localStorage.getItem('LIGHTRAG-API-TOKEN');
+  const token = localStorage.getItem('AUGENTIK-API-TOKEN');
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     'Accept': 'application/x-ndjson',

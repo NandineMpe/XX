@@ -21,12 +21,12 @@ load_dotenv(dotenv_path=".env", override=False)
 
 class OllamaServerInfos:
     # Constants for emulated Ollama model information
-    LIGHTRAG_NAME = "lightrag"
-    LIGHTRAG_TAG = os.getenv("OLLAMA_EMULATING_MODEL_TAG", "latest")
-    LIGHTRAG_MODEL = f"{LIGHTRAG_NAME}:{LIGHTRAG_TAG}"
-    LIGHTRAG_SIZE = 7365960935  # it's a dummy value
-    LIGHTRAG_CREATED_AT = "2024-01-15T00:00:00Z"
-    LIGHTRAG_DIGEST = "sha256:lightrag"
+    AUGENTIK_NAME = "augentik"
+    AUGENTIK_TAG = os.getenv("OLLAMA_EMULATING_MODEL_TAG", "latest")
+    AUGENTIK_MODEL = f"{AUGENTIK_NAME}:{AUGENTIK_TAG}"
+    AUGENTIK_SIZE = 7365960935  # it's a dummy value
+    AUGENTIK_CREATED_AT = "2024-01-15T00:00:00Z"
+    AUGENTIK_DIGEST = "sha256:augentik"
 
 
 ollama_server_infos = OllamaServerInfos()
@@ -177,7 +177,7 @@ def parse_args() -> argparse.Namespace:
         "--simulated-model-name",
         type=str,
         default=get_env_value(
-            "SIMULATED_MODEL_NAME", ollama_server_infos.LIGHTRAG_MODEL
+            "SIMULATED_MODEL_NAME", ollama_server_infos.AUGENTIK_MODEL
         ),
         help="Number of conversation history turns to include (default: from env or 3)",
     )
@@ -292,7 +292,7 @@ def parse_args() -> argparse.Namespace:
     args.guest_token_expire_hours = get_env_value("GUEST_TOKEN_EXPIRE_HOURS", 24, int)
     args.jwt_algorithm = get_env_value("JWT_ALGORITHM", "HS256")
 
-    ollama_server_infos.LIGHTRAG_MODEL = args.simulated_model_name
+    ollama_server_infos.AUGENTIK_MODEL = args.simulated_model_name
 
     return args
 

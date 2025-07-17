@@ -7,16 +7,17 @@ import { useAuthStore } from '@/stores/state'
 import { cn } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 import { navigationService } from '@/services/navigation'
-import { ZapIcon, GithubIcon, LogOutIcon } from 'lucide-react'
+import { ZapIcon, LogOutIcon } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip'
 
 interface NavigationTabProps {
   value: string
   currentTab: string
   children: React.ReactNode
+  onClick?: () => void
 }
 
-function NavigationTab({ value, currentTab, children }: NavigationTabProps) {
+function NavigationTab({ value, currentTab, children, onClick }: NavigationTabProps) {
   return (
     <TabsTrigger
       value={value}
@@ -24,6 +25,7 @@ function NavigationTab({ value, currentTab, children }: NavigationTabProps) {
         'cursor-pointer px-2 py-1 transition-all',
         currentTab === value ? '!bg-emerald-400 !text-zinc-50' : 'hover:bg-background/60'
       )}
+      onClick={onClick}
     >
       {children}
     </TabsTrigger>
@@ -32,22 +34,20 @@ function NavigationTab({ value, currentTab, children }: NavigationTabProps) {
 
 function TabsNavigation() {
   const currentTab = useSettingsStore.use.currentTab()
+  const setCurrentTab = useSettingsStore.use.setCurrentTab()
   const { t } = useTranslation()
 
   return (
     <div className="flex h-8 self-center">
       <TabsList className="h-full gap-2">
-        <NavigationTab value="documents" currentTab={currentTab}>
-          {t('header.documents')}
+        <NavigationTab value="audit-queries" currentTab={currentTab} onClick={() => setCurrentTab('audit-queries')}>
+          {t('header.auditQueries')}
         </NavigationTab>
-        <NavigationTab value="knowledge-graph" currentTab={currentTab}>
-          {t('header.knowledgeGraph')}
+        <NavigationTab value="knowledge-graph" currentTab={currentTab} onClick={() => setCurrentTab('knowledge-graph')}>
+          {t('header.knowledgeGraphVisualisations')}
         </NavigationTab>
-        <NavigationTab value="retrieval" currentTab={currentTab}>
-          {t('header.retrieval')}
-        </NavigationTab>
-        <NavigationTab value="api" currentTab={currentTab}>
-          {t('header.api')}
+        <NavigationTab value="support" currentTab={currentTab} onClick={() => setCurrentTab('support')}>
+          {t('header.support')}
         </NavigationTab>
       </TabsList>
     </div>
@@ -56,11 +56,7 @@ function TabsNavigation() {
 
 export default function SiteHeader() {
   const { t } = useTranslation()
-  const { isGuestMode, coreVersion, apiVersion, username, webuiTitle, webuiDescription } = useAuthStore()
-
-  const versionDisplay = (coreVersion && apiVersion)
-    ? `${coreVersion}/${apiVersion}`
-    : null;
+  const { isGuestMode, username, webuiTitle, webuiDescription } = useAuthStore()
 
   const handleLogout = () => {
     navigationService.navigateToLogin();
@@ -71,7 +67,7 @@ export default function SiteHeader() {
       <div className="min-w-[200px] w-auto flex items-center">
         <a href={webuiPrefix} className="flex items-center gap-2">
           <ZapIcon className="size-4 text-emerald-400" aria-hidden="true" />
-          <span className="font-bold md:inline-block">{SiteInfo.name}</span>
+          <span className="font-bold md:inline-block">Augentik</span>
         </a>
         {webuiTitle && (
           <div className="flex items-center">
@@ -103,22 +99,20 @@ export default function SiteHeader() {
         )}
       </div>
 
-      <nav className="w-[200px] flex items-center justify-end">
-        <div className="flex items-center gap-2">
-          <AppSettings />
-          {!isGuestMode && (
-            <Button
-              variant="ghost"
-              size="icon"
-              side="bottom"
-              tooltip={`${t('header.logout')} (${username})`}
-              onClick={handleLogout}
-            >
-              <LogOutIcon className="size-4" aria-hidden="true" />
-            </Button>
-          )}
-        </div>
-      </nav>
+      <div className="flex items-center gap-2">
+        <AppSettings />
+        {!isGuestMode && (
+          <Button
+            variant="ghost"
+            size="icon"
+            side="bottom"
+            tooltip={`${t('header.logout')} (${username})`}
+            onClick={handleLogout}
+          >
+            <LogOutIcon className="size-4" aria-hidden="true" />
+          </Button>
+        )}
+      </div>
     </header>
   )
 }

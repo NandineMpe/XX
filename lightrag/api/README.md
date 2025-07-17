@@ -1,6 +1,6 @@
-# LightRAG Server and WebUI
+# Augentik Server and WebUI
 
-The LightRAG Server is designed to provide a Web UI and API support. The Web UI facilitates document indexing, knowledge graph exploration, and a simple RAG query interface. LightRAG Server also provides an Ollama-compatible interface, aiming to emulate LightRAG as an Ollama chat model. This allows AI chat bots, such as Open WebUI, to access LightRAG easily.
+The Augentik Server is designed to provide a Web UI and API support. The Web UI facilitates document indexing, knowledge graph exploration, and a simple RAG query interface. Augentik Server also provides an Ollama-compatible interface, aiming to emulate Augentik as an Ollama chat model. This allows AI chat bots, such as Open WebUI, to access Augentik easily.
 
 ![image-20250323122538997](./README.assets/image-20250323122538997.png)
 
@@ -15,33 +15,33 @@ The LightRAG Server is designed to provide a Web UI and API support. The Web UI 
 * Install from PyPI
 
 ```bash
-pip install "lightrag-hku[api]"
+pip install "augentik-hku[api]"
 ```
 
 * Installation from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/HKUDS/lightrag.git
+git clone https://github.com/HKUDS/augentik.git
 
 # Change to the repository directory
-cd lightrag
+cd augentik
 
 # create a Python virtual environment if necessary
 # Install in editable mode with API support
 pip install -e ".[api]"
 ```
 
-### Before Starting LightRAG Server
+### Before Starting Augentik Server
 
-LightRAG necessitates the integration of both an LLM (Large Language Model) and an Embedding Model to effectively execute document indexing and querying operations. Prior to the initial deployment of the LightRAG server, it is essential to configure the settings for both the LLM and the Embedding Model. LightRAG supports binding to various LLM/Embedding backends:
+Augentik necessitates the integration of both an LLM (Large Language Model) and an Embedding Model to effectively execute document indexing and querying operations. Prior to the initial deployment of the Augentik server, it is essential to configure the settings for both the LLM and the Embedding Model. Augentik supports binding to various LLM/Embedding backends:
 
 * ollama
 * lollms
 * openai or openai compatible
 * azure_openai
 
-It is recommended to use environment variables to configure the LightRAG Server. There is an example environment variable file named `env.example` in the root directory of the project. Please copy this file to the startup directory and rename it to `.env`. After that, you can modify the parameters related to the LLM and Embedding models in the `.env` file. It is important to note that the LightRAG Server will load the environment variables from `.env` into the system environment variables each time it starts. **LightRAG Server will prioritize the settings in the system environment variables to .env file**.
+It is recommended to use environment variables to configure the Augentik Server. There is an example environment variable file named `env.example` in the root directory of the project. Please copy this file to the startup directory and rename it to `.env`. After that, you can modify the parameters related to the LLM and Embedding models in the `.env` file. It is important to note that the Augentik Server will load the environment variables from `.env` into the system environment variables each time it starts. **Augentik Server will prioritize the settings in the system environment variables to .env file**.
 
 > Since VS Code with the Python extension may automatically load the .env file in the integrated terminal, please open a new terminal session after each modification to the .env file.
 
@@ -81,22 +81,22 @@ EMBEDDING_DIM=1024
 # EMBEDDING_BINDING_API_KEY=your_api_key
 ```
 
-### Starting LightRAG Server
+### Starting Augentik Server
 
-The LightRAG Server supports two operational modes:
+The Augentik Server supports two operational modes:
 * The simple and efficient Uvicorn mode:
 
 ```
-lightrag-server
+augentik-server
 ```
 * The multiprocess Gunicorn + Uvicorn mode (production mode, not supported on Windows environments):
 
 ```
-lightrag-gunicorn --workers 4
+augentik-gunicorn --workers 4
 ```
 The `.env` file **must be placed in the startup directory**.
 
-Upon launching, the LightRAG Server will create a documents directory (default is `./inputs`) and a data directory (default is `./rag_storage`). This allows you to initiate multiple instances of LightRAG Server from different directories, with each instance configured to listen on a distinct network port.
+Upon launching, the Augentik Server will create a documents directory (default is `./inputs`) and a data directory (default is `./rag_storage`). This allows you to initiate multiple instances of Augentik Server from different directories, with each instance configured to listen on a distinct network port.
 
 Here are some commonly used startup parameters:
 
@@ -106,34 +106,34 @@ Here are some commonly used startup parameters:
 - `--log-level`: Logging level (default: INFO)
 - `--input-dir`: Specifying the directory to scan for documents (default: ./inputs)
 
-> - The requirement for the .env file to be in the startup directory is intentionally designed this way. The purpose is to support users in launching multiple LightRAG instances simultaneously, allowing different .env files for different instances.
-> - **After changing the .env file, you need to open a new terminal to make  the new settings take effect.** This because the LightRAG Server will load the environment variables from .env into the system environment variables each time it starts, and LightRAG Server will prioritize the settings in the system environment variables.
+> - The requirement for the .env file to be in the startup directory is intentionally designed this way. The purpose is to support users in launching multiple Augentik instances simultaneously, allowing different .env files for different instances.
+> - **After changing the .env file, you need to open a new terminal to make  the new settings take effect.** This because the Augentik Server will load the environment variables from .env into the system environment variables each time it starts, and Augentik Server will prioritize the settings in the system environment variables.
 
-### Launching LightRAG Server with Docker
+### Launching Augentik Server with Docker
 
 * Clone the repository:
 ```shell
-git clone https://github.com/HKUDS/LightRAG.git
-cd LightRAG
+git clone https://github.com/HKUDS/Augentik.git
+cd Augentik
 ```
 
 * Prepare the .env file:
     Create a personalized .env file from sample file `env.example`. Configure the LLM and embedding parameters according to your requirements.
 
-* Start the LightRAG Server using the following commands:
+* Start the Augentik Server using the following commands:
 ```shell
 docker compose up
 # Use --build if you have pulled a new version
 docker compose up --build
 ```
 
-### Deploying LightRAG Server with docker without cloneing the repository
+### Deploying Augentik Server with docker without cloneing the repository
 
-* Create a working folder for LightRAG Server:
+* Create a working folder for Augentik Server:
 
 ```shell
-mkdir lightrag
-cd lightrag
+mkdir augentik
+cd augentik
 ```
 
 * Create a docker compose file named docker-compose.yml:
@@ -141,9 +141,9 @@ cd lightrag
 
 ```yaml
 services:
-  lightrag:
-    container_name: lightrag
-    image: ghcr.io/hkuds/lightrag:latest
+  augentik:
+    container_name: augentik
+    image: ghcr.io/hkuds/augentik:latest
     ports:
       - "${PORT:-9621}:9621"
     volumes:
@@ -160,12 +160,12 @@ services:
 * Prepare the .env file:
     Create a personalized .env file from sample file `env.example`. Configure the LLM and embedding parameters according to your requirements.
 
-* Start the LightRAG Server using the following commands:
+* Start the Augentik Server using the following commands:
 ```shell
 docker compose up
 ```
 
-> Historical versions of LightRAG docker images can be found here: [LightRAG Docker Images]( https://github.com/HKUDS/LightRAG/pkgs/container/lightrag)
+> Historical versions of Augentik docker images can be found here: [Augentik Docker Images]( https://github.com/HKUDS/Augentik/pkgs/container/augentik)
 
 ### Auto scan on startup
 
@@ -179,9 +179,9 @@ When starting any of the servers with the `--auto-scan-at-startup` parameter, th
 
 ### Multiple workers for Gunicorn + Uvicorn
 
-The LightRAG Server can operate in the `Gunicorn + Uvicorn` preload mode. Gunicorn's multiple worker (multiprocess) capability prevents document indexing tasks from blocking RAG queries. Using CPU-exhaustive document extraction tools, such as docling, can lead to the entire system being blocked in pure Uvicorn mode.
+The Augentik Server can operate in the `Gunicorn + Uvicorn` preload mode. Gunicorn's multiple worker (multiprocess) capability prevents document indexing tasks from blocking RAG queries. Using CPU-exhaustive document extraction tools, such as docling, can lead to the entire system being blocked in pure Uvicorn mode.
 
-Though LightRAG Server uses one worker to process the document indexing pipeline, with the async task support of Uvicorn, multiple files can be processed in parallel. The bottleneck of document indexing speed mainly lies with the LLM. If your LLM supports high concurrency, you can accelerate document indexing by increasing the concurrency level of the LLM. Below are several environment variables related to concurrent processing, along with their default values:
+Though Augentik Server uses one worker to process the document indexing pipeline, with the async task support of Uvicorn, multiple files can be processed in parallel. The bottleneck of document indexing speed mainly lies with the LLM. If your LLM supports high concurrency, you can accelerate document indexing by increasing the concurrency level of the LLM. Below are several environment variables related to concurrent processing, along with their default values:
 
 ```
 ### Number of worker processes, not greater than (2 x number_of_cores) + 1
@@ -192,44 +192,44 @@ MAX_PARALLEL_INSERT=2
 MAX_ASYNC=4
 ```
 
-### Install LightRAG as a Linux Service
+### Install Augentik as a Linux Service
 
-Create your service file `lightrag.service` from the sample file: `lightrag.service.example`. Modify the `WorkingDirectory` and `ExecStart` in the service file:
+Create your service file `augentik.service` from the sample file: `augentik.service.example`. Modify the `WorkingDirectory` and `ExecStart` in the service file:
 
 ```text
-Description=LightRAG Ollama Service
-WorkingDirectory=<lightrag installed directory>
-ExecStart=<lightrag installed directory>/lightrag/api/lightrag-api
+Description=Augentik Ollama Service
+WorkingDirectory=<augentik installed directory>
+ExecStart=<augentik installed directory>/augentik/api/augentik-api
 ```
 
-Modify your service startup script: `lightrag-api`. Change your Python virtual environment activation command as needed:
+Modify your service startup script: `augentik-api`. Change your Python virtual environment activation command as needed:
 
 ```shell
 #!/bin/bash
 
 # your python virtual environment activation
-source /home/netman/lightrag-xyj/venv/bin/activate
-# start lightrag api server
-lightrag-server
+source /home/netman/augentik-xyj/venv/bin/activate
+# start augentik api server
+augentik-server
 ```
 
-Install LightRAG service. If your system is Ubuntu, the following commands will work:
+Install Augentik service. If your system is Ubuntu, the following commands will work:
 
 ```shell
-sudo cp lightrag.service /etc/systemd/system/
+sudo cp augentik.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl start lightrag.service
-sudo systemctl status lightrag.service
-sudo systemctl enable lightrag.service
+sudo systemctl start augentik.service
+sudo systemctl status augentik.service
+sudo systemctl enable augentik.service
 ```
 
 ## Ollama Emulation
 
-We provide Ollama-compatible interfaces for LightRAG, aiming to emulate LightRAG as an Ollama chat model. This allows AI chat frontends supporting Ollama, such as Open WebUI, to access LightRAG easily.
+We provide Ollama-compatible interfaces for Augentik, aiming to emulate Augentik as an Ollama chat model. This allows AI chat frontends supporting Ollama, such as Open WebUI, to access Augentik easily.
 
-### Connect Open WebUI to LightRAG
+### Connect Open WebUI to Augentik
 
-After starting the lightrag-server, you can add an Ollama-type connection in the Open WebUI admin panel. And then a model named `lightrag:latest` will appear in Open WebUI's model management interface. Users can then send queries to LightRAG through the chat interface. You should install LightRAG as a service for this use case.
+After starting the augentik-server, you can add an Ollama-type connection in the Open WebUI admin panel. And then a model named `augentik:latest` will appear in Open WebUI's model management interface. Users can then send queries to Augentik through the chat interface. You should install Augentik as a service for this use case.
 
 Open WebUI uses an LLM to do the session title and session keyword generation task. So the Ollama chat completion API detects and forwards OpenWebUI session-related requests directly to the underlying LLM. Screenshot from Open WebUI:
 
@@ -237,9 +237,9 @@ Open WebUI uses an LLM to do the session title and session keyword generation ta
 
 ### Choose Query mode in chat
 
-The default query mode is `hybrid` if you send a message (query) from the Ollama interface of LightRAG. You can select query mode by sending a message with a query prefix.
+The default query mode is `hybrid` if you send a message (query) from the Ollama interface of Augentik. You can select query mode by sending a message with a query prefix.
 
-A query prefix in the query string can determine which LightRAG query mode is used to generate the response for the query. The supported prefixes include:
+A query prefix in the query string can determine which Augentik query mode is used to generate the response for the query. The supported prefixes include:
 
 ```
 /local
@@ -257,15 +257,15 @@ A query prefix in the query string can determine which LightRAG query mode is us
 /mixcontext
 ```
 
-For example, the chat message `/mix What's LightRAG?` will trigger a mix mode query for LightRAG. A chat message without a query prefix will trigger a hybrid mode query by default.
+For example, the chat message `/mix What's Augentik?` will trigger a mix mode query for Augentik. A chat message without a query prefix will trigger a hybrid mode query by default.
 
-`/bypass` is not a LightRAG query mode; it will tell the API Server to pass the query directly to the underlying LLM, including the chat history. So the user can use the LLM to answer questions based on the chat history. If you are using Open WebUI as a front end, you can just switch the model to a normal LLM instead of using the `/bypass` prefix.
+`/bypass` is not a Augentik query mode; it will tell the API Server to pass the query directly to the underlying LLM, including the chat history. So the user can use the LLM to answer questions based on the chat history. If you are using Open WebUI as a front end, you can just switch the model to a normal LLM instead of using the `/bypass` prefix.
 
-`/context` is also not a LightRAG query mode; it will tell LightRAG to return only the context information prepared for the LLM. You can check the context if it's what you want, or process the context by yourself.
+`/context` is also not a Augentik query mode; it will tell Augentik to return only the context information prepared for the LLM. You can check the context if it's what you want, or process the context by yourself.
 
 ### Add user prompt in chat
 
-When using LightRAG for content queries, avoid combining the search process with unrelated output processing, as this significantly impacts query effectiveness. User prompt is specifically designed to address this issue — it does not participate in the RAG retrieval phase, but rather guides the LLM on how to process the retrieved results after the query is completed. We can append square brackets to the query prefix to provide the LLM with the user prompt:
+When using Augentik for content queries, avoid combining the search process with unrelated output processing, as this significantly impacts query effectiveness. User prompt is specifically designed to address this issue — it does not participate in the RAG retrieval phase, but rather guides the LLM on how to process the retrieved results after the query is completed. We can append square brackets to the query prefix to provide the LLM with the user prompt:
 
 ```
 /[Use mermaid format for diagrams] Please draw a character relationship diagram for Scrooge
@@ -274,12 +274,12 @@ When using LightRAG for content queries, avoid combining the search process with
 
 ## API Key and Authentication
 
-By default, the LightRAG Server can be accessed without any authentication. We can configure the server with an API Key or account credentials to secure it.
+By default, the Augentik Server can be accessed without any authentication. We can configure the server with an API Key or account credentials to secure it.
 
 * API Key:
 
 ```
-LIGHTRAG_API_KEY=your-secure-api-key-here
+AUGENTIK_API_KEY=your-secure-api-key-here
 WHITELIST_PATHS=/health,/api/*
 ```
 
@@ -287,7 +287,7 @@ WHITELIST_PATHS=/health,/api/*
 
 * Account credentials (the Web UI requires login before access can be granted):
 
-LightRAG API Server implements JWT-based authentication using the HS256 algorithm. To enable secure access control, the following environment variables are required:
+Augentik API Server implements JWT-based authentication using the HS256 algorithm. To enable secure access control, the following environment variables are required:
 
 ```bash
 # For jwt auth
@@ -306,9 +306,9 @@ Azure OpenAI API can be created using the following commands in Azure CLI (you n
 
 ```bash
 # Change the resource group name, location, and OpenAI resource name as needed
-RESOURCE_GROUP_NAME=LightRAG
+RESOURCE_GROUP_NAME=Augentik
 LOCATION=swedencentral
-RESOURCE_NAME=LightRAG-OpenAI
+RESOURCE_NAME=Augentik-OpenAI
 
 az login
 az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
@@ -336,7 +336,7 @@ EMBEDDING_BINDING=azure_openai
 EMBEDDING_MODEL=your-embedding-deployment-name
 ```
 
-## LightRAG Server Configuration in Detail
+## Augentik Server Configuration in Detail
 
 The API Server can be configured in three ways (highest priority first):
 
@@ -348,7 +348,7 @@ Most of the configurations come with default settings; check out the details in 
 
 ### LLM and Embedding Backend Supported
 
-LightRAG supports binding to various LLM/Embedding backends:
+Augentik supports binding to various LLM/Embedding backends:
 
 * ollama
 * lollms
@@ -364,7 +364,7 @@ It's very common to set `ENABLE_LLM_CACHE_FOR_EXTRACT` to true for a test enviro
 
 ### Storage Types Supported
 
-LightRAG uses 4 types of storage for different purposes:
+Augentik uses 4 types of storage for different purposes:
 
 * KV_STORAGE: llm response cache, text chunks, document information
 * VECTOR_STORAGE: entities vectors, relation vectors, chunks vectors
@@ -417,15 +417,15 @@ MongoDocStatusStorage       MongoDB
 You can select storage implementation by environment variables. You can set the following environment variables to a specific storage implementation name before the first start of the API Server:
 
 ```
-LIGHTRAG_KV_STORAGE=PGKVStorage
-LIGHTRAG_VECTOR_STORAGE=PGVectorStorage
-LIGHTRAG_GRAPH_STORAGE=PGGraphStorage
-LIGHTRAG_DOC_STATUS_STORAGE=PGDocStatusStorage
+AUGENTIK_KV_STORAGE=PGKVStorage
+AUGENTIK_VECTOR_STORAGE=PGVectorStorage
+AUGENTIK_GRAPH_STORAGE=PGGraphStorage
+AUGENTIK_DOC_STATUS_STORAGE=PGDocStatusStorage
 ```
 
-You cannot change storage implementation selection after adding documents to LightRAG. Data migration from one storage implementation to another is not supported yet. For further information, please read the sample env file or config.ini file.
+You cannot change storage implementation selection after adding documents to Augentik. Data migration from one storage implementation to another is not supported yet. For further information, please read the sample env file or config.ini file.
 
-### LightRAG API Server Command Line Options
+### Augentik API Server Command Line Options
 
 | Parameter             | Default       | Description                                                                                                                     |
 | --------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -438,7 +438,7 @@ You cannot change storage implementation selection after adding documents to Lig
 | --timeout             | 150           | Timeout in seconds. None for infinite timeout (not recommended)                                                                 |
 | --log-level           | INFO          | Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)                                                                           |
 | --verbose             | -             | Verbose debug output (True, False)                                                                                              |
-| --key                 | None          | API key for authentication. Protects the LightRAG server against unauthorized access                                            |
+| --key                 | None          | API key for authentication. Protects the Augentik server against unauthorized access                                            |
 | --ssl                 | False         | Enable HTTPS                                                                                                                    |
 | --ssl-certfile        | None          | Path to SSL certificate file (required if --ssl is enabled)                                                                     |
 | --ssl-keyfile         | None          | Path to SSL private key file (required if --ssl is enabled)                                                                     |
@@ -480,10 +480,10 @@ EMBEDDING_BINDING_HOST=http://localhost:11434
 
 ### For JWT Auth
 # AUTH_ACCOUNTS='admin:admin123,user1:pass456'
-# TOKEN_SECRET=your-key-for-LightRAG-API-Server-xxx
+# TOKEN_SECRET=your-key-for-Augentik-API-Server-xxx
 # TOKEN_EXPIRE_HOURS=48
 
-# LIGHTRAG_API_KEY=your-secure-api-key-here-123
+# AUGENTIK_API_KEY=your-secure-api-key-here-123
 # WHITELIST_PATHS=/api/*
 # WHITELIST_PATHS=/health,/api/*
 
@@ -491,7 +491,7 @@ EMBEDDING_BINDING_HOST=http://localhost:11434
 
 ## Document and Chunk  Processing Login Clarification
 
-The document processing pipeline in LightRAG is somewhat complex and is divided into two primary stages: the Extraction stage (entity and relationship extraction) and the Merging stage (entity and relationship merging). There are two key parameters that control pipeline concurrency: the maximum number of files processed in parallel (MAX_PARALLEL_INSERT) and the maximum number of concurrent LLM requests (MAX_ASYNC). The workflow is described as follows:
+The document processing pipeline in Augentik is somewhat complex and is divided into two primary stages: the Extraction stage (entity and relationship extraction) and the Merging stage (entity and relationship merging). There are two key parameters that control pipeline concurrency: the maximum number of files processed in parallel (MAX_PARALLEL_INSERT) and the maximum number of concurrent LLM requests (MAX_ASYNC). The workflow is described as follows:
 
 1. MAX_PARALLEL_INSERT controls the number of files processed in parallel during the extraction stage.
 2. MAX_ASYNC limits the total number of concurrent LLM requests in the system, including those for querying, extraction, and merging. LLM requests have different priorities: query operations have the highest priority, followed by merging, and then extraction.
@@ -608,18 +608,18 @@ curl http://localhost:9621/api/tags
 
 #### POST /api/chat
 
-Handle chat completion requests. Routes user queries through LightRAG by selecting query mode based on query prefix. Detects and forwards OpenWebUI session-related requests (for metadata generation task) directly to the underlying LLM.
+Handle chat completion requests. Routes user queries through Augentik by selecting query mode based on query prefix. Detects and forwards OpenWebUI session-related requests (for metadata generation task) directly to the underlying LLM.
 
 ```shell
 curl -N -X POST http://localhost:9621/api/chat -H "Content-Type: application/json" -d \
-  '{"model":"lightrag:latest","messages":[{"role":"user","content":"猪八戒是谁"}],"stream":true}'
+  '{"model":"augentik:latest","messages":[{"role":"user","content":"猪八戒是谁"}],"stream":true}'
 ```
 
 > For more information about Ollama API, please visit: [Ollama API documentation](https://github.com/ollama/ollama/blob/main/docs/api.md)
 
 #### POST /api/generate
 
-Handle generate completion requests. For compatibility purposes, the request is not processed by LightRAG, and will be handled by the underlying LLM model.
+Handle generate completion requests. For compatibility purposes, the request is not processed by Augentik, and will be handled by the underlying LLM model.
 
 ### Utility Endpoints:
 

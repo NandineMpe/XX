@@ -6,7 +6,7 @@ import { Message, QueryRequest } from '@/api/lightrag'
 
 type Theme = 'dark' | 'light' | 'system'
 type Language = 'en' | 'zh' | 'fr' | 'ar' | 'zh_TW'
-type Tab = 'documents' | 'knowledge-graph' | 'retrieval' | 'api'
+export type TabType = 'audit-queries' | 'knowledge-graph' | 'support';
 
 interface SettingsState {
   // Document manager settings
@@ -65,8 +65,8 @@ interface SettingsState {
   enableHealthCheck: boolean
   setEnableHealthCheck: (enable: boolean) => void
 
-  currentTab: Tab
-  setCurrentTab: (tab: Tab) => void
+  currentTab: TabType
+  setCurrentTab: (tab: TabType) => void
 }
 
 const useSettingsStoreBase = create<SettingsState>()(
@@ -98,7 +98,7 @@ const useSettingsStoreBase = create<SettingsState>()(
 
       apiKey: null,
 
-      currentTab: 'documents',
+      currentTab: 'audit-queries',
       showFileName: false,
 
       retrievalHistory: [],
@@ -153,7 +153,7 @@ const useSettingsStoreBase = create<SettingsState>()(
 
       setApiKey: (apiKey: string | null) => set({ apiKey }),
 
-      setCurrentTab: (tab: Tab) => set({ currentTab: tab }),
+      setCurrentTab: (tab: TabType) => set({ currentTab: tab }),
 
       setRetrievalHistory: (history: Message[]) => set({ retrievalHistory: history }),
 

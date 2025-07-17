@@ -1,6 +1,6 @@
-# LightRAG WebUI
+# Augentik WebUI
 
-LightRAG WebUI is a React-based web interface for interacting with the LightRAG system. It provides a user-friendly interface for querying, managing, and exploring LightRAG's functionalities.
+Augentik WebUI is a React-based web interface for interacting with the Augentik system. It provides a user-friendly interface for querying, managing, and exploring Augentik's functionalities.
 
 ## Installation
 

@@ -61,7 +61,7 @@ class NavigationService {
     // Store current username before logout for comparison during next login
     const currentUsername = useAuthStore.getState().username;
     if (currentUsername) {
-      localStorage.setItem('LIGHTRAG-PREVIOUS-USER', currentUsername);
+      localStorage.setItem('AUGENTIK-PREVIOUS-USER', currentUsername);
     }
 
     // Reset application state but preserve history

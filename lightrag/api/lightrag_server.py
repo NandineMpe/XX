@@ -154,8 +154,8 @@ def create_app(args):
 
     # Initialize FastAPI
     app_kwargs = {
-        "title": "LightRAG Server API",
-        "description": "Providing API for LightRAG core, Web UI and Ollama Model Emulation"
+        "title": "Augentik Server API",
+        "description": "Providing API for Augentik core, Web UI and Ollama Model Emulation"
         + "(With authentication)"
         if api_key
         else "",

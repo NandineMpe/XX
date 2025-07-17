@@ -173,6 +173,15 @@ export default function DocumentManager() {
   // State for document status filter
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
+  // 1. Add state: selectedDoc, showViewModal, showDeleteDialog
+  // 2. On TableRow click, set selectedDoc and open action modal
+  // 3. Add modal/dialog for viewing document details (showViewModal)
+  // 4. Add confirmation dialog for deleting document (showDeleteDialog)
+  // 5. Implement deleteDocument function using API
+  const [selectedDoc, setSelectedDoc] = useState<DocStatusResponse | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
 
   // Handle sort column click
   const handleSort = (field: SortField) => {

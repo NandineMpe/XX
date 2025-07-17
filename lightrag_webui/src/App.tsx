@@ -102,7 +102,7 @@ function App() {
         setInitializing(true); // Start initialization
 
         // Get version info
-        const token = localStorage.getItem('LIGHTRAG-API-TOKEN');
+        const token = localStorage.getItem('AUGENTIK-API-TOKEN');
         const status = await getAuthStatus();
 
         // If auth is not configured and a new token is returned, use the new token
@@ -166,7 +166,7 @@ function App() {
               <div className="min-w-[200px] w-auto flex items-center">
                 <a href={webuiPrefix} className="flex items-center gap-2">
                   <ZapIcon className="size-4 text-emerald-400" aria-hidden="true" />
-                  <span className="font-bold md:inline-block">{SiteInfo.name}</span>
+                  <span className="font-bold md:inline-block">Augentik</span>
                 </a>
               </div>
 

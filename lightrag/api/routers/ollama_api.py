@@ -242,16 +242,16 @@ class OllamaAPI:
             return OllamaTagResponse(
                 models=[
                     {
-                        "name": self.ollama_server_infos.LIGHTRAG_MODEL,
-                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                        "size": self.ollama_server_infos.LIGHTRAG_SIZE,
-                        "digest": self.ollama_server_infos.LIGHTRAG_DIGEST,
-                        "modified_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                        "name": self.ollama_server_infos.AUGENTIK_MODEL,
+                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                        "size": self.ollama_server_infos.AUGENTIK_SIZE,
+                        "digest": self.ollama_server_infos.AUGENTIK_DIGEST,
+                        "modified_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                         "details": {
                             "parent_model": "",
                             "format": "gguf",
-                            "family": self.ollama_server_infos.LIGHTRAG_NAME,
-                            "families": [self.ollama_server_infos.LIGHTRAG_NAME],
+                            "family": self.ollama_server_infos.AUGENTIK_NAME,
+                            "families": [self.ollama_server_infos.AUGENTIK_NAME],
                             "parameter_size": "13B",
                             "quantization_level": "Q4_0",
                         },
