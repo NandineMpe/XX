@@ -1,3 +1,6 @@
+// If you see type errors for missing modules, run:
+// bun add -d @types/react @types/react-dom @types/react-i18next @types/lucide-react @types/sonner
+// or use npm/yarn equivalent
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsStore } from '@/stores/settings'
@@ -187,7 +190,7 @@ export default function DocumentManager() {
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       // Toggle sort direction if clicking the same field
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
+      setSortDirection((prev: SortDirection) => prev === 'asc' ? 'desc' : 'asc')
     } else {
       // Set new sort field with default desc direction
       setSortField(field)
@@ -197,8 +200,8 @@ export default function DocumentManager() {
 
   // Sort documents based on current sort field and direction
   const sortDocuments = useCallback((documents: DocStatusResponse[]) => {
-    return [...documents].sort((a, b) => {
-      let valueA, valueB;
+    return [...documents].sort((a: DocStatusResponse, b: DocStatusResponse) => {
+      let valueA: string | number, valueB: string | number;
 
       // Special handling for ID field based on showFileName setting
       if (sortField === 'id' && showFileName) {
@@ -209,8 +212,8 @@ export default function DocumentManager() {
         valueB = b.id;
       } else {
         // Date fields
-        valueA = new Date(a[sortField]).getTime();
-        valueB = new Date(b[sortField]).getTime();
+        valueA = new Date((a as any)[sortField]).getTime();
+        valueB = new Date((b as any)[sortField]).getTime();
       }
 
       // Apply sort direction
@@ -237,7 +240,8 @@ export default function DocumentManager() {
     if (statusFilter === 'all') {
       // When filter is 'all', include documents from all statuses
       Object.entries(docs.statuses).forEach(([status, documents]) => {
-        documents.forEach(doc => {
+        const docsArr = documents as DocStatusResponse[];
+        docsArr.forEach((doc: DocStatusResponse) => {
           allDocuments.push({
             ...doc,
             status: status as DocStatus
@@ -246,8 +250,8 @@ export default function DocumentManager() {
       });
     } else {
       // When filter is specific status, only include documents from that status
-      const documents = docs.statuses[statusFilter] || [];
-      documents.forEach(doc => {
+      const documents: DocStatusResponse[] = docs.statuses[statusFilter] || [];
+      documents.forEach((doc: DocStatusResponse) => {
         allDocuments.push({
           ...doc,
           status: statusFilter
@@ -270,8 +274,9 @@ export default function DocumentManager() {
     const counts: Record<string, number> = { all: 0 };
 
     Object.entries(docs.statuses).forEach(([status, documents]) => {
-      counts[status as DocStatus] = documents.length;
-      counts.all += documents.length;
+      const docsArr = documents as DocStatusResponse[];
+      counts[status as DocStatus] = docsArr.length;
+      counts.all += docsArr.length;
     });
 
     return counts;
@@ -664,7 +669,7 @@ export default function DocumentManager() {
                       </TableRow>
                     </TableHeader>
                     <TableBody className="text-sm overflow-auto">
-                      {filteredAndSortedDocs && filteredAndSortedDocs.map((doc) => (
+                      {filteredAndSortedDocs && filteredAndSortedDocs.map((doc: DocStatusWithStatus) => (
                         <TableRow key={doc.id}>
                           <TableCell className="truncate font-mono overflow-visible max-w-[250px]">
                             {showFileName ? (

@@ -1,3 +1,6 @@
+// If you see type errors for missing modules, run:
+// bun add -d @types/react @types/react-dom @types/react-i18next @types/lucide-react @types/sonner
+// or use npm/yarn equivalent
 import { useState, useCallback, useEffect, useRef } from 'react'
 import ThemeProvider from '@/components/ThemeProvider'
 import TabVisibilityProvider from '@/contexts/TabVisibilityProvider'
@@ -197,17 +200,14 @@ function App() {
             >
               <SiteHeader />
               <div className="relative grow">
-                <TabsContent value="documents" className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
-                  <DocumentManager />
+                <TabsContent value="audit-queries" className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
+                  <RetrievalTesting />
                 </TabsContent>
                 <TabsContent value="knowledge-graph" className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
                   <GraphViewer />
                 </TabsContent>
-                <TabsContent value="retrieval" className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
-                  <RetrievalTesting />
-                </TabsContent>
-                <TabsContent value="api" className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
-                  <ApiSite />
+                <TabsContent value="support" className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
+                  <DocumentManager />
                 </TabsContent>
               </div>
             </Tabs>

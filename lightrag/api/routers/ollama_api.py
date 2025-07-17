@@ -241,21 +241,21 @@ class OllamaAPI:
             """Return available models acting as an Ollama server"""
             return OllamaTagResponse(
                 models=[
-                    {
-                        "name": self.ollama_server_infos.AUGENTIK_MODEL,
-                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
-                        "size": self.ollama_server_infos.AUGENTIK_SIZE,
-                        "digest": self.ollama_server_infos.AUGENTIK_DIGEST,
-                        "modified_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
-                        "details": {
-                            "parent_model": "",
-                            "format": "gguf",
-                            "family": self.ollama_server_infos.AUGENTIK_NAME,
-                            "families": [self.ollama_server_infos.AUGENTIK_NAME],
-                            "parameter_size": "13B",
-                            "quantization_level": "Q4_0",
-                        },
-                    }
+                    OllamaModel(
+                        name=self.ollama_server_infos.AUGENTIK_MODEL,
+                        model=self.ollama_server_infos.AUGENTIK_MODEL,
+                        size=self.ollama_server_infos.AUGENTIK_SIZE,
+                        digest=self.ollama_server_infos.AUGENTIK_DIGEST,
+                        modified_at=self.ollama_server_infos.AUGENTIK_CREATED_AT,
+                        details=OllamaModelDetails(
+                            parent_model="",
+                            format="gguf",
+                            family=self.ollama_server_infos.AUGENTIK_NAME,
+                            families=[self.ollama_server_infos.AUGENTIK_NAME],
+                            parameter_size="13B",
+                            quantization_level="Q4_0"
+                        )
+                    )
                 ]
             )
 
@@ -264,22 +264,22 @@ class OllamaAPI:
             """List Running Models - returns currently running models"""
             return OllamaPsResponse(
                 models=[
-                    {
-                        "name": self.ollama_server_infos.LIGHTRAG_MODEL,
-                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                        "size": self.ollama_server_infos.LIGHTRAG_SIZE,
-                        "digest": self.ollama_server_infos.LIGHTRAG_DIGEST,
-                        "details": {
-                            "parent_model": "",
-                            "format": "gguf",
-                            "family": "llama",
-                            "families": ["llama"],
-                            "parameter_size": "7.2B",
-                            "quantization_level": "Q4_0",
-                        },
-                        "expires_at": "2050-12-31T14:38:31.83753-07:00",
-                        "size_vram": self.ollama_server_infos.LIGHTRAG_SIZE,
-                    }
+                    OllamaRunningModel(
+                        name=self.ollama_server_infos.AUGENTIK_MODEL,
+                        model=self.ollama_server_infos.AUGENTIK_MODEL,
+                        size=self.ollama_server_infos.AUGENTIK_SIZE,
+                        digest=self.ollama_server_infos.AUGENTIK_DIGEST,
+                        details=OllamaRunningModelDetails(
+                            parent_model="",
+                            format="gguf",
+                            family=self.ollama_server_infos.AUGENTIK_NAME,
+                            families=[self.ollama_server_infos.AUGENTIK_NAME],
+                            parameter_size="13B",
+                            quantization_level="Q4_0"
+                        ),
+                        expires_at="2050-12-31T14:38:31.83753-07:00",
+                        size_vram=self.ollama_server_infos.AUGENTIK_SIZE
+                    )
                 ]
             )
 
@@ -295,6 +295,7 @@ class OllamaAPI:
             try:
                 # Parse the request body manually
                 request = await parse_request_body(raw_request, OllamaGenerateRequest)
+                assert isinstance(request, OllamaGenerateRequest)
 
                 query = request.prompt
                 start_time = time.time_ns()
@@ -322,8 +323,8 @@ class OllamaAPI:
                                 total_response = response
 
                                 data = {
-                                    "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                    "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                    "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                    "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                     "response": response,
                                     "done": False,
                                 }
@@ -335,8 +336,8 @@ class OllamaAPI:
                                 eval_time = last_chunk_time - first_chunk_time
 
                                 data = {
-                                    "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                    "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                    "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                    "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                     "done": True,
                                     "total_duration": total_time,
                                     "load_duration": 0,
@@ -357,8 +358,8 @@ class OllamaAPI:
 
                                             total_response += chunk
                                             data = {
-                                                "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                                "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                                "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                                "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                                 "response": chunk,
                                                 "done": False,
                                             }
@@ -374,8 +375,8 @@ class OllamaAPI:
 
                                     # Send error message to client
                                     error_data = {
-                                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                        "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                        "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                         "response": f"\n\nError: {error_msg}",
                                         "done": False,
                                     }
@@ -383,8 +384,8 @@ class OllamaAPI:
 
                                     # Send final message to close the stream
                                     final_data = {
-                                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                        "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                        "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                         "done": True,
                                     }
                                     yield f"{json.dumps(final_data, ensure_ascii=False)}\n"
@@ -397,8 +398,8 @@ class OllamaAPI:
                                 eval_time = last_chunk_time - first_chunk_time
 
                                 data = {
-                                    "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                    "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                    "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                    "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                     "done": True,
                                     "total_duration": total_time,
                                     "load_duration": 0,
@@ -440,8 +441,8 @@ class OllamaAPI:
                     eval_time = last_chunk_time - first_chunk_time
 
                     return {
-                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                        "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                        "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                         "response": str(response_text),
                         "done": True,
                         "total_duration": total_time,
@@ -467,6 +468,7 @@ class OllamaAPI:
             try:
                 # Parse the request body manually
                 request = await parse_request_body(raw_request, OllamaChatRequest)
+                assert isinstance(request, OllamaChatRequest)
 
                 # Get all messages
                 messages = request.messages
@@ -538,8 +540,8 @@ class OllamaAPI:
                                 total_response = response
 
                                 data = {
-                                    "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                    "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                    "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                    "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                     "message": {
                                         "role": "assistant",
                                         "content": response,
@@ -555,8 +557,8 @@ class OllamaAPI:
                                 eval_time = last_chunk_time - first_chunk_time
 
                                 data = {
-                                    "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                    "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                    "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                    "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                     "done": True,
                                     "total_duration": total_time,
                                     "load_duration": 0,
@@ -577,8 +579,8 @@ class OllamaAPI:
 
                                             total_response += chunk
                                             data = {
-                                                "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                                "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                                "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                                "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                                 "message": {
                                                     "role": "assistant",
                                                     "content": chunk,
@@ -598,8 +600,8 @@ class OllamaAPI:
 
                                     # Send error message to client
                                     error_data = {
-                                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                        "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                        "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                         "message": {
                                             "role": "assistant",
                                             "content": f"\n\nError: {error_msg}",
@@ -611,8 +613,8 @@ class OllamaAPI:
 
                                     # Send final message to close the stream
                                     final_data = {
-                                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                        "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                        "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                         "done": True,
                                     }
                                     yield f"{json.dumps(final_data, ensure_ascii=False)}\n"
@@ -626,8 +628,8 @@ class OllamaAPI:
                                 eval_time = last_chunk_time - first_chunk_time
 
                                 data = {
-                                    "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                                    "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                                    "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                                    "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                                     "message": {
                                         "role": "assistant",
                                         "content": "",
@@ -690,8 +692,8 @@ class OllamaAPI:
                     eval_time = last_chunk_time - first_chunk_time
 
                     return {
-                        "model": self.ollama_server_infos.LIGHTRAG_MODEL,
-                        "created_at": self.ollama_server_infos.LIGHTRAG_CREATED_AT,
+                        "model": self.ollama_server_infos.AUGENTIK_MODEL,
+                        "created_at": self.ollama_server_infos.AUGENTIK_CREATED_AT,
                         "message": {
                             "role": "assistant",
                             "content": str(response_text),

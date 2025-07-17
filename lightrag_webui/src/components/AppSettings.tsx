@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { GearIcon } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { backendBaseUrl } from '@/lib/constants'
@@ -53,7 +53,7 @@ export default function AppSettings({ className }: AppSettingsProps) {
         onClick={() => setOpened(true)}
         aria-label={t('settings.openSettings', 'Open Settings')}
       >
-        <GearIcon className="h-5 w-5" />
+        <Settings className="h-5 w-5" />
       </button>
       {opened && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
