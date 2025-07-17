@@ -1,0 +1,38 @@
+# Exclude frontend from Railway deployment
+lightrag_webui/
+
+# Exclude development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Exclude test files
+tests/
+examples/
+
+# Exclude documentation
+docs/
+README.assets/
+
+# Exclude Kubernetes deployment files
+k8s-deploy/
+
+# Exclude Docker files (Railway uses its own containerization)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Exclude git files
+.git/
+.gitignore
+.gitattributes
+
+# Exclude pre-commit config
+.pre-commit-config.yaml
+
+# Exclude local development files
+lightrag.log
+rag_storage/
+inputs/ 
