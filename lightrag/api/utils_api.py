@@ -200,7 +200,7 @@ def display_splash_screen(args: argparse.Namespace) -> None:
         ASCIIColors.white("    ├─ SSL Key: ", end="")
         ASCIIColors.yellow(f"{args.ssl_keyfile}")
     ASCIIColors.white("    ├─ Ollama Emulating Model: ", end="")
-    ASCIIColors.yellow(f"{ollama_server_infos.LIGHTRAG_MODEL}")
+    ASCIIColors.yellow(f"{ollama_server_infos.AUGENTIK_MODEL}")
     ASCIIColors.white("    ├─ Log Level: ", end="")
     ASCIIColors.yellow(f"{args.log_level}")
     ASCIIColors.white("    ├─ Verbose Debug: ", end="")

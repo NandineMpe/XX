@@ -529,8 +529,8 @@ export default function DocumentManager() {
                 <FilterIcon className="h-4 w-4" />
                 <div className="flex gap-1" dir={i18n.dir()}>
                   <Button
-                    size="sm"
                     variant={statusFilter === 'all' ? 'secondary' : 'outline'}
+                    size="sm"
                     onClick={() => setStatusFilter('all')}
                     className={cn(
                       statusFilter === 'all' && 'bg-gray-100 dark:bg-gray-900 font-medium border border-gray-400 dark:border-gray-500 shadow-sm'
@@ -539,8 +539,8 @@ export default function DocumentManager() {
                     {t('documentPanel.documentManager.status.all')} ({documentCounts.all})
                   </Button>
                   <Button
-                    size="sm"
                     variant={statusFilter === 'processed' ? 'secondary' : 'outline'}
+                    size="sm"
                     onClick={() => setStatusFilter('processed')}
                     className={cn(
                       documentCounts.processed > 0 ? 'text-green-600' : 'text-gray-500',
@@ -550,8 +550,8 @@ export default function DocumentManager() {
                     {t('documentPanel.documentManager.status.completed')} ({documentCounts.processed || 0})
                   </Button>
                   <Button
-                    size="sm"
                     variant={statusFilter === 'processing' ? 'secondary' : 'outline'}
+                    size="sm"
                     onClick={() => setStatusFilter('processing')}
                     className={cn(
                       documentCounts.processing > 0 ? 'text-blue-600' : 'text-gray-500',
@@ -561,8 +561,8 @@ export default function DocumentManager() {
                     {t('documentPanel.documentManager.status.processing')} ({documentCounts.processing || 0})
                   </Button>
                   <Button
-                    size="sm"
                     variant={statusFilter === 'pending' ? 'secondary' : 'outline'}
+                    size="sm"
                     onClick={() => setStatusFilter('pending')}
                     className={cn(
                       documentCounts.pending > 0 ? 'text-yellow-600' : 'text-gray-500',
@@ -572,8 +572,8 @@ export default function DocumentManager() {
                     {t('documentPanel.documentManager.status.pending')} ({documentCounts.pending || 0})
                   </Button>
                   <Button
-                    size="sm"
                     variant={statusFilter === 'failed' ? 'secondary' : 'outline'}
+                    size="sm"
                     onClick={() => setStatusFilter('failed')}
                     className={cn(
                       documentCounts.failed > 0 ? 'text-red-600' : 'text-gray-500',
