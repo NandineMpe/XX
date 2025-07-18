@@ -75,9 +75,8 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             <img
               src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png"
               alt="Augentik Logo"
-              className="mx-auto mb-2 w-20 h-20 object-contain"
+              className="mx-auto mb-2 w-32 h-32 object-contain"
             />
-            <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight text-center">{title}</h1>
             <p className="animate-element animate-delay-200 text-muted-foreground text-center">{description}</p>
 
             <form className="space-y-5" onSubmit={onSignIn}>

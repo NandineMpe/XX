@@ -22,7 +22,7 @@ const LoginPage = () => {
     event.preventDefault();
     // Simulate guest login (no credentials required)
     login('guest-token', true, 'core-version', 'api-version', 'Augentik', '');
-    navigate('/');
+    window.location.href = 'https://lightrag-production-71c6.up.railway.app';
   };
 
   return (
