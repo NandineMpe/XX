@@ -7,6 +7,7 @@ import Spline from '@splinetool/react-spline';
 import styles from './LandingNavButtons.module.css';
 
 const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
+const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png';
 
 const INTEGRATION_LOGOS = [
   { src: 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/svg%20logos/azure.svg', alt: 'Azure' },
@@ -91,13 +92,8 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start overflow-x-hidden">
-      {/* Navbar */}
+      {/* Navbar - nav buttons left, logo right */}
       <nav className="w-full flex items-center justify-between px-8 py-4 bg-black/80 shadow-md fixed top-0 left-0 z-50">
-        <img
-          src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/favicon.ico"
-          alt="Augentik Logo"
-          className="w-12 h-12 mr-4"
-        />
         <div className={styles.container}>
           <div className={styles.btn}>
             <a href="#action">Augentik In Action</a>
@@ -112,10 +108,16 @@ const LandingPage = () => {
             <a onClick={() => navigate('/login')}>Sign In</a>
           </div>
         </div>
+        <img
+          src={logoUrl}
+          alt="Augentik Logo"
+          className="w-14 h-14 ml-6"
+          style={{ minWidth: 48, minHeight: 48 }}
+        />
       </nav>
 
-      {/* Hero Section with Spline filling the area */}
-      <section className="w-full flex flex-col items-center justify-center pt-24 pb-0 px-0 bg-black relative min-h-[60vh]" style={{ minHeight: '60vh', height: '60vh', maxHeight: '100vh', overflow: 'hidden' }}>
+      {/* Hero Section with Spline filling the area, below navbar */}
+      <section className="w-full flex flex-col items-center justify-center pt-32 pb-0 px-0 bg-black relative" style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
         <div className="absolute inset-0 w-full h-full">
           <Spline scene={splineUrl} style={{ width: '100%', height: '100%' }} />
         </div>
@@ -166,7 +168,7 @@ const LandingPage = () => {
       </section>
 
       {/* Our Vision Section */}
-      <section id="vision" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-white text-black relative z-10">
+      <section id="vision" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
         <div className="max-w-3xl w-full mx-auto text-center">
           <h2 className="text-4xl font-bold mb-4 tracking-tight">Our Vision</h2>
           <p className="text-lg mb-8">Augentik performs the audit before your auditor comes in to ask questions. We believe in proactive, intelligent audit automation—so you can focus on your business, not your inbox.</p>
@@ -174,11 +176,11 @@ const LandingPage = () => {
       </section>
 
       {/* Integrations Section */}
-      <section id="integrations" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-gray-50 text-black relative z-10">
-        <div className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg bg-white/80 p-10 flex flex-col items-center">
-          <div className="uppercase text-xs tracking-widest text-gray-500 mb-2">Integrations</div>
+      <section id="integrations" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
+        <div className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg bg-black/80 p-10 flex flex-col items-center">
+          <div className="uppercase text-xs tracking-widest text-gray-400 mb-2">Integrations</div>
           <h2 className="text-3xl font-bold mb-2 text-center">Built to plug right into your stack</h2>
-          <p className="text-base text-gray-700 mb-8 text-center">Integrate with the tools you already use and deploy to your own infrastructure, communication, or documentation.</p>
+          <p className="text-base text-gray-300 mb-8 text-center">Integrate with the tools you already use and deploy to your own infrastructure, communication, or documentation.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 w-full items-center justify-items-center">
             {INTEGRATION_LOGOS.map((logo, idx) => (
               <img
@@ -189,28 +191,6 @@ const LandingPage = () => {
                 loading="lazy"
               />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How Augentik Works Section */}
-      <section id="how-it-works" className="w-full max-w-4xl py-20 px-4 flex flex-col items-center relative z-10">
-        <h2 className="text-3xl font-bold mb-8 text-center">How Augentik Works</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-gray-900 rounded-xl p-6 flex flex-col items-center shadow-lg">
-            <span className="text-4xl mb-4">🔍</span>
-            <h3 className="font-semibold text-xl mb-2">Ingest</h3>
-            <p className="text-gray-300 text-center">Upload your documents and data securely to the Augentik platform.</p>
-          </div>
-          <div className="bg-gray-900 rounded-xl p-6 flex flex-col items-center shadow-lg">
-            <span className="text-4xl mb-4">🧠</span>
-            <h3 className="font-semibold text-xl mb-2">Analyze</h3>
-            <p className="text-gray-300 text-center">Our AI-powered engine processes and analyzes your data for audit insights.</p>
-          </div>
-          <div className="bg-gray-900 rounded-xl p-6 flex flex-col items-center shadow-lg">
-            <span className="text-4xl mb-4">📊</span>
-            <h3 className="font-semibold text-xl mb-2">Report</h3>
-            <p className="text-gray-300 text-center">Get clear, actionable reports and recommendations instantly.</p>
           </div>
         </div>
       </section>
