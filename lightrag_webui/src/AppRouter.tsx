@@ -5,6 +5,7 @@ import { navigationService } from '@/services/navigation'
 import { Toaster } from 'sonner'
 import App from './App'
 import LoginPage from '@/features/LoginPage'
+import LandingPage from '@/features/LandingPage'
 import ThemeProvider from '@/components/ThemeProvider'
 
 const AppContent = () => {
@@ -52,9 +53,9 @@ const AppContent = () => {
   useEffect(() => {
     if (!initializing && !isAuthenticated) {
       const currentPath = window.location.hash.slice(1);
-      if (currentPath !== '/login') {
-        console.log('Not authenticated, redirecting to login');
-        navigate('/login');
+      if (currentPath !== '/login' && currentPath !== '/') {
+        console.log('Not authenticated, redirecting to landing page');
+        navigate('/');
       }
     }
   }, [initializing, isAuthenticated, navigate]);
@@ -68,8 +69,12 @@ const AppContent = () => {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route
+        path="/"
+        element={isAuthenticated ? <App /> : <LandingPage />}
+      />
+      <Route
         path="/*"
-        element={isAuthenticated ? <App /> : null}
+        element={isAuthenticated ? <App /> : <LandingPage />}
       />
     </Routes>
   )
