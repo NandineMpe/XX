@@ -66,7 +66,12 @@ export default function SiteHeader() {
     <header className="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 flex h-10 w-full border-b px-4 backdrop-blur">
       <div className="min-w-[200px] w-auto flex items-center">
         <a href={webuiPrefix} className="flex items-center gap-2">
-          <ZapIcon className="size-4 text-emerald-400" aria-hidden="true" />
+          <img
+            src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png"
+            alt="Augentik Logo"
+            className="h-7 w-7 object-contain mr-2"
+            style={{ display: 'inline-block', verticalAlign: 'middle' }}
+          />
           <span className="font-bold md:inline-block">Augentik</span>
         </a>
         {webuiTitle && (

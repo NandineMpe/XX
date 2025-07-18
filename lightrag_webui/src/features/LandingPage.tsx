@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Spline from '@splinetool/react-spline';
 import styles from './LandingNavButtons.module.css';
-import { Sparkles } from "@/components/ui/sparkles"
 import { TubelightNavBar } from "@/components/ui/tubelight-navbar"
 import { Home, User, Layers, LogIn } from "lucide-react"
 import SectionWithMockup from "@/components/ui/section-with-mockup"
@@ -113,17 +112,30 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Augentik In Action Section */}
-      <SectionWithMockup
-        title={
-          <>Intelligent Supporting Document Retrieval</>
-        }
-        description={
-          <>Eliminate the back-and-forth of audit season by letting your system handle routine documentation requests with built-in agentic automation.<br /><br />When your external auditors send a request our system automatically reads and classifies the request, locates the appropriate documents from your internal repositories, and routes the results to you for one-click approval before sending them out. This system saves hours of manual searching, reduces delays in "Provided By Client" (PBC) items, and ensures consistency across audit cycles. It's especially helpful during peak periods when multiple auditors are reaching out across multiple entities.<br /><br />By reducing your team's audit burden, this feature allows you to stay focused on the business—not your inbox.</>
-        }
-        primaryImageSrc={""}
-        secondaryImageSrc={""}
-      />
+      {/* Augentik In Action Section with Tabs */}
+      <section id="action" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
+        <div className="max-w-4xl w-full mx-auto flex flex-col items-center">
+          <div className="flex space-x-4 mb-8">
+            {TABS.map((tabOption) => (
+              <button
+                key={tabOption.key}
+                onClick={() => setActiveTab(tabOption.key)}
+                className={`px-6 py-2 rounded-full font-semibold text-lg transition-colors focus:outline-none ${activeTab === tabOption.key ? 'bg-purple-900/40 text-white' : 'bg-black/40 text-gray-300 hover:bg-purple-900/20'}`}
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                {tabOption.label}
+              </button>
+            ))}
+          </div>
+          <SectionWithMockup
+            title={tab.heading}
+            description={tab.description}
+            primaryImageSrc={""}
+            secondaryImageSrc={""}
+            reverseLayout={activeTab === 'walkthroughs'}
+          />
+        </div>
+      </section>
 
       {/* Our Vision Section */}
       <section id="vision" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
@@ -137,11 +149,7 @@ const LandingPage = () => {
       <section id="integrations" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
         <div className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg bg-black/80 p-10 flex flex-col items-center relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
-            <Sparkles
-              density={1200}
-              className="absolute inset-x-0 bottom-0 h-full w-full [mask-image:radial-gradient(50%_50%,white,transparent_85%)]"
-              color="#8350e8"
-            />
+            {/* Sparkles removed */}
           </div>
           <div className="uppercase text-xs tracking-widest text-gray-400 mb-2 relative z-10">Integrations</div>
           <h2 className="text-3xl font-bold mb-2 text-center relative z-10">Built to plug right into your stack</h2>
@@ -159,6 +167,10 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      {/* Footer */}
+      <footer className="w-full bg-black text-gray-400 py-6 text-center mt-12 border-t border-gray-800" style={{ fontFamily: "'Playfair Display', serif" }}>
+        A Dreamweaver Venture Studio company
+      </footer>
     </div>
   );
 };
