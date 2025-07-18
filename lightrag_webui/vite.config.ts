@@ -1,8 +1,13 @@
 import { defineConfig } from 'vite'
 import path from 'path'
-import { webuiPrefix } from '@/lib/constants'
+import { webuiPrefix } from './src/lib/constants'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
+
+// Helper to safely access env vars
+function getEnvVar(key: string, defaultValue: any = undefined) {
+  return process.env[key] !== undefined ? process.env[key] : defaultValue;
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -15,7 +20,7 @@ export default defineConfig({
   // base: import.meta.env.VITE_BASE_URL || '/webui/',
   base: webuiPrefix,
   build: {
-    outDir: path.resolve(__dirname, '../lightrag/api/webui'),
+    outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
       output: {
@@ -56,19 +61,28 @@ export default defineConfig({
     }
   },
   server: {
-    proxy: import.meta.env.VITE_API_PROXY === 'true' && import.meta.env.VITE_API_ENDPOINTS ?
-      Object.fromEntries(
-        import.meta.env.VITE_API_ENDPOINTS.split(',').map(endpoint => [
-          endpoint,
-          {
-            target: import.meta.env.VITE_BACKEND_URL || 'http://localhost:9621',
-            changeOrigin: true,
-            rewrite: endpoint === '/api' ?
-              (path) => path.replace(/^\/api/, '') :
-              endpoint === '/docs' || endpoint === '/openapi.json' ?
-                (path) => path : undefined
-          }
-        ])
-      ) : {}
+    proxy: (() => {
+      // Try to get from import.meta.env, fallback to process.env
+      const VITE_API_PROXY = getEnvVar('VITE_API_PROXY', 'false');
+      const VITE_API_ENDPOINTS = getEnvVar('VITE_API_ENDPOINTS', '');
+      const VITE_BACKEND_URL = getEnvVar('VITE_BACKEND_URL', 'http://localhost:9621');
+      if (VITE_API_PROXY === 'true' && VITE_API_ENDPOINTS) {
+        return Object.fromEntries(
+          VITE_API_ENDPOINTS.split(',').map((endpoint: string) => [
+            endpoint,
+            {
+              target: VITE_BACKEND_URL,
+              changeOrigin: true,
+              rewrite: endpoint === '/api'
+                ? (path: string) => path.replace(/^\/api/, '')
+                : endpoint === '/docs' || endpoint === '/openapi.json'
+                  ? (path: string) => path
+                  : undefined
+            }
+          ])
+        );
+      }
+      return {};
+    })()
   }
 })
