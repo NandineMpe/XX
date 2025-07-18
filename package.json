@@ -3,5 +3,8 @@
   "private": true,
   "scripts": {
     "build-frontend-and-stage": "cd lightrag_webui && npm install && npm run build && cd .. && git add lightrag/api/webui"
+  },
+  "devDependencies": {
+    "vite": "^7.0.5"
   }
-} 
+}
