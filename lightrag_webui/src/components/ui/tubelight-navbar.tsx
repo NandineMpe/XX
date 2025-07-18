@@ -58,7 +58,7 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
             return (
               <a
                 key={item.name}
-                href="https://lightrag-production-71c6.up.railway.app/webui/login"
+                href="https://lightrag-production-71c6.up.railway.app/webui"
                 className={cn(
                   "relative cursor-pointer text-lg font-semibold px-6 py-2 rounded-full transition-colors flex items-center gap-2",
                   "text-white/80 hover:text-primary",
