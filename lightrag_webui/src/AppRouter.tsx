@@ -7,6 +7,7 @@ import App from './App'
 import LoginPage from '@/features/LoginPage'
 import LandingPage from '@/features/LandingPage'
 import ThemeProvider from '@/components/ThemeProvider'
+import SettingsPage from '@/features/SettingsPage';
 
 const AppContent = () => {
   const [initializing, setInitializing] = useState(true)
@@ -68,6 +69,7 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
       <Route
         path="/"
         element={isAuthenticated ? <App /> : <LandingPage />}
