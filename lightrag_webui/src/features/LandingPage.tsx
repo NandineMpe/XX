@@ -1,19 +1,45 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import Spline from '@splinetool/react-spline';
+
+const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start">
+      {/* Navbar */}
+      <nav className="w-full flex items-center justify-between px-8 py-4 bg-black/80 shadow-md fixed top-0 left-0 z-50">
+        <button
+          onClick={() => navigate('/login')}
+          className="px-6 py-2 rounded-full bg-emerald-500 text-white font-semibold shadow-lg hover:scale-105 transition text-base"
+        >
+          Sign In
+        </button>
+        <img
+          src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/favicon.ico"
+          alt="Augentik Logo"
+          className="w-12 h-12 ml-4"
+        />
+      </nav>
+
+      {/* Spline 3D Scene */}
+      <div className="w-full flex justify-center items-center pt-24 pb-8 bg-black">
+        <div className="w-full max-w-4xl h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+          <Spline scene={splineUrl} />
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="w-full flex flex-col items-center justify-center py-24 px-4 bg-gradient-to-b from-black via-gray-900 to-black">
-        <img src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/favicon.ico" alt="Augentik Logo" className="w-16 h-16 mb-6" />
+      <section className="w-full flex flex-col items-center justify-center pb-24 px-4 bg-gradient-to-b from-black via-gray-900 to-black">
         <h1 className="text-5xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">Audit.<span className="text-white">Reimagined</span></h1>
         <p className="text-lg max-w-2xl text-center mb-8 text-gray-200">
           Statutory audits don’t just cost money. They cost time, team focus, and peace of mind.<br />
           We’re here to help you take that time back.
         </p>
-        <div className="flex gap-4">
+        <div className="flex gap-4 mt-4">
           <a href="#how-it-works" className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold shadow-lg hover:scale-105 transition">Learn More</a>
-          <a href="#" className="px-6 py-3 rounded-full bg-white text-black font-semibold shadow-lg hover:scale-105 transition">Get Started</a>
         </div>
       </section>
 
