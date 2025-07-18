@@ -5,6 +5,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Spline from '@splinetool/react-spline';
 import styles from './LandingNavButtons.module.css';
+import { Sparkles } from "@/components/ui/sparkles"
+import { TubelightNavBar } from "@/components/ui/tubelight-navbar"
+import { Home, User, Layers, LogIn } from "lucide-react"
+import SectionWithMockup from "@/components/ui/section-with-mockup"
 
 const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
 const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png';
@@ -90,31 +94,17 @@ const LandingPage = () => {
   const [activeTab, setActiveTab] = useState('supporting');
   const tab = TABS.find(t => t.key === activeTab) || TABS[0];
 
+  const navItems = [
+    { name: 'Augentik In Action', url: '#action', icon: <Home /> },
+    { name: 'Our Vision', url: '#vision', icon: <User /> },
+    { name: 'Integrations', url: '#integrations', icon: <Layers /> },
+    { name: 'Sign In', url: '/login', icon: <LogIn /> },
+  ]
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start overflow-x-hidden">
-      {/* Navbar - nav buttons left, logo right */}
-      <nav className="w-full flex items-center justify-between px-8 py-4 bg-black/80 shadow-md fixed top-0 left-0 z-50">
-        <div className={styles.container}>
-          <div className={styles.btn}>
-            <a href="#action">Augentik In Action</a>
-          </div>
-          <div className={styles.btn}>
-            <a href="#vision">Our Vision</a>
-          </div>
-          <div className={styles.btn}>
-            <a href="#integrations">Integrations</a>
-          </div>
-          <div className={styles.btn}>
-            <a onClick={() => navigate('/login')}>Sign In</a>
-          </div>
-        </div>
-        <img
-          src={logoUrl}
-          alt="Augentik Logo"
-          className="w-14 h-14 ml-6"
-          style={{ minWidth: 48, minHeight: 48 }}
-        />
-      </nav>
+      {/* Tubelight Navbar */}
+      <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
       {/* Hero Section with Spline filling the area, below navbar */}
       <section className="w-full flex flex-col items-center justify-center pt-32 pb-0 px-0 bg-black relative" style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
@@ -124,48 +114,16 @@ const LandingPage = () => {
       </section>
 
       {/* Augentik In Action Section */}
-      <section id="action" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black relative z-10">
-        <h2 className="text-3xl font-bold mb-8 text-center">Augentik In Action</h2>
-        <div className="flex flex-col md:flex-row w-full max-w-5xl gap-8">
-          {/* Tabs */}
-          <div className="flex flex-col md:w-1/4 w-full mb-4 md:mb-0">
-            <div className="flex md:flex-col flex-row gap-2 md:gap-4">
-              {TABS.map(t => (
-                <button
-                  key={t.key}
-                  className={`px-4 py-2 rounded-full border border-gray-700 text-white font-semibold transition-all ${activeTab === t.key ? 'bg-white/10 border-purple-400' : 'bg-black/40 hover:bg-white/5'}`}
-                  onClick={() => setActiveTab(t.key)}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {/* Content */}
-          <div className="flex-1 flex flex-col md:flex-row gap-8">
-            <div className="flex-1 min-w-[260px]">
-              <h3 className="text-xl font-bold mb-2">{tab.heading}</h3>
-              <p className="text-gray-300 mb-4">{tab.subheading}</p>
-              <details className="mb-4">
-                <summary className="cursor-pointer font-semibold text-white bg-gray-800 px-4 py-2 rounded-lg w-fit">View detailed description</summary>
-                <p className="mt-2 text-gray-400 whitespace-pre-line">{tab.description}</p>
-              </details>
-              <ol className="list-decimal pl-4 space-y-4">
-                {tab.steps.map((step, idx) => (
-                  <li key={idx}>
-                    <div className="font-bold text-lg mb-1">{String(idx+1).padStart(2, '0')} {step.title}</div>
-                    <div className="text-gray-300 text-base">{step.desc}</div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            {/* Placeholder for video/recording or image */}
-            <div className="flex-1 min-w-[320px] flex flex-col items-center justify-center border border-gray-700 rounded-lg bg-black/40 h-[340px]">
-              <span className="text-gray-500 text-sm">Section Recording / Demo Placeholder</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <SectionWithMockup
+        title={
+          <>Intelligent Supporting Document Retrieval</>
+        }
+        description={
+          <>Eliminate the back-and-forth of audit season by letting your system handle routine documentation requests with built-in agentic automation.<br /><br />When your external auditors send a request our system automatically reads and classifies the request, locates the appropriate documents from your internal repositories, and routes the results to you for one-click approval before sending them out. This system saves hours of manual searching, reduces delays in "Provided By Client" (PBC) items, and ensures consistency across audit cycles. It's especially helpful during peak periods when multiple auditors are reaching out across multiple entities.<br /><br />By reducing your team's audit burden, this feature allows you to stay focused on the business—not your inbox.</>
+        }
+        primaryImageSrc={""}
+        secondaryImageSrc={""}
+      />
 
       {/* Our Vision Section */}
       <section id="vision" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
@@ -177,11 +135,18 @@ const LandingPage = () => {
 
       {/* Integrations Section */}
       <section id="integrations" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
-        <div className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg bg-black/80 p-10 flex flex-col items-center">
-          <div className="uppercase text-xs tracking-widest text-gray-400 mb-2">Integrations</div>
-          <h2 className="text-3xl font-bold mb-2 text-center">Built to plug right into your stack</h2>
-          <p className="text-base text-gray-300 mb-8 text-center">Integrate with the tools you already use and deploy to your own infrastructure, communication, or documentation.</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 w-full items-center justify-items-center">
+        <div className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg bg-black/80 p-10 flex flex-col items-center relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <Sparkles
+              density={1200}
+              className="absolute inset-x-0 bottom-0 h-full w-full [mask-image:radial-gradient(50%_50%,white,transparent_85%)]"
+              color="#8350e8"
+            />
+          </div>
+          <div className="uppercase text-xs tracking-widest text-gray-400 mb-2 relative z-10">Integrations</div>
+          <h2 className="text-3xl font-bold mb-2 text-center relative z-10">Built to plug right into your stack</h2>
+          <p className="text-base text-gray-300 mb-8 text-center relative z-10">Integrate with the tools you already use and deploy to your own infrastructure, communication, or documentation.</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 w-full items-center justify-items-center relative z-10">
             {INTEGRATION_LOGOS.map((logo, idx) => (
               <img
                 key={idx}
