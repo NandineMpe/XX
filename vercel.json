@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://lightrag-production-71c6.up.railway.app/webui/",
+      "permanent": true
+    }
+  ]
+} 
