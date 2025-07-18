@@ -26,3 +26,12 @@ repos:
       - id: check-manifest
         stages: [manual]
         exclude: ^lightrag/api/webui/
+
+  # Local hook to build and stage frontend before commit
+  - repo: local
+    hooks:
+      - id: build-frontend-and-stage
+        name: Build and Stage Frontend
+        entry: npm run build-frontend-and-stage
+        language: system
+        pass_filenames: false
