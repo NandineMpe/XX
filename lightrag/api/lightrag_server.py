@@ -187,7 +187,11 @@ def create_app(args):
     # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=get_cors_origins(),
+        allow_origins=[
+            "https://augentik.com",
+            "https://www.augentik.com",
+            "http://localhost:5173",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
