@@ -391,7 +391,7 @@ export default function RetrievalTesting() {
           </div>
         </form>
       </div>
-      <QuerySettings />
+      {/* <QuerySettings /> Removed from here, will be moved to settings page */}
     </div>
   )
 }

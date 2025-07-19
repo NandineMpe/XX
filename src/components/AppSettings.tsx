@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/Select'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip'
 import { useNavigate } from 'react-router-dom';
+import QuerySettings from '@/components/retrieval/QuerySettings';
 
 interface AppSettingsProps {
   className?: string
@@ -248,17 +249,16 @@ export default function AppSettings({ className, asPage }: AppSettingsProps) {
               </div>
             </div>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">{t('settings.apiDocumentation', 'API Documentation')}</h3>
-            <div className="w-full h-[400px] border rounded overflow-hidden">
-              <iframe
-                src={backendBaseUrl + '/docs'}
-                className="w-full h-full border-0"
-                title="API Documentation"
-              />
+        </div>
+        {/* Add Query Parameters Section */}
+        {asPage && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-2">Query Parameters</h3>
+            <div className="max-w-md">
+              <QuerySettings />
             </div>
           </div>
-        </div>
+        )}
       </div>
     )
   }

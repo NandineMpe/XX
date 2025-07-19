@@ -22,7 +22,7 @@ function NavigationTab({ value, currentTab, children, onClick }: NavigationTabPr
     <TabsTrigger
       value={value}
       className={cn(
-        'cursor-pointer px-2 py-1 transition-all',
+        'cursor-pointer px-2 py-1 transition-all rounded-md',
         currentTab === value ? '!bg-emerald-400 !text-zinc-50' : 'hover:bg-background/60'
       )}
       onClick={onClick}
@@ -63,38 +63,27 @@ export default function SiteHeader() {
   }
 
   return (
-    <header className="border-border/40 bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 flex h-10 w-full border-b px-4 backdrop-blur">
-      <div className="min-w-[200px] w-auto flex items-center">
+    <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 py-4 bg-black/80 shadow-md backdrop-blur-lg">
+      {/* Logo far left */}
+      <div className="flex items-center">
         <a href={webuiPrefix} className="flex items-center gap-2">
           <img
             src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png"
             alt="Augentik Logo"
-            className="h-7 w-7 object-contain mr-2"
-            style={{ display: 'inline-block', verticalAlign: 'middle' }}
+            className="w-20 h-20 mr-6 object-contain"
+            style={{ minWidth: 80, minHeight: 80, maxWidth: 120, maxHeight: 120 }}
           />
-          <span className="font-bold md:inline-block">Augentik</span>
+          <span className="font-bold md:inline-block text-white text-2xl" style={{ fontFamily: "'Playfair Display', serif" }}>Augentik</span>
         </a>
-        {webuiTitle && (
-          <div className="flex items-center">
-            <span className="mx-1 text-xs text-gray-500 dark:text-gray-400">|</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="font-medium text-sm cursor-default">
-                    {webuiTitle}
-                  </span>
-                </TooltipTrigger>
-                {webuiDescription && (
-                  <TooltipContent side="bottom">
-                    {webuiDescription}
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
+        <div className="flex items-center">
+          <span className="mx-1 text-xs text-gray-400">|</span>
+          <span className="font-medium text-lg cursor-default text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+            Client Side Audit Management
+          </span>
+        </div>
       </div>
 
+      {/* Center nav tabs */}
       <div className="flex h-10 flex-1 items-center justify-center">
         <TabsNavigation />
         {isGuestMode && (
@@ -104,6 +93,7 @@ export default function SiteHeader() {
         )}
       </div>
 
+      {/* Right side settings and logout */}
       <div className="flex items-center gap-2">
         <AppSettings />
         {!isGuestMode && (
@@ -114,7 +104,7 @@ export default function SiteHeader() {
             tooltip={`${t('header.logout')} (${username})`}
             onClick={handleLogout}
           >
-            <LogOutIcon className="size-4" aria-hidden="true" />
+            <LogOutIcon className="size-4 text-white" aria-hidden="true" />
           </Button>
         )}
       </div>
