@@ -41,14 +41,12 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
     >
       {/* Logo far left */}
       <div className="flex items-center">
-        {logoUrl && (
-          <img
-            src={logoUrl}
-            alt="Augentik Logo"
-            className="w-28 h-28 mr-6 object-contain"
-            style={{ minWidth: 80, minHeight: 80, maxWidth: 120, maxHeight: 120 }}
-          />
-        )}
+        <img
+          src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png"
+          alt="Augentik Logo"
+          className="w-28 h-28 mr-6 object-contain"
+          style={{ minWidth: 80, minHeight: 80, maxWidth: 120, maxHeight: 120 }}
+        />
       </div>
       {/* Nav buttons center */}
       <div className="flex-1 flex items-center justify-center gap-3">
