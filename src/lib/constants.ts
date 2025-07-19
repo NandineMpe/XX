@@ -1,6 +1,6 @@
 import { ButtonVariantType } from '@/components/ui/Button'
 
-export const backendBaseUrl = 'http://localhost:9621'
+export const backendBaseUrl = import.meta.env.VITE_API_URL
 export const webuiPrefix = '/webui/'
 
 export const controlButtonVariant: ButtonVariantType = 'ghost'
