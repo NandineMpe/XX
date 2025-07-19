@@ -169,7 +169,7 @@ function App() {
               <div className="min-w-[200px] w-auto flex items-center">
                 <a href={webuiPrefix} className="flex items-center gap-2">
                   <img
-                    src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png"
+                    src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png"
                     alt="Augentik Logo"
                     className="h-7 w-7 object-contain mr-2"
                     style={{ display: 'inline-block', verticalAlign: 'middle' }}
