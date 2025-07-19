@@ -73,7 +73,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
           <div className="flex flex-col gap-6">
             {/* Augentik Logo */}
             <img
-              src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png"
+              src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png"
               alt="Augentik Logo"
               className="mx-auto mb-2 w-32 h-32 object-contain"
             />

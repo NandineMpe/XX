@@ -10,7 +10,7 @@ import { Home, User, Layers, LogIn } from "lucide-react"
 import SectionWithMockup from "@/components/ui/section-with-mockup"
 
 const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
-const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png';
+const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png';
 
 const INTEGRATION_LOGOS = [
   { src: 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/svg%20logos/azure.svg', alt: 'Azure' },
