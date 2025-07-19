@@ -56,9 +56,10 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
           const isActive = activeTab === item.name
           if (item.name === "Sign In") {
             return (
-              <a
+              <Link
                 key={item.name}
-                href="https://lightrag-production-71c6.up.railway.app/webui"
+                to={item.url}
+                onClick={() => setActiveTab(item.name)}
                 className={cn(
                   "relative cursor-pointer text-lg font-semibold px-6 py-2 rounded-full transition-colors flex items-center gap-2",
                   "text-white/80 hover:text-primary",
@@ -80,7 +81,7 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
                     </div>
                   </div>
                 )}
-              </a>
+              </Link>
             )
           }
           return (

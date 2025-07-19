@@ -1,28 +1,47 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/state'
-import { useSettingsStore } from '@/stores/settings'
-import { loginToServer, getAuthStatus } from '@/api/lightrag'
+import { loginToServer } from '@/api/lightrag'
 import { toast } from 'sonner'
-import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardHeader } from '@/components/ui/Card'
-import Input from '@/components/ui/Input'
-import Button from '@/components/ui/Button'
-import { ZapIcon } from 'lucide-react'
-import AppSettings from '@/components/AppSettings'
-import './LoginPage.css'; // Import the new CSS (to be created)
 import { SignInPage } from '@/components/ui/sign-in';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
+  const [loading, setLoading] = useState(false);
 
-  // Dummy sign-in handler: logs in as guest, no credentials required
-  const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
+  // Real sign-in handler: authenticates with backend
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Simulate guest login (no credentials required)
-    login('guest-token', true, 'core-version', 'api-version', 'Augentik', '');
-    window.location.href = 'https://lightrag-production-71c6.up.railway.app';
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const username = formData.get('username') as string;
+    const password = formData.get('password') as string;
+    if (!username) {
+      toast.error('Please enter your username.');
+      return;
+    }
+    if (!password) {
+      toast.error('Please enter your password.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const resp = await loginToServer(username, password);
+      login(
+        resp.access_token,
+        false, // not guest
+        resp.core_version,
+        resp.api_version,
+        resp.webui_title || null,
+        resp.webui_description || null
+      );
+      navigate('/');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
