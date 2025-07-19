@@ -67,6 +67,9 @@ export default function RetrievalTesting() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
+  const retrievalHistory = useSettingsStore((state) => state.retrievalHistory)
+  const setRetrievalHistory = useSettingsStore.use.setRetrievalHistory()
+
   // Scroll to bottom function - restored smooth scrolling with better handling
   const scrollToBottom = useCallback(() => {
     // Set flag to indicate this is a programmatic scroll
@@ -316,82 +319,102 @@ export default function RetrievalTesting() {
   }, [setMessages])
 
   return (
-    <div className="flex size-full gap-2 px-2 pb-12 overflow-hidden">
-      <div className="flex grow flex-col gap-4">
-        <div className="relative grow">
-          <div
-            ref={messagesContainerRef}
-            className="bg-primary-foreground/60 absolute inset-0 flex flex-col overflow-auto rounded-lg border p-2"
-            onClick={() => {
-              if (shouldFollowScrollRef.current) {
-                shouldFollowScrollRef.current = false;
-              }
-            }}
-          >
-            <div className="flex min-h-0 flex-1 flex-col gap-2">
-              {messages.length === 0 ? (
-                <div className="text-muted-foreground flex h-full items-center justify-center text-lg">
-                  {t('retrievePanel.retrieval.startPrompt')}
-                </div>
-              ) : (
-                messages.map((message) => { // Remove unused idx
-                  // isComplete logic is now handled internally based on message.mermaidRendered
-                  return (
-                    <div
-                      key={message.id} // Use stable ID for key
-                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      {<ChatMessage message={message} />}
+    <div className="flex h-full w-full">
+      {/* Main chat area */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex size-full gap-2 px-2 pb-12 overflow-hidden">
+          <div className="flex grow flex-col gap-4">
+            <div className="relative grow">
+              <div
+                ref={messagesContainerRef}
+                className="bg-primary-foreground/60 absolute inset-0 flex flex-col overflow-auto rounded-lg border p-2"
+                onClick={() => {
+                  if (shouldFollowScrollRef.current) {
+                    shouldFollowScrollRef.current = false;
+                  }
+                }}
+              >
+                <div className="flex min-h-0 flex-1 flex-col gap-2">
+                  {messages.length === 0 ? (
+                    <div className="text-muted-foreground flex h-full items-center justify-center text-lg">
+                      {t('retrievePanel.retrieval.startPrompt')}
                     </div>
-                  );
-                })
-              )}
-              <div ref={messagesEndRef} className="pb-1" />
+                  ) : (
+                    messages.map((message) => { // Remove unused idx
+                      // isComplete logic is now handled internally based on message.mermaidRendered
+                      return (
+                        <div
+                          key={message.id} // Use stable ID for key
+                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          {<ChatMessage message={message} />}
+                        </div>
+                      );
+                    })
+                  )}
+                  <div ref={messagesEndRef} className="pb-1" />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
-          <div className="flex-1 relative">
-            <label htmlFor="query-input" className="sr-only">
-              {t('retrievePanel.retrieval.placeholder')}
-            </label>
-            <Input
-              id="query-input"
-              className="w-full"
-              value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value)
-                if (inputError) setInputError('')
-              }}
-              placeholder={t('retrievePanel.retrieval.placeholder')}
-              disabled={isLoading}
-            />
-            {/* Error message below input */}
-            {inputError && (
-              <div className="mt-1 text-xs text-red-500">{inputError}</div>
-            )}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
+              <div className="flex-1 relative">
+                <label htmlFor="query-input" className="sr-only">
+                  {t('retrievePanel.retrieval.placeholder')}
+                </label>
+                <Input
+                  id="query-input"
+                  className="w-full"
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value)
+                    if (inputError) setInputError('')
+                  }}
+                  placeholder={t('retrievePanel.retrieval.placeholder')}
+                  disabled={isLoading}
+                />
+                {/* Error message below input */}
+                {inputError && (
+                  <div className="mt-1 text-xs text-red-500">{inputError}</div>
+                )}
+              </div>
+              <div className="flex gap-2 w-full">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={clearMessages}
+                  disabled={isLoading}
+                  size="sm"
+                  className="flex-1"
+                >
+                  <EraserIcon />
+                  {t('retrievePanel.retrieval.clear')}
+                </Button>
+                <Button type="submit" variant="default" disabled={isLoading} size="sm" className="flex-1">
+                  <SendIcon />
+                  {t('retrievePanel.retrieval.send')}
+                </Button>
+              </div>
+            </form>
           </div>
-          <div className="flex gap-2 w-full">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={clearMessages}
-              disabled={isLoading}
-              size="sm"
-              className="flex-1"
-            >
-              <EraserIcon />
-              {t('retrievePanel.retrieval.clear')}
-            </Button>
-            <Button type="submit" variant="default" disabled={isLoading} size="sm" className="flex-1">
-              <SendIcon />
-              {t('retrievePanel.retrieval.send')}
-            </Button>
-          </div>
-        </form>
+          {/* <QuerySettings /> Removed from here, will be moved to settings page */}
+        </div>
       </div>
-      {/* <QuerySettings /> Removed from here, will be moved to settings page */}
+      {/* Chat History Sidebar */}
+      <aside className="w-80 bg-black/80 border-l border-zinc-800 p-4 overflow-y-auto">
+        <h2 className="text-lg font-bold mb-4 text-white">Chat History</h2>
+        {retrievalHistory.length === 0 ? (
+          <div className="text-gray-400">No previous chats.</div>
+        ) : (
+          <ul className="space-y-4">
+            {retrievalHistory.map((msg, idx) => (
+              <li key={msg.id || idx} className="cursor-pointer hover:bg-zinc-900 rounded p-2" onClick={() => setMessages([msg])}>
+                <ChatMessage message={msg} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </aside>
     </div>
   )
 }
