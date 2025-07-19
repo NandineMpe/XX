@@ -18,18 +18,32 @@ interface NavigationTabProps {
 }
 
 function NavigationTab({ value, currentTab, children, onClick }: NavigationTabProps) {
+  const isActive = currentTab === value;
   return (
     <TabsTrigger
       value={value}
       className={cn(
-        'cursor-pointer px-2 py-1 transition-all rounded-md',
-        currentTab === value ? '!bg-emerald-400 !text-zinc-50' : 'hover:bg-background/60'
+        'relative cursor-pointer text-lg font-semibold px-6 py-2 rounded-full transition-colors',
+        'text-white/80 hover:text-primary',
+        isActive && 'bg-purple-900/20 text-white',
+        !isActive && 'bg-black/40',
+        'mx-1',
       )}
+      style={{ fontFamily: "'Playfair Display', serif" }}
       onClick={onClick}
     >
       {children}
+      {isActive && (
+        <div className="absolute inset-0 w-full bg-primary/10 rounded-full -z-10">
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-t-full">
+            <div className="absolute w-12 h-6 bg-primary/20 rounded-full blur-md -top-2 -left-2" />
+            <div className="absolute w-8 h-6 bg-primary/20 rounded-full blur-md -top-1" />
+            <div className="absolute w-4 h-4 bg-primary/20 rounded-full blur-sm top-0 left-2" />
+          </div>
+        </div>
+      )}
     </TabsTrigger>
-  )
+  );
 }
 
 function TabsNavigation() {
@@ -39,7 +53,7 @@ function TabsNavigation() {
 
   return (
     <div className="flex h-8 self-center">
-      <TabsList className="h-full gap-2">
+      <TabsList className="h-full gap-2 bg-transparent shadow-none p-0">
         <NavigationTab value="audit-queries" currentTab={currentTab} onClick={() => setCurrentTab('audit-queries')}>
           {t('header.auditQueries')}
         </NavigationTab>
