@@ -167,3 +167,8 @@
     background-color: hsl(0 0% 0%);
   }
 }
+
+/* Utility class to ensure main content starts below the navbar */
+.main-content-below-navbar {
+  padding-top: 6rem; /* Adjust to match navbar height */
+}
