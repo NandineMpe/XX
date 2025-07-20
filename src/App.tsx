@@ -197,7 +197,7 @@ function App() {
           </div>
         ) : (
           // Main content after initialization
-          <main className="flex h-screen w-screen overflow-hidden">
+          <main className="flex h-screen w-screen overflow-hidden with-header-spacing">
             <Tabs
               defaultValue={currentTab}
               className="!m-0 flex grow flex-col !p-0 overflow-hidden"

@@ -6,4 +6,8 @@ html, body {
 
 * {
   font-family: 'Playfair Display', serif !important;
+}
+
+.with-header-spacing {
+  padding-top: 104px; /* Adjust if header height changes */
 } 
