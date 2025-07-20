@@ -319,7 +319,7 @@ export default function RetrievalTesting() {
   }, [setMessages])
 
   return (
-    <div className="flex h-full w-full">
+    <div className="main-content-below-navbar flex h-full w-full">
       {/* Main chat area */}
       <div className="flex-1 flex flex-col">
         <div className="flex size-full gap-2 px-2 pb-12 overflow-hidden">
