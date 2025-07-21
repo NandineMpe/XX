@@ -483,7 +483,7 @@ export default function DocumentManager() {
   }, [sortField, sortDirection]);
 
   return (
-    <Card className="main-content-below-navbar !rounded-none !overflow-hidden flex flex-col h-full min-h-0">
+    <Card className="main-content-below-navbar !rounded-none !overflow-hidden flex flex-col h-full min-h-0 w-full max-w-none">
       <CardHeader className="py-2 px-6">
         <CardTitle className="text-lg">{t('documentPanel.documentManager.title')}</CardTitle>
       </CardHeader>

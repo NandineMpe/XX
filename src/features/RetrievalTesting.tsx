@@ -1,6 +1,6 @@
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { throttle } from '@/lib/utils'
 import { queryText, queryTextStream } from '@/api/lightrag'
 import { errorMessage } from '@/lib/utils'
@@ -8,7 +8,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { useDebounce } from '@/hooks/useDebounce'
 import QuerySettings from '@/components/retrieval/QuerySettings'
 import { ChatMessage, MessageWithError } from '@/components/retrieval/ChatMessage'
-import { EraserIcon, SendIcon } from 'lucide-react'
+import { EraserIcon, SendIcon, PaperclipIcon, MicIcon, MicOffIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { QueryMode } from '@/api/lightrag'
 
@@ -56,6 +56,12 @@ export default function RetrievalTesting() {
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [inputError, setInputError] = useState('') // Error message for input
+  const [searchQuery, setSearchQuery] = useState('') // Search query for chat history
+  const [pinnedChats, setPinnedChats] = useState<Set<string>>(new Set()) // Track pinned chats
+  const [attachments, setAttachments] = useState<File[]>([]) // Track file attachments
+  const [isRecording, setIsRecording] = useState(false) // Track voice recording state
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null) // Media recorder for voice
+  const [useLLM, setUseLLM] = useState(true) // Toggle for LLM usage
   // Reference to track if we should follow scroll during streaming (using ref for synchronous updates)
   const shouldFollowScrollRef = useRef(true)
   // Reference to track if user interaction is from the form area
@@ -69,6 +75,92 @@ export default function RetrievalTesting() {
 
   const retrievalHistory = useSettingsStore((state) => state.retrievalHistory)
   const setRetrievalHistory = useSettingsStore.use.setRetrievalHistory()
+
+  // Group messages into conversations
+  const conversations = useMemo(() => {
+    const groups: { id: string; messages: MessageWithError[]; timestamp: number; preview: string }[] = [];
+    let currentGroup: MessageWithError[] = [];
+    
+    retrievalHistory.forEach((msg) => {
+      if (msg.role === 'user') {
+        if (currentGroup.length > 0) {
+          groups.push({
+            id: currentGroup[0]?.id || generateUniqueId(),
+            messages: currentGroup,
+            timestamp: Date.now(), // You might want to store actual timestamps
+            preview: currentGroup[0]?.content || ''
+          });
+        }
+        currentGroup = [msg];
+      } else {
+        currentGroup.push(msg);
+      }
+    });
+    
+    if (currentGroup.length > 0) {
+      groups.push({
+        id: currentGroup[0]?.id || generateUniqueId(),
+        messages: currentGroup,
+        timestamp: Date.now(),
+        preview: currentGroup[0]?.content || ''
+      });
+    }
+    
+    return groups;
+  }, [retrievalHistory]);
+
+  // Filter conversations based on search query
+  const filteredConversations = useMemo(() => {
+    if (!searchQuery.trim()) return conversations;
+    
+    return conversations.filter(conv => 
+      conv.preview.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conv.messages.some(msg => msg.content.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [conversations, searchQuery]);
+
+  // Load a conversation into the chat
+  const loadConversation = useCallback((conversation: typeof conversations[0]) => {
+    setMessages(conversation.messages);
+  }, []);
+
+  // Toggle pin status of a conversation
+  const togglePin = useCallback((conversationId: string) => {
+    setPinnedChats(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(conversationId)) {
+        newSet.delete(conversationId);
+      } else {
+        newSet.add(conversationId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Export answer to various formats
+  const exportAnswer = useCallback((message: MessageWithError) => {
+    const content = message.content;
+    const timestamp = new Date().toISOString();
+    const filename = `audit-answer-${timestamp}.txt`;
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, []);
+
+  // Escalate answer for review
+  const escalateAnswer = useCallback((message: MessageWithError) => {
+    // This would typically send to a review queue or notification system
+    console.log('Escalating answer for review:', message.content);
+    // For now, just show an alert
+    alert('Answer escalated for review. This would typically notify supervisors or trigger a review workflow.');
+  }, []);
 
   // Scroll to bottom function - restored smooth scrolling with better handling
   const scrollToBottom = useCallback(() => {
@@ -199,7 +291,9 @@ export default function RetrievalTesting() {
           .filter((m) => m.isError !== true)
           .slice(-(state.querySettings.history_turns || 0) * 2)
           .map((m) => ({ role: m.role, content: m.content })),
-        ...(modeOverride ? { mode: modeOverride } : {})
+        ...(modeOverride ? { mode: modeOverride } : {}),
+        // Add LLM toggle to query parameters
+        use_llm: useLLM
       }
 
       try {
@@ -231,7 +325,7 @@ export default function RetrievalTesting() {
           .setRetrievalHistory([...prevMessages, userMessage, assistantMessage])
       }
     },
-    [inputValue, isLoading, messages, setMessages, t, scrollToBottom]
+    [inputValue, isLoading, messages, setMessages, t, scrollToBottom, useLLM]
   )
 
   // Add event listeners to detect when user manually interacts with the container
@@ -318,10 +412,82 @@ export default function RetrievalTesting() {
     useSettingsStore.getState().setRetrievalHistory([])
   }, [setMessages])
 
+  // Handle file attachment
+  const handleFileAttachment = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      setAttachments(prev => [...prev, ...files]);
+    }
+  }, []);
+
+  // Remove attachment
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Start voice recording
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/wav' });
+        // For now, just show a message. In a real app, you'd send this to a speech-to-text service
+        setInputValue(prev => prev + ' [Voice message recorded - would be transcribed here]');
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      alert('Could not access microphone. Please check permissions.');
+    }
+  }, []);
+
+  // Stop voice recording
+  const stopRecording = useCallback(() => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setMediaRecorder(null);
+    }
+  }, [mediaRecorder, isRecording]);
+
+  // Quick suggestions for onboarding and fast actions
+  const quickSuggestions = [
+    'List all transactions over $10,000',
+    'Show me recent audit exceptions',
+    'Summarize last quarter\'s consolidation entries',
+    'What are the top 5 risks this month?',
+    'Find unusual journal entries',
+    'Compare current vs previous period',
+    'Identify related party transactions',
+    'Check for duplicate payments'
+  ];
+
+  // Focus input on mount and after sending
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, []);
+  useEffect(() => {
+    if (!isLoading && inputRef.current) inputRef.current.focus();
+  }, [isLoading]);
+
   return (
     <div className="main-content-below-navbar flex h-full w-full">
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col pt-12">
         <div className="flex size-full gap-2 px-2 pb-12 overflow-hidden">
           <div className="flex grow flex-col gap-4">
             <div className="relative grow">
@@ -336,83 +502,265 @@ export default function RetrievalTesting() {
               >
                 <div className="flex min-h-0 flex-1 flex-col gap-2">
                   {messages.length === 0 ? (
-                    <div className="text-muted-foreground flex h-full items-center justify-center text-lg">
-                      {t('retrievePanel.retrieval.startPrompt')}
+                    <div className="flex flex-col h-full items-center justify-center text-center gap-6">
+                      <div className="text-2xl font-bold text-primary">Welcome to the Audit Query Assistant</div>
+                      <div className="text-muted-foreground text-lg">Start by typing your question below or try a quick suggestion:</div>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {quickSuggestions.map((s, i) => (
+                          <button
+                            key={i}
+                            className="bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                            onClick={() => setInputValue(s)}
+                            tabIndex={0}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    messages.map((message) => { // Remove unused idx
-                      // isComplete logic is now handled internally based on message.mermaidRendered
-                      return (
-                        <div
-                          key={message.id} // Use stable ID for key
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          {<ChatMessage message={message} />}
-                        </div>
-                      );
-                    })
+                    messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        {<ChatMessage 
+                          message={message} 
+                          onExport={exportAnswer}
+                          onEscalate={escalateAnswer}
+                        />}
+                      </div>
+                    ))
                   )}
                   <div ref={messagesEndRef} className="pb-1" />
                 </div>
               </div>
             </div>
-
             <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
+              {/* LLM Toggle */}
+              <div className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Knowledge Scope</span>
+                  <span className="text-xs text-muted-foreground">
+                    {useLLM ? 'Include External Knowledge' : 'Internal Knowledge only'}
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={useLLM}
+                    onChange={(e) => setUseLLM(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              
               <div className="flex-1 relative">
                 <label htmlFor="query-input" className="sr-only">
                   {t('retrievePanel.retrieval.placeholder')}
                 </label>
-                <Input
-                  id="query-input"
-                  className="w-full"
-                  value={inputValue}
-                  onChange={(e) => {
-                    setInputValue(e.target.value)
-                    if (inputError) setInputError('')
-                  }}
-                  placeholder={t('retrievePanel.retrieval.placeholder')}
-                  disabled={isLoading}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="query-input"
+                    ref={inputRef}
+                    className="flex-1"
+                    value={inputValue}
+                    onChange={(e) => {
+                      setInputValue(e.target.value)
+                      if (inputError) setInputError('')
+                    }}
+                    placeholder={useLLM 
+                      ? t('retrievePanel.retrieval.placeholder')
+                      : 'Enter your query for basic retrieval...'
+                    }
+                    disabled={isLoading}
+                    autoFocus
+                  />
+                  {/* File attachment button */}
+                  <label htmlFor="file-attachment" className="cursor-pointer">
+                    <input
+                      id="file-attachment"
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={handleFileAttachment}
+                      accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.xls"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isLoading}
+                      className="h-10 w-10 p-0"
+                    >
+                      <PaperclipIcon className="w-4 h-4" />
+                    </Button>
+                  </label>
+                  {/* Voice recording button */}
+                  <Button
+                    type="button"
+                    variant={isRecording ? "destructive" : "outline"}
+                    size="sm"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isLoading}
+                    className="h-10 w-10 p-0"
+                  >
+                    {isRecording ? (
+                      <MicOffIcon className="w-4 h-4" />
+                    ) : (
+                      <MicIcon className="w-4 h-4" />
+                    )}
+                  </Button>
+                  {/* Send button */}
+                  <Button 
+                    type="submit" 
+                    variant="default" 
+                    disabled={isLoading || !inputValue.trim()} 
+                    size="sm" 
+                    className="h-10 w-10 p-0"
+                  >
+                    <SendIcon className="w-4 h-4" />
+                  </Button>
+                </div>
                 {/* Error message below input */}
                 {inputError && (
                   <div className="mt-1 text-xs text-red-500">{inputError}</div>
                 )}
               </div>
-              <div className="flex gap-2 w-full">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={clearMessages}
-                  disabled={isLoading}
-                  size="sm"
-                  className="flex-1"
-                >
-                  <EraserIcon />
-                  {t('retrievePanel.retrieval.clear')}
-                </Button>
-                <Button type="submit" variant="default" disabled={isLoading} size="sm" className="flex-1">
-                  <SendIcon />
-                  {t('retrievePanel.retrieval.send')}
-                </Button>
-              </div>
+              
+              {/* Attachments display */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-2 bg-muted/50 rounded-lg">
+                  {attachments.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-background px-2 py-1 rounded text-xs"
+                    >
+                      <span className="truncate max-w-32">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(index)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Quick suggestions */}
+              {messages.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {quickSuggestions.slice(0, 4).map((suggestion, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-medium transition-colors border border-primary/20"
+                      onClick={() => setInputValue(suggestion)}
+                      disabled={isLoading}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
+              
             </form>
           </div>
-          {/* <QuerySettings /> Removed from here, will be moved to settings page */}
         </div>
       </div>
       {/* Chat History Sidebar */}
       <aside className="w-80 bg-black/80 border-l border-zinc-800 p-4 overflow-y-auto">
         <h2 className="text-lg font-bold mb-4 text-white">Chat History</h2>
-        {retrievalHistory.length === 0 ? (
-          <div className="text-gray-400">No previous chats.</div>
+        
+        {/* Search input */}
+        <div className="mb-4">
+          <Input
+            placeholder="Search conversations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-zinc-900 border-zinc-700 text-white placeholder-gray-400"
+          />
+        </div>
+
+        {filteredConversations.length === 0 ? (
+          <div className="text-gray-400 text-center py-8">
+            {searchQuery ? 'No conversations found.' : 'No previous chats.'}
+          </div>
         ) : (
-          <ul className="space-y-4">
-            {retrievalHistory.map((msg, idx) => (
-              <li key={msg.id || idx} className="cursor-pointer hover:bg-zinc-900 rounded p-2" onClick={() => setMessages([msg])}>
-                <ChatMessage message={msg} />
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-2">
+            {/* Pinned conversations */}
+            {filteredConversations.filter(conv => pinnedChats.has(conv.id)).length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm font-medium text-gray-400 mb-2">Pinned</h3>
+                {filteredConversations
+                  .filter(conv => pinnedChats.has(conv.id))
+                  .map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      className="bg-zinc-900/50 border border-zinc-700 rounded-lg p-3 mb-2 cursor-pointer hover:bg-zinc-900 transition-colors"
+                      onClick={() => loadConversation(conversation)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm truncate">{conversation.preview}</p>
+                          <p className="text-gray-400 text-xs mt-1">
+                            {conversation.messages.length} messages
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            togglePin(conversation.id);
+                          }}
+                          className="text-yellow-400 hover:text-yellow-300 ml-2"
+                        >
+                          📌
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* Regular conversations */}
+            <div>
+              {pinnedChats.size > 0 && (
+                <h3 className="text-sm font-medium text-gray-400 mb-2">Recent</h3>
+              )}
+              {filteredConversations
+                .filter(conv => !pinnedChats.has(conv.id))
+                .map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 mb-2 cursor-pointer hover:bg-zinc-800 transition-colors"
+                    onClick={() => loadConversation(conversation)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm truncate">{conversation.preview}</p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          {conversation.messages.length} messages
+                        </p>
+                      </div>
+                      {pinnedChats.has(conversation.id) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            togglePin(conversation.id);
+                          }}
+                          className="text-yellow-400 hover:text-yellow-300 ml-2"
+                        >
+                          📌
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
         )}
       </aside>
     </div>

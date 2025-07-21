@@ -54,14 +54,17 @@ function TabsNavigation() {
   return (
     <div className="flex h-8 self-center">
       <TabsList className="h-full gap-2 bg-transparent shadow-none p-0">
+        <NavigationTab value="support" currentTab={currentTab} onClick={() => setCurrentTab('support')}>
+          Supporting Document Retrieval
+        </NavigationTab>
+        <NavigationTab value="process-walkthrough" currentTab={currentTab} onClick={() => setCurrentTab('process-walkthrough')}>
+          Process Walkthrough Library
+        </NavigationTab>
         <NavigationTab value="audit-queries" currentTab={currentTab} onClick={() => setCurrentTab('audit-queries')}>
-          {t('header.auditQueries')}
+          Audit Query Assistant
         </NavigationTab>
         <NavigationTab value="knowledge-graph" currentTab={currentTab} onClick={() => setCurrentTab('knowledge-graph')}>
-          {t('header.knowledgeGraphVisualisations')}
-        </NavigationTab>
-        <NavigationTab value="support" currentTab={currentTab} onClick={() => setCurrentTab('support')}>
-          {t('header.support')}
+          Data Connections
         </NavigationTab>
       </TabsList>
     </div>

@@ -1,0 +1,238 @@
+import React, { useState, useMemo } from 'react';
+import DataTable from '@/components/ui/DataTable';
+import Badge from '@/components/ui/Badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
+import { ColumnDef } from '@tanstack/react-table';
+import { Mail, RefreshCw, FileText, AlertTriangle, CheckCircle, Clock, Loader2, Send, XCircle } from 'lucide-react';
+import { format } from 'date-fns';
+
+// Status definitions
+const STATUS = {
+  REQUESTED: 'Requested',
+  IN_PROGRESS: 'Auto-Retrieval in Progress',
+  WAITING_EMAIL: 'Waiting for Client Email Approval',
+  CLIENT_APPROVED: 'Client Approved via Email',
+  SENT: 'Sent to Auditor',
+  FAILED: 'Failed / Needs Manual Intervention',
+};
+
+const statusMeta = {
+  [STATUS.REQUESTED]:    { icon: <Clock className="text-gray-400" />, color: 'gray', label: 'Requested' },
+  [STATUS.IN_PROGRESS]:  { icon: <Loader2 className="animate-spin text-blue-500" />, color: 'blue', label: 'Auto-Retrieval' },
+  [STATUS.WAITING_EMAIL]:{ icon: <Mail className="text-yellow-500" />, color: 'yellow', label: 'Waiting Email', badge: true },
+  [STATUS.CLIENT_APPROVED]: { icon: <CheckCircle className="text-green-500" />, color: 'green', label: 'Client Approved' },
+  [STATUS.SENT]:         { icon: <Send className="text-blue-600" />, color: 'blue', label: 'Sent' },
+  [STATUS.FAILED]:       { icon: <AlertTriangle className="text-red-500" />, color: 'red', label: 'Failed', error: true },
+};
+
+// Mock data
+const mockRequests = [
+  {
+    id: '1',
+    auditor: 'Jane Smith',
+    document: '2023 Bank Statement',
+    date: '2024-06-01',
+    source: 'PBC Automation',
+    method: 'Auto-Email',
+    status: STATUS.WAITING_EMAIL,
+    lastUpdate: '2024-06-01T10:00:00Z',
+    email: 'client@example.com',
+    auditTrail: [
+      { status: STATUS.REQUESTED, at: '2024-06-01T08:00:00Z' },
+      { status: STATUS.IN_PROGRESS, at: '2024-06-01T08:05:00Z' },
+      { status: STATUS.WAITING_EMAIL, at: '2024-06-01T10:00:00Z', email: 'client@example.com' },
+    ],
+    attachments: [],
+    error: null,
+  },
+  {
+    id: '2',
+    auditor: 'John Doe',
+    document: 'Payroll Q1 2024',
+    date: '2024-05-28',
+    source: 'Manual',
+    method: 'Manual Upload',
+    status: STATUS.SENT,
+    lastUpdate: '2024-05-29T09:00:00Z',
+    email: null,
+    auditTrail: [
+      { status: STATUS.REQUESTED, at: '2024-05-28T07:00:00Z' },
+      { status: STATUS.IN_PROGRESS, at: '2024-05-28T07:10:00Z' },
+      { status: STATUS.CLIENT_APPROVED, at: '2024-05-28T15:00:00Z' },
+      { status: STATUS.SENT, at: '2024-05-29T09:00:00Z' },
+    ],
+    attachments: [{ name: 'payroll.pdf', url: '#' }],
+    error: null,
+  },
+  {
+    id: '3',
+    auditor: 'Jane Smith',
+    document: 'Vendor Invoices',
+    date: '2024-05-25',
+    source: 'PBC Automation',
+    method: 'Auto-Email',
+    status: STATUS.FAILED,
+    lastUpdate: '2024-05-25T12:00:00Z',
+    email: 'client@example.com',
+    auditTrail: [
+      { status: STATUS.REQUESTED, at: '2024-05-25T09:00:00Z' },
+      { status: STATUS.IN_PROGRESS, at: '2024-05-25T09:10:00Z' },
+      { status: STATUS.WAITING_EMAIL, at: '2024-05-25T10:00:00Z', email: 'client@example.com' },
+      { status: STATUS.FAILED, at: '2024-05-25T12:00:00Z', error: 'Email bounced' },
+    ],
+    attachments: [],
+    error: 'Email bounced',
+  },
+];
+
+const statusActions = {
+  [STATUS.WAITING_EMAIL]: ['Resend Email'],
+  [STATUS.FAILED]: ['Retry', 'View Log'],
+};
+
+const columns: ColumnDef<any, any>[] = [
+  {
+    header: '',
+    accessorKey: 'status',
+    cell: ({ row }) => {
+      const meta = statusMeta[row.original.status];
+      return (
+        <span className="flex items-center gap-1">
+          {meta.icon}
+          {meta.badge && <Badge variant="secondary" className="ml-1">Email</Badge>}
+        </span>
+      );
+    },
+    size: 40,
+  },
+  { header: 'Auditor', accessorKey: 'auditor' },
+  { header: 'Document Requested', accessorKey: 'document' },
+  { header: 'Date', accessorKey: 'date', cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd') },
+  { header: 'Source/Trigger', accessorKey: 'source' },
+  { header: 'Retrieval Method', accessorKey: 'method' },
+  {
+    header: 'Current Status',
+    accessorKey: 'status',
+    cell: ({ getValue }) => {
+      const meta = statusMeta[getValue()];
+      return (
+        <span className={`flex items-center gap-2 font-medium text-${meta.color}-700`}>
+          {meta.icon}
+          {meta.label}
+        </span>
+      );
+    },
+  },
+  { header: 'Last Update', accessorKey: 'lastUpdate', cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd HH:mm') },
+  {
+    header: '',
+    id: 'actions',
+    cell: ({ row }) => {
+      const actions = statusActions[row.original.status] || [];
+      return (
+        <div className="flex gap-2">
+          {actions.map((action) => (
+            <button key={action} className="text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">
+              {action}
+            </button>
+          ))}
+        </div>
+      );
+    },
+    size: 80,
+  },
+];
+
+export default function DocumentRetrievalDashboard() {
+  const [selected, setSelected] = useState<any | null>(null);
+  const [search, setSearch] = useState('');
+
+  // Filter logic
+  const filtered = useMemo(() => {
+    return mockRequests.filter((r) =>
+      r.document.toLowerCase().includes(search.toLowerCase()) ||
+      r.auditor.toLowerCase().includes(search.toLowerCase()) ||
+      r.status.toLowerCase().includes(search.toLowerCase()) ||
+      r.date.includes(search)
+    );
+  }, [search]);
+
+  return (
+    <div className="w-full max-w-7xl mx-auto py-8 px-4">
+      <h1 className="text-2xl font-bold mb-6">Supporting Document Retrieval</h1>
+      <div className="mb-4 flex items-center gap-4">
+        <input
+          className="border rounded px-3 py-2 w-72 text-sm focus:outline-none focus:ring focus:border-blue-300"
+          placeholder="Search by document, auditor, status, or date..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
+      <DataTable columns={columns} data={filtered} />
+      {/* Detail Dialog */}
+      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
+        <DialogContent>
+          {selected && (
+            <div>
+              <DialogHeader>
+                <DialogTitle>{selected.document}</DialogTitle>
+                <DialogDescription>
+                  Requested by <b>{selected.auditor}</b> on {format(new Date(selected.date), 'yyyy-MM-dd')}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4 space-y-2">
+                <div className="font-semibold">Audit Trail</div>
+                <ul className="text-xs space-y-1">
+                  {selected.auditTrail.map((item: any, i: number) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <span>{statusMeta[item.status].icon}</span>
+                      <span>{statusMeta[item.status].label}</span>
+                      <span className="text-gray-400 ml-2">{format(new Date(item.at), 'yyyy-MM-dd HH:mm')}</span>
+                      {item.email && <Badge variant="secondary">Email: {item.email}</Badge>}
+                      {item.error && <span className="text-red-500 ml-2">{item.error}</span>}
+                    </li>
+                  ))}
+                </ul>
+                <div className="font-semibold mt-4">Attachments / Logs</div>
+                {selected.attachments.length ? (
+                  <ul className="text-xs space-y-1">
+                    {selected.attachments.map((a: any, i: number) => (
+                      <li key={i}><a href={a.url} className="text-blue-600 underline">{a.name}</a></li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-gray-400 text-xs">Pending</div>
+                )}
+                {/* Status-specific info */}
+                {selected.status === STATUS.WAITING_EMAIL && (
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Mail className="w-4 h-4 text-yellow-500" />
+                      <span className="font-medium">Waiting for Client Email Approval</span>
+                    </div>
+                    <div className="text-xs">Email sent to <b>{selected.email}</b> on {format(new Date(selected.lastUpdate), 'yyyy-MM-dd HH:mm')}</div>
+                    <button className="mt-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">Resend Email</button>
+                    <div className="text-xs text-gray-500 mt-2">Approval must be completed via secure email link. No in-app approval/upload.</div>
+                  </div>
+                )}
+                {selected.status === STATUS.CLIENT_APPROVED && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-xs">
+                    Client approved via email at {format(new Date(selected.lastUpdate), 'yyyy-MM-dd HH:mm')}, document queued for auditor.
+                  </div>
+                )}
+                {selected.status === STATUS.FAILED && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-xs">
+                    <div className="font-medium text-red-600 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Failed / Needs Manual Intervention</div>
+                    <div className="mt-1">{selected.error}</div>
+                    <button className="mt-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">Retry</button>
+                    <button className="ml-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">View Log</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+} 

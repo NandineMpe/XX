@@ -18,6 +18,8 @@ import GraphViewer from '@/features/GraphViewer'
 import DocumentManager from '@/features/DocumentManager'
 import RetrievalTesting from '@/features/RetrievalTesting'
 import ApiSite from '@/features/ApiSite'
+import DocumentRetrievalDashboard from '@/features/DocumentRetrievalDashboard';
+import ProcessWalkthroughLibrary from '@/features/ProcessWalkthroughLibrary';
 
 import { Tabs, TabsContent } from '@/components/ui/Tabs'
 
@@ -212,7 +214,10 @@ function App() {
                   <GraphViewer />
                 </TabsContent>
                 <TabsContent value="support" className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
-                  <DocumentManager />
+                  <DocumentRetrievalDashboard />
+                </TabsContent>
+                <TabsContent value="process-walkthrough" className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
+                  <ProcessWalkthroughLibrary />
                 </TabsContent>
               </div>
             </Tabs>

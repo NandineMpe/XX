@@ -5,19 +5,20 @@ import { useNavigate } from 'react-router-dom';
 export default function SettingsPage() {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-start py-12">
-      <div className="w-full max-w-2xl bg-card rounded-xl shadow-lg p-8 relative">
+    <div className="min-h-screen w-full bg-background text-foreground flex flex-col items-stretch justify-start py-0">
+      <div className="w-full h-full bg-card rounded-none shadow-none p-0 relative flex-1 flex">
         {/* Back Arrow Button */}
         <button
-          className="absolute left-4 top-4 p-2 rounded-full hover:bg-accent focus:outline-none"
+          className="absolute left-8 top-8 p-2 rounded-full hover:bg-accent focus:outline-none z-10"
           onClick={() => navigate(-1)}
           aria-label="Back"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-3xl font-bold mb-6 text-center">Settings</h1>
         {/* Render the AppSettings form content as a page, not a modal */}
-        <AppSettings asPage />
+        <div className="flex-1 flex">
+          <AppSettings asPage sidebarClassName="mt-16" />
+        </div>
       </div>
     </div>
   );

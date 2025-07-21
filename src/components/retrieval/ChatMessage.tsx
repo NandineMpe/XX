@@ -15,7 +15,7 @@ import type { Element } from 'hast'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneLight, oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
-import { LoaderIcon, CopyIcon } from 'lucide-react'
+import { LoaderIcon, CopyIcon, DownloadIcon, AlertTriangleIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export type MessageWithError = Message & {
@@ -28,8 +28,14 @@ export type MessageWithError = Message & {
   mermaidRendered?: boolean
 }
 
+interface ChatMessageProps {
+  message: MessageWithError
+  onExport?: (message: MessageWithError) => void
+  onEscalate?: (message: MessageWithError) => void
+}
+
 // Restore original component definition and export
-export const ChatMessage = ({ message }: { message: MessageWithError }) => { // Remove isComplete prop
+export const ChatMessage = ({ message, onExport, onEscalate }: ChatMessageProps) => { // Remove isComplete prop
   const { t } = useTranslation()
   const { theme } = useTheme()
   const [katexPlugin, setKatexPlugin] = useState<any>(null)
@@ -105,16 +111,42 @@ export const ChatMessage = ({ message }: { message: MessageWithError }) => { // 
         >
           {message.content}
         </ReactMarkdown>
-        {message.role === 'assistant' && message.content && message.content.length > 0 && ( // Added check for message.content existence
-          <Button
-            onClick={handleCopyMarkdown}
-            className="absolute right-0 bottom-0 size-6 rounded-md opacity-20 transition-opacity hover:opacity-100"
-            tooltip={t('retrievePanel.chatMessage.copyTooltip')}
-            variant="default"
-            size="icon"
-          >
-            <CopyIcon className="size-4" /> {/* Explicit size */}
-          </Button>
+        
+        {/* Action buttons for assistant messages */}
+        {message.role === 'assistant' && !message.isError && (
+          <div className="flex gap-2 mt-3 pt-2 border-t border-border/50">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyMarkdown}
+              className="text-xs h-7 px-2"
+            >
+              <CopyIcon className="w-3 h-3 mr-1" />
+              Copy
+            </Button>
+            {onExport && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onExport(message)}
+                className="text-xs h-7 px-2"
+              >
+                <DownloadIcon className="w-3 h-3 mr-1" />
+                Export
+              </Button>
+            )}
+            {onEscalate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEscalate(message)}
+                className="text-xs h-7 px-2 text-orange-600 hover:text-orange-700"
+              >
+                <AlertTriangleIcon className="w-3 h-3 mr-1" />
+                Escalate
+              </Button>
+            )}
+          </div>
         )}
       </div>
       {message.content === '' && <LoaderIcon className="animate-spin duration-2000" />} {/* Check for empty string specifically */}
