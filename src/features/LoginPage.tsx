@@ -45,10 +45,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="bg-black min-h-screen flex items-center justify-center">
+    <div className='bg-black min-h-screen flex items-center justify-center'>
       <SignInPage
-        title={<span className="font-light text-foreground tracking-tighter">Sign in to Augentik</span>}
-        description="Access your account and continue your journey with us"
+        title={<span className='font-light text-foreground tracking-tighter'>Sign in to Augentik</span>}
+        description='Access your account and continue your journey with us'
         onSignIn={handleSignIn}
       />
     </div>

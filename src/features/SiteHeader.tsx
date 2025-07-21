@@ -79,48 +79,48 @@ export default function SiteHeader() {
   }
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 py-4 bg-black/80 shadow-md backdrop-blur-lg">
+    <header className='fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 py-4 bg-black/80 shadow-md backdrop-blur-lg'>
       {/* Logo far left */}
-      <div className="flex items-center">
-        <a href={webuiPrefix} className="flex items-center gap-2">
+      <div className='flex items-center'>
+        <a href={webuiPrefix} className='flex items-center gap-2'>
           <img
-            src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png"
-            alt="Augentik Logo"
-            className="w-20 h-20 mr-6 object-contain"
+            src='https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png'
+            alt='Augentik Logo'
+            className='w-20 h-20 mr-6 object-contain'
             style={{ minWidth: 80, minHeight: 80, maxWidth: 120, maxHeight: 120 }}
           />
-          <span className="font-bold md:inline-block text-white text-2xl" style={{ fontFamily: "'Playfair Display', serif" }}>Augentik</span>
+          <span className='font-bold md:inline-block text-white text-2xl' style={{ fontFamily: "'Playfair Display', serif" }}>Augentik</span>
         </a>
-        <div className="flex items-center">
-          <span className="mx-1 text-xs text-gray-400">|</span>
-          <span className="font-medium text-lg cursor-default text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <div className='flex items-center'>
+          <span className='mx-1 text-xs text-gray-400'>|</span>
+          <span className='font-medium text-lg cursor-default text-white' style={{ fontFamily: "'Playfair Display', serif" }}>
             Client Side Audit Management
           </span>
         </div>
       </div>
 
       {/* Center nav tabs */}
-      <div className="flex h-10 flex-1 items-center justify-center">
+      <div className='flex h-10 flex-1 items-center justify-center'>
         <TabsNavigation />
         {isGuestMode && (
-          <div className="ml-2 self-center px-2 py-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 rounded-md">
+          <div className='ml-2 self-center px-2 py-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 rounded-md'>
             {t('login.guestMode', 'Guest Mode')}
           </div>
         )}
       </div>
 
       {/* Right side settings and logout */}
-      <div className="flex items-center gap-2">
+      <div className='flex items-center gap-2'>
         <AppSettings />
         {!isGuestMode && (
           <Button
-            variant="ghost"
-            size="icon"
-            side="bottom"
+            variant='ghost'
+            size='icon'
+            side='bottom'
             tooltip={`${t('header.logout')} (${username})`}
             onClick={handleLogout}
           >
-            <LogOutIcon className="size-4 text-white" aria-hidden="true" />
+            <LogOutIcon className='size-4 text-white' aria-hidden='true' />
           </Button>
         )}
       </div>

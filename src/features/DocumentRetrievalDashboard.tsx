@@ -37,9 +37,10 @@ const statusActions = {
 const columns: ColumnDef<DocumentRequest, any>[] = [
   {
     header: '',
-    accessorFn: (row) => row.status,
+    id: 'status',
+    accessorFn: (row) => row.status ?? '',
     cell: ({ row }) => {
-      const meta = statusMeta[row.original.status];
+      const meta = statusMeta[row.original.status] || statusMeta[STATUS.REQUESTED];
       return (
         <span className="flex items-center gap-1">
           {meta.icon}
@@ -49,16 +50,41 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
     },
     size: 40,
   },
-  { header: 'Auditor', accessorFn: (row) => row.auditor },
-  { header: 'Document Requested', accessorFn: (row) => row.document },
-  { header: 'Date', accessorFn: (row) => row.date, cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd') },
-  { header: 'Source/Trigger', accessorFn: (row) => row.source },
-  { header: 'Retrieval Method', accessorFn: (row) => row.method },
+  {
+    header: 'Auditor',
+    id: 'auditor',
+    accessorFn: (row) => row.auditor ?? '',
+  },
+  {
+    header: 'Document Requested',
+    id: 'document',
+    accessorFn: (row) => row.document ?? '',
+  },
+  {
+    header: 'Date',
+    id: 'date',
+    accessorFn: (row) => row.date ?? '',
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value ? format(new Date(value), 'yyyy-MM-dd') : '';
+    },
+  },
+  {
+    header: 'Source/Trigger',
+    id: 'source',
+    accessorFn: (row) => row.source ?? '',
+  },
+  {
+    header: 'Retrieval Method',
+    id: 'method',
+    accessorFn: (row) => row.method ?? '',
+  },
   {
     header: 'Current Status',
-    accessorFn: (row) => row.status,
+    id: 'currentStatus',
+    accessorFn: (row) => row.status ?? '',
     cell: ({ getValue }) => {
-      const meta = statusMeta[getValue()];
+      const meta = statusMeta[getValue()] || statusMeta[STATUS.REQUESTED];
       return (
         <span className={`flex items-center gap-2 font-medium text-${meta.color}-700`}>
           {meta.icon}
@@ -67,7 +93,15 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
       );
     },
   },
-  { header: 'Last Update', accessorFn: (row) => row.lastUpdate, cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd HH:mm') },
+  {
+    header: 'Last Update',
+    id: 'lastUpdate',
+    accessorFn: (row) => row.lastUpdate ?? '',
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value ? format(new Date(value), 'yyyy-MM-dd HH:mm') : '';
+    },
+  },
   {
     header: '',
     id: 'actions',
@@ -87,16 +121,6 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
   },
 ];
 
-// Add a simple Tooltip component for accessibility
-const Tooltip = ({ text, children }: { text: string; children: React.ReactNode }) => (
-  <span className="relative group">
-    {children}
-    <span className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition bg-zinc-800 text-xs text-white rounded px-2 py-1 absolute z-10 left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap shadow-lg">
-      {text}
-    </span>
-  </span>
-);
-
 export default function DocumentRetrievalDashboard() {
   const requests = useDocumentRequestStore((s) => s.requests);
   const [selected, setSelected] = useState<DocumentRequest | null>(null);
@@ -112,11 +136,12 @@ export default function DocumentRetrievalDashboard() {
 
   // Enhanced filter logic
   const filtered = useMemo(() => {
+    if (!Array.isArray(requests)) return [];
     return requests.filter((r) =>
-      (r.document.toLowerCase().includes(search.toLowerCase()) ||
-        r.auditor.toLowerCase().includes(search.toLowerCase()) ||
-        r.status.toLowerCase().includes(search.toLowerCase()) ||
-        r.date.includes(search)) &&
+      (r.document?.toLowerCase().includes(search.toLowerCase()) ||
+        r.auditor?.toLowerCase().includes(search.toLowerCase()) ||
+        r.status?.toLowerCase().includes(search.toLowerCase()) ||
+        r.date?.includes(search)) &&
       (filterStatus ? r.status === filterStatus : true) &&
       (filterAuditor ? r.auditor === filterAuditor : true) &&
       (filterDate ? r.date === filterDate : true)
@@ -189,7 +214,7 @@ export default function DocumentRetrievalDashboard() {
         {/* Table with tooltips */}
         <DataTable
           columns={columns}
-          data={filtered as DocumentRequest[]}
+          data={Array.isArray(filtered) ? filtered : []}
         />
         {/* Detail Dialog */}
         <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
@@ -219,11 +244,11 @@ export default function DocumentRetrievalDashboard() {
                   {selected.attachments.length ? (
                     <ul className="text-xs space-y-1">
                       {selected.attachments.map((a: any, i: number) => (
-                        <li key={i}><a href={a.url} className="text-blue-600 underline">{a.name}</a></li>
+                        <li key={i}><a href={a.url} className='text-blue-600 underline'>{a.name}</a></li>
                       ))}
                     </ul>
                   ) : (
-                    <div className="text-gray-400 text-xs">Pending</div>
+                    <div className='text-gray-400 text-xs'>Pending</div>
                   )}
                   {/* Status-specific info */}
                   {selected.status === STATUS.WAITING_EMAIL && (

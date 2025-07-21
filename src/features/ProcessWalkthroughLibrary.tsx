@@ -12,14 +12,62 @@ const entities = [
       {
         id: 'business-model',
         name: 'Business Model',
-        description: 'Interactive business model of Ornua (company being audited).',
+        description: 'Interactive business model of Ornua.',
         steps: [
           {
-            title: 'Business Model',
-            explanation: 'Explore the interactive business model of Ornua.',
-            controls: ['Drag and drop, click to explore nodes'],
+            title: 'Dairy Procurement',
+            explanation: 'Procurement of raw milk from farmers and suppliers, ensuring quality and traceability.',
+            controls: [
+              'Supplier vetting and onboarding',
+              'Milk quality testing and traceability',
+              'Contract management and pricing controls',
+            ],
             docs: [
-              { name: 'Business Model Overview', type: 'view' },
+              { name: 'Milk Supply Contracts', type: 'view', description: 'Contracts with milk suppliers outlining terms and conditions.' },
+              { name: 'Quality Test Reports', type: 'request', description: 'Lab reports for milk quality and safety.' },
+              { name: 'Supplier Onboarding Checklist', type: 'view', description: 'Checklist for onboarding new suppliers.' },
+            ],
+          },
+          {
+            title: 'Value-Addition Process',
+            explanation: 'Processing of raw milk into value-added products such as cheese, butter, and powders.',
+            controls: [
+              'Production batch controls',
+              'Recipe and formulation management',
+              'Equipment calibration and maintenance',
+            ],
+            docs: [
+              { name: 'Production Batch Records', type: 'request', description: 'Records of each production batch.' },
+              { name: 'Recipe Change Approvals', type: 'view', description: 'Approvals for any changes in product recipes.' },
+              { name: 'Maintenance Logs', type: 'request', description: 'Logs of equipment maintenance and calibration.' },
+            ],
+          },
+          {
+            title: 'Global Sales and Revenue Generation',
+            explanation: 'Sales of finished products to global markets, revenue recognition, and customer management.',
+            controls: [
+              'Sales order approval workflow',
+              'Revenue recognition policy',
+              'Customer credit checks',
+            ],
+            docs: [
+              { name: 'Sales Invoices', type: 'request', description: 'Invoices issued to customers for product sales.' },
+              { name: 'Revenue Recognition Policy', type: 'view', description: 'Company policy for recognizing revenue.' },
+              { name: 'Customer Credit Reports', type: 'request', description: 'Reports on customer creditworthiness.' },
+            ],
+          },
+          {
+            title: 'Profit Allocation',
+            explanation: 'Allocation of profits generated from global sales activities to members and reinvestment.',
+            controls: [
+              'Profit distribution approval',
+              'Capital retention policy',
+              'Member payout calculations',
+            ],
+            docs: [
+              { name: 'Profit Distribution Statements', type: 'request', description: 'Statements showing profit allocation to members.' },
+              { name: 'Board Approval Minutes', type: 'view', description: 'Minutes from board meetings approving profit allocation.' },
+              { name: 'Capital Retention Schedules', type: 'view', description: 'Schedules showing retained capital for reinvestment.' },
             ],
           },
         ],
@@ -46,7 +94,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
     return () => clearTimeout(timer);
   }, [onClose]);
   return (
-    <div className="fixed top-8 right-8 z-[100] bg-green-700 text-white px-4 py-2 rounded shadow-lg animate-fade-in">
+    <div className='fixed top-8 right-8 z-[100] bg-green-700 text-white px-4 py-2 rounded shadow-lg animate-fade-in'>
       {message}
     </div>
   );
@@ -61,7 +109,7 @@ export default function ProcessWalkthroughLibrary() {
   const addRequest = useDocumentRequestStore((s) => s.addRequest);
 
   const { RiveComponent } = useRive({
-    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/drag_and_drop_elearning%20%2812%29.riv',
+    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_business_model.riv',
     autoplay: true,
   });
 
