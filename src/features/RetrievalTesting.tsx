@@ -1,17 +1,15 @@
-import Input from '@/components/ui/Input'
-import Button from '@/components/ui/Button'
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { throttle } from '@/lib/utils'
 import { queryText, queryTextStream } from '@/api/lightrag'
 import { errorMessage } from '@/lib/utils'
 import { useSettingsStore } from '@/stores/settings'
 import { useDebounce } from '@/hooks/useDebounce'
-import QuerySettings from '@/components/retrieval/QuerySettings'
 import { ChatMessage, MessageWithError } from '@/components/retrieval/ChatMessage'
-import { EraserIcon, SendIcon, PaperclipIcon, MicIcon, MicOffIcon } from 'lucide-react'
+import { Search, MoreHorizontal, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { QueryMode } from '@/api/lightrag'
-import { Send, Paperclip, Mic, X, Sparkles, Plus } from 'lucide-react';
+import { Send, Paperclip, X, Sparkles } from 'lucide-react';
+import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
 
 // Helper function to generate unique IDs with browser compatibility
 const generateUniqueId = () => {
@@ -29,40 +27,23 @@ export default function RetrievalTesting() {
     try {
       const history = useSettingsStore.getState().retrievalHistory || []
       // Ensure each message from history has a unique ID and mermaidRendered status
-      return history.map((msg, index) => {
-        try {
-          const msgWithError = msg as MessageWithError // Cast to access potential properties
-          return {
-            ...msg,
-            id: msgWithError.id || `hist-${Date.now()}-${index}`, // Add ID if missing
-            mermaidRendered: msgWithError.mermaidRendered ?? true // Assume historical mermaid is rendered
-          }
-        } catch (error) {
-          console.error('Error processing message:', error)
-          // Return a default message if there's an error
-          return {
-            role: 'system',
-            content: 'Error loading message',
-            id: `error-${Date.now()}-${index}`,
-            isError: true,
-            mermaidRendered: true
-          }
-        }
+      return history.map((msg: any, index: number) => {
+        return {
+          ...msg,
+          id: msg.id || `hist-${Date.now()}-${index}`,
+          mermaidRendered: (msg as any).mermaidRendered ?? true
+        } as MessageWithError;
       })
     } catch (error) {
       console.error('Error loading history:', error)
-      return [] // Return an empty array if there's an error
+      return []
     }
   })
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [inputError, setInputError] = useState('') // Error message for input
   const [searchQuery, setSearchQuery] = useState('') // Search query for chat history
-  const [pinnedChats, setPinnedChats] = useState<Set<string>>(new Set()) // Track pinned chats
-  const [attachments, setAttachments] = useState<File[]>([]) // Track file attachments
-  const [isRecording, setIsRecording] = useState(false) // Track voice recording state
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null) // Media recorder for voice
-  const [useLLM, setUseLLM] = useState(true) // Toggle for LLM usage
+  // Removed unused isRecording, setIsRecording, mediaRecorder, setMediaRecorder
+  const [useLLM] = useState(true) // Toggle for LLM usage
   // Reference to track if we should follow scroll during streaming (using ref for synchronous updates)
   const shouldFollowScrollRef = useRef(true)
   // Reference to track if user interaction is from the form area
@@ -75,7 +56,6 @@ export default function RetrievalTesting() {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const retrievalHistory = useSettingsStore((state) => state.retrievalHistory)
-  const setRetrievalHistory = useSettingsStore.use.setRetrievalHistory()
 
   // Group messages into conversations
   const conversations = useMemo(() => {
@@ -110,32 +90,9 @@ export default function RetrievalTesting() {
     return groups;
   }, [retrievalHistory]);
 
-  // Filter conversations based on search query
-  const filteredConversations = useMemo(() => {
-    if (!searchQuery.trim()) return conversations;
-    
-    return conversations.filter(conv => 
-      conv.preview.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.messages.some(msg => msg.content.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  }, [conversations, searchQuery]);
-
   // Load a conversation into the chat
   const loadConversation = useCallback((conversation: typeof conversations[0]) => {
     setMessages(conversation.messages);
-  }, []);
-
-  // Toggle pin status of a conversation
-  const togglePin = useCallback((conversationId: string) => {
-    setPinnedChats(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(conversationId)) {
-        newSet.delete(conversationId);
-      } else {
-        newSet.add(conversationId);
-      }
-      return newSet;
-    });
   }, []);
 
   // Export answer to various formats
@@ -189,7 +146,7 @@ export default function RetrievalTesting() {
 
       // If input starts with a slash, but does not match the valid prefix pattern, treat as error
       if (/^\/\S+/.test(inputValue) && !prefixMatch) {
-        setInputError(t('retrievePanel.retrieval.queryModePrefixInvalid'))
+        // setInputError(t('retrievePanel.retrieval.queryModePrefixInvalid')) // Removed unused variable
         return
       }
 
@@ -197,19 +154,19 @@ export default function RetrievalTesting() {
         const mode = prefixMatch[1] as QueryMode
         const query = prefixMatch[2]
         if (!allowedModes.includes(mode)) {
-          setInputError(
-            t('retrievePanel.retrieval.queryModeError', {
-              modes: 'naive, local, global, hybrid, mix, bypass',
-            })
-          )
+          // setInputError( // Removed unused variable
+          //   t('retrievePanel.retrieval.queryModeError', {
+          //     modes: 'naive, local, global, hybrid, mix, bypass',
+          //   })
+          // )
           return
         }
         modeOverride = mode
         actualQuery = query
       }
 
-      // Clear error message
-      setInputError('')
+      // Clear error message // Removed unused variable
+      // setInputError('')
 
       // Create messages
       // Save the original input (with prefix if any) in userMessage.content for display
@@ -408,62 +365,6 @@ export default function RetrievalTesting() {
   }, [debouncedMessages, scrollToBottom])
 
 
-  const clearMessages = useCallback(() => {
-    setMessages([])
-    useSettingsStore.getState().setRetrievalHistory([])
-  }, [setMessages])
-
-  // Handle file attachment
-  const handleFileAttachment = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length > 0) {
-      setAttachments(prev => [...prev, ...files]);
-    }
-  }, []);
-
-  // Remove attachment
-  const removeAttachment = useCallback((index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  // Start voice recording
-  const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunks.push(e.data);
-        }
-      };
-
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/wav' });
-        // For now, just show a message. In a real app, you'd send this to a speech-to-text service
-        setInputValue(prev => prev + ' [Voice message recorded - would be transcribed here]');
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-    } catch (error) {
-      console.error('Error starting recording:', error);
-      alert('Could not access microphone. Please check permissions.');
-    }
-  }, []);
-
-  // Stop voice recording
-  const stopRecording = useCallback(() => {
-    if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      setMediaRecorder(null);
-    }
-  }, [mediaRecorder, isRecording]);
-
   // Quick suggestions for onboarding and fast actions
   const quickSuggestions = [
     'List all transactions over $10,000',
@@ -556,6 +457,32 @@ export default function RetrievalTesting() {
     }
   };
 
+  // --- Group conversations by date for sidebar ---
+  const groupedConversations = useMemo(() => {
+    const today: typeof conversations = [];
+    const yesterday: typeof conversations = [];
+    const previous7: typeof conversations = [];
+    conversations.forEach(conv => {
+      // Use the timestamp of the first message in the group, or fallback to extracting from id
+      const firstMsg = conv.messages[0];
+      let date: Date;
+      if (firstMsg && (firstMsg as any).timestamp) {
+        date = new Date((firstMsg as any).timestamp);
+      } else if (firstMsg && firstMsg.id && /^hist-(\d+)-/.test(firstMsg.id)) {
+        // Try to extract timestamp from id if it matches 'hist-<timestamp>-<index>'
+        const match = firstMsg.id.match(/^hist-(\d+)-/);
+        date = match ? new Date(Number(match[1])) : new Date();
+      } else {
+        date = new Date();
+      }
+      if (isToday(date)) today.push(conv);
+      else if (isYesterday(date)) yesterday.push(conv);
+      else if (isAfter(date, subDays(new Date(), 7))) previous7.push(conv);
+    });
+    return { today, yesterday, previous7 };
+  }, [conversations]);
+  // --- End grouping ---
+
   return (
     <div className="main-content-below-navbar flex h-full w-full">
       {/* Main chat area */}
@@ -612,97 +539,80 @@ export default function RetrievalTesting() {
           </div>
         </div>
       </div>
-      {/* Chat History Sidebar */}
-      <aside className="w-80 bg-black/80 border-l border-zinc-800 p-4 overflow-y-auto">
-        <h2 className="text-lg font-bold mb-4 text-white">Chat History</h2>
-        
-        {/* Search input */}
-        <div className="mb-4">
-          <Input
-            placeholder="Search conversations..."
+      {/* Chat History Sidebar - Modern, grouped, clean design */}
+      <aside className="w-80 bg-black/80 border-l border-zinc-800 p-4 flex flex-col h-full">
+        <button className="rounded-full bg-zinc-800 text-white font-semibold py-2 mb-4 w-full hover:bg-zinc-700 transition flex items-center justify-center gap-2">
+          <Plus className="w-4 h-4" /> New Chat
+        </button>
+        <div className="relative mb-4">
+          <input
+            className="w-full rounded-full bg-zinc-900 border border-zinc-700 text-white pl-10 pr-4 py-2 text-sm focus:outline-none"
+            placeholder="Search"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-900 border-zinc-700 text-white placeholder-gray-400"
+            onChange={e => setSearchQuery(e.target.value)}
           />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
         </div>
-
-        {filteredConversations.length === 0 ? (
-          <div className="text-gray-400 text-center py-8">
-            {searchQuery ? 'No conversations found.' : 'No previous chats.'}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {/* Pinned conversations */}
-            {filteredConversations.filter(conv => pinnedChats.has(conv.id)).length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-sm font-medium text-gray-400 mb-2">Pinned</h3>
-                {filteredConversations
-                  .filter(conv => pinnedChats.has(conv.id))
-                  .map((conversation) => (
-                    <div
-                      key={conversation.id}
-                      className="bg-zinc-900/50 border border-zinc-700 rounded-lg p-3 mb-2 cursor-pointer hover:bg-zinc-900 transition-colors"
-                      onClick={() => loadConversation(conversation)}
+        <div className="flex-1 overflow-y-auto">
+          {/* Today */}
+          {groupedConversations.today.length > 0 && (
+            <div className="mb-4">
+              <div className="text-xs text-zinc-500 mb-2">Today</div>
+              <ul className="divide-y divide-zinc-800">
+                {groupedConversations.today.map(chat => (
+                  <li key={chat.id}>
+                    <button
+                      className={'w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left hover:bg-zinc-900'}
+                      onClick={() => loadConversation(chat)}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm truncate">{conversation.preview}</p>
-                          <p className="text-gray-400 text-xs mt-1">
-                            {conversation.messages.length} messages
-                          </p>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            togglePin(conversation.id);
-                          }}
-                          className="text-yellow-400 hover:text-yellow-300 ml-2"
-                        >
-                          📌
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )}
-
-            {/* Regular conversations */}
-            <div>
-              {pinnedChats.size > 0 && (
-                <h3 className="text-sm font-medium text-gray-400 mb-2">Recent</h3>
-              )}
-              {filteredConversations
-                .filter(conv => !pinnedChats.has(conv.id))
-                .map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 mb-2 cursor-pointer hover:bg-zinc-800 transition-colors"
-                    onClick={() => loadConversation(conversation)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm truncate">{conversation.preview}</p>
-                        <p className="text-gray-400 text-xs mt-1">
-                          {conversation.messages.length} messages
-                        </p>
-                      </div>
-                      {pinnedChats.has(conversation.id) && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            togglePin(conversation.id);
-                          }}
-                          className="text-yellow-400 hover:text-yellow-300 ml-2"
-                        >
-                          📌
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                      <span className="truncate flex-1">{chat.preview}</span>
+                      <span className="ml-2 text-zinc-400"><MoreHorizontal size={18} /></span>
+                    </button>
+                  </li>
                 ))}
+              </ul>
             </div>
-          </div>
-        )}
+          )}
+          {/* Yesterday */}
+          {groupedConversations.yesterday.length > 0 && (
+            <div className="mb-4">
+              <div className="text-xs text-zinc-500 mb-2">Yesterday</div>
+              <ul className="divide-y divide-zinc-800">
+                {groupedConversations.yesterday.map(chat => (
+                  <li key={chat.id}>
+                    <button
+                      className={'w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left hover:bg-zinc-900'}
+                      onClick={() => loadConversation(chat)}
+                    >
+                      <span className="truncate flex-1">{chat.preview}</span>
+                      <span className="ml-2 text-zinc-400"><MoreHorizontal size={18} /></span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {/* Previous 7 days */}
+          {groupedConversations.previous7.length > 0 && (
+            <div className="mb-4">
+              <div className="text-xs text-zinc-500 mb-2">Previous 7 days</div>
+              <ul className="divide-y divide-zinc-800">
+                {groupedConversations.previous7.map(chat => (
+                  <li key={chat.id}>
+                    <button
+                      className={'w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left hover:bg-zinc-900'}
+                      onClick={() => loadConversation(chat)}
+                    >
+                      <span className="truncate flex-1">{chat.preview}</span>
+                      <span className="ml-2 text-zinc-400"><MoreHorizontal size={18} /></span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <button className="w-full text-xs text-blue-400 mt-4">Show more...</button>
+        </div>
       </aside>
     </div>
   )
@@ -710,7 +620,6 @@ export default function RetrievalTesting() {
 
 const AIInputField = ({ onSend }: { onSend: (message: string, files: any[]) => void }) => {
   const [message, setMessage] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -821,26 +730,6 @@ const AIInputField = ({ onSend }: { onSend: (message: string, files: any[]) => v
                 className="hidden"
                 accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.csv,.json"
               />
-              <button
-                onClick={() => setIsRecording(!isRecording)}
-                className={`group relative p-3 rounded-2xl transition-all duration-300 hover:scale-110 ${
-                  isRecording 
-                    ? 'bg-gradient-to-br from-red-900/80 to-pink-900/80 animate-pulse shadow-lg shadow-red-900/50' 
-                    : 'bg-gradient-to-br from-zinc-900/80 to-black/80 hover:from-green-900/80 hover:to-emerald-900/80 hover:shadow-lg'
-                }`}
-                title={isRecording ? "Stop recording" : "Voice input"}
-              >
-                <Mic className={`w-5 h-5 transition-colors duration-300 ${
-                  isRecording 
-                    ? 'text-red-400' 
-                    : 'text-zinc-400 group-hover:text-green-400'
-                }`} />
-                <div className={`absolute inset-0 rounded-2xl transition-all duration-300 ${
-                  isRecording 
-                    ? 'bg-gradient-to-br from-red-400/20 to-pink-400/20' 
-                    : 'bg-gradient-to-br from-green-400/0 to-emerald-400/0 group-hover:from-green-400/20 group-hover:to-emerald-400/20'
-                }`}></div>
-              </button>
             </div>
             {/* Text Input - No Background */}
             <div className="flex-1 relative">
@@ -851,7 +740,7 @@ const AIInputField = ({ onSend }: { onSend: (message: string, files: any[]) => v
                 onKeyDown={handleKeyDown}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                placeholder="Ask me anything... ✨"
+                placeholder='What would you like clarified?'
                 className="w-full resize-none border-none outline-none text-zinc-200 placeholder-zinc-500 text-lg leading-relaxed min-h-[32px] max-h-32 bg-transparent font-medium selection:bg-blue-200/50"
                 rows={1}
                 style={{ background: 'transparent' }}
@@ -895,19 +784,6 @@ const AIInputField = ({ onSend }: { onSend: (message: string, files: any[]) => v
             </div>
           )}
         </div>
-        {/* Recording Indicator */}
-        {isRecording && (
-          <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center gap-3 bg-gradient-to-r from-red-500/90 to-pink-500/90 backdrop-blur-xl text-white px-6 py-3 rounded-2xl shadow-2xl shadow-red-500/50">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-              </div>
-              <span className="font-medium">Listening...</span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
