@@ -1,5 +1,5 @@
 import Button from '@/components/ui/Button'
-import { SiteInfo, webuiPrefix } from '@/lib/constants'
+import { webuiPrefix } from '@/lib/constants'
 import AppSettings from '@/components/AppSettings'
 import { TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { useSettingsStore } from '@/stores/settings'
@@ -7,8 +7,7 @@ import { useAuthStore } from '@/stores/state'
 import { cn } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 import { navigationService } from '@/services/navigation'
-import { ZapIcon, LogOutIcon } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/Tooltip'
+import { LogOutIcon } from 'lucide-react'
 
 interface NavigationTabProps {
   value: string
@@ -29,7 +28,7 @@ function NavigationTab({ value, currentTab, children, onClick }: NavigationTabPr
         !isActive && 'bg-black/40',
         'mx-1',
       )}
-      style={{ fontFamily: "'Playfair Display', serif" }}
+      style={{ fontFamily: '"Playfair Display", serif' }}
       onClick={onClick}
     >
       {children}
@@ -73,7 +72,7 @@ function TabsNavigation() {
 
 export default function SiteHeader() {
   const { t } = useTranslation()
-  const { isGuestMode, username, webuiTitle, webuiDescription } = useAuthStore()
+  const { isGuestMode, username } = useAuthStore()
 
   const handleLogout = () => {
     navigationService.navigateToLogin();

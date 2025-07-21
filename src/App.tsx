@@ -6,18 +6,15 @@ import ThemeProvider from '@/components/ThemeProvider'
 import TabVisibilityProvider from '@/contexts/TabVisibilityProvider'
 import ApiKeyAlert from '@/components/ApiKeyAlert'
 import StatusIndicator from '@/components/status/StatusIndicator'
-import { healthCheckInterval, SiteInfo, webuiPrefix } from '@/lib/constants'
+import { healthCheckInterval, webuiPrefix } from '@/lib/constants'
 import { useBackendState, useAuthStore } from '@/stores/state'
 import { useSettingsStore } from '@/stores/settings'
 import { getAuthStatus } from '@/api/lightrag'
 import SiteHeader from '@/features/SiteHeader'
 import { InvalidApiKeyError, RequireApiKeError } from '@/api/lightrag'
-import { ZapIcon } from 'lucide-react'
 
 import GraphViewer from '@/features/GraphViewer'
-import DocumentManager from '@/features/DocumentManager'
 import RetrievalTesting from '@/features/RetrievalTesting'
-import ApiSite from '@/features/ApiSite'
 import DocumentRetrievalDashboard from '@/features/DocumentRetrievalDashboard';
 import ProcessWalkthroughLibrary from '@/features/ProcessWalkthroughLibrary';
 
@@ -207,16 +204,16 @@ function App() {
             >
               <SiteHeader />
               <div className="relative grow">
-                <TabsContent value="audit-queries" className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
+                <TabsContent value='audit-queries' className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
                   <RetrievalTesting />
                 </TabsContent>
-                <TabsContent value="knowledge-graph" className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
+                <TabsContent value='knowledge-graph' className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
                   <GraphViewer />
                 </TabsContent>
-                <TabsContent value="support" className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
+                <TabsContent value='support' className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
                   <DocumentRetrievalDashboard />
                 </TabsContent>
-                <TabsContent value="process-walkthrough" className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
+                <TabsContent value='process-walkthrough' className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
                   <ProcessWalkthroughLibrary />
                 </TabsContent>
               </div>
