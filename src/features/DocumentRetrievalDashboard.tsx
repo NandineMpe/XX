@@ -3,7 +3,7 @@ import DataTable from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { ColumnDef } from '@tanstack/react-table';
-import { Mail, RefreshCw, FileText, AlertTriangle, CheckCircle, Clock, Loader2, Send, XCircle } from 'lucide-react';
+import { Mail, RefreshCw, FileText, AlertTriangle, CheckCircle, Clock, Loader2, Send, XCircle, Search, Slash } from 'lucide-react';
 import { format } from 'date-fns';
 
 // Status definitions
@@ -159,6 +159,7 @@ export default function DocumentRetrievalDashboard() {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterAuditor, setFilterAuditor] = useState('');
   const [filterDate, setFilterDate] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
 
   // Unique status and auditor options for filters
   const statusOptions = Array.from(new Set(mockRequests.map(r => r.status)));
@@ -181,39 +182,63 @@ export default function DocumentRetrievalDashboard() {
     <div className="flex h-full w-full bg-black text-white pt-24">
       <div className="w-full max-w-7xl mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold mb-6">Supporting Document Retrieval</h1>
-        {/* Search/Filter Bar */}
+        {/* Search/Filter Bar with custom style */}
         <div className="mb-4 flex flex-wrap items-center gap-4">
-          <input
-            className="border rounded px-3 py-2 w-64 text-sm focus:outline-none focus:ring focus:border-blue-300 bg-zinc-900 border-zinc-700 text-white"
-            placeholder="Search by document, auditor, status, or date..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+          {/* Search input with icon and slash */}
+          <label className={`search-label flex items-center relative rounded-[12px] overflow-hidden bg-[#3D3D3D] px-3 py-2 cursor-text border border-transparent focus-within:bg-[#464646] focus-within:border-gray-400 hover:border-gray-400 transition w-64`}
+            style={{ minWidth: 220 }}
+          >
+            <input
+              className="outline-none w-full border-none bg-transparent text-gray-300 pr-8 text-sm placeholder-gray-400"
+              placeholder="Search by document, auditor, status, or date..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              type="text"
+            />
+            {/* Slash icon for shortcut hint */}
+            {!search && !searchFocused && (
+              <span className="slash-icon absolute right-2 top-1/2 -translate-y-1/2 border border-[#393838] bg-gradient-to-br from-[#343434] to-[#6d6d6d] rounded text-center shadow-inner text-xs w-[15px] h-[18px] flex items-center justify-center select-none pointer-events-none">
+                /
+              </span>
+            )}
+            {/* Magnifying glass icon */}
+            {(search || searchFocused) && (
+              <Search className="search-icon absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            )}
+          </label>
+          {/* Status filter dropdown */}
           <select
-            className="border rounded px-2 py-2 text-sm bg-zinc-900 border-zinc-700 text-white"
+            className="rounded-[12px] bg-[#3D3D3D] border border-transparent px-3 py-2 text-sm text-white focus:outline-none focus:bg-[#464646] focus:border-gray-400 hover:border-gray-400 transition"
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value)}
+            style={{ minWidth: 140 }}
           >
             <option value="">All Statuses</option>
             {statusOptions.map(status => (
               <option key={status} value={status}>{status}</option>
             ))}
           </select>
+          {/* Auditor filter dropdown */}
           <select
-            className="border rounded px-2 py-2 text-sm bg-zinc-900 border-zinc-700 text-white"
+            className="rounded-[12px] bg-[#3D3D3D] border border-transparent px-3 py-2 text-sm text-white focus:outline-none focus:bg-[#464646] focus:border-gray-400 hover:border-gray-400 transition"
             value={filterAuditor}
             onChange={e => setFilterAuditor(e.target.value)}
+            style={{ minWidth: 140 }}
           >
             <option value="">All Auditors</option>
             {auditorOptions.map(auditor => (
               <option key={auditor} value={auditor}>{auditor}</option>
             ))}
           </select>
+          {/* Date filter input */}
           <input
             type="date"
-            className="border rounded px-2 py-2 text-sm bg-zinc-900 border-zinc-700 text-white"
+            className="rounded-[12px] bg-[#3D3D3D] border border-transparent px-3 py-2 text-sm text-white focus:outline-none focus:bg-[#464646] focus:border-gray-400 hover:border-gray-400 transition"
             value={filterDate}
             onChange={e => setFilterDate(e.target.value)}
+            style={{ minWidth: 140 }}
           />
         </div>
         {/* Table with tooltips */}
