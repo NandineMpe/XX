@@ -1,5 +1,12 @@
 import React, { useState, useMemo } from 'react';
-// Placeholder for Rive animation
+import Rive from '@rive-app/react-canvas';
+// Rive animation for Ornua Business Model
+const OrnuaRiveAnimation = () => (
+  <div className="w-full h-96 bg-gray-900 flex items-center justify-center rounded-lg border border-gray-700 mb-6">
+    <Rive src="https://ifonjarzvpechegr.public.blob.vercel-storage.com/drag_and_drop_elearning%20%2812%29.riv" style={{ width: '100%', height: '22rem', background: 'transparent' }} />
+  </div>
+);
+// Placeholder for other processes
 const RiveAnimation = ({ step }: { step: number }) => (
   <div className="w-full h-64 bg-gray-900 flex items-center justify-center rounded-lg border border-gray-700 mb-6">
     <span className="text-gray-400">[Rive Animation for Step {step + 1}]</span>
@@ -8,6 +15,27 @@ const RiveAnimation = ({ step }: { step: number }) => (
 
 // Mock config/data
 const entities = [
+  {
+    id: 'ornua',
+    name: 'Ornua',
+    processes: [
+      {
+        id: 'business-model',
+        name: 'Business Model',
+        description: 'Interactive business model of Ornua (company being audited).',
+        steps: [
+          {
+            title: 'Business Model',
+            explanation: 'Explore the interactive business model of Ornua.',
+            controls: ['Drag and drop, click to explore nodes'],
+            docs: [
+              { name: 'Business Model Overview', type: 'view' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   {
     id: 'kerry-gold',
     name: 'Kerry Gold',
@@ -79,7 +107,7 @@ export default function ProcessWalkthroughLibrary() {
   const step = selectedProcess.steps[currentStep];
 
   return (
-    <div className="flex h-full w-full bg-black text-white">
+    <div className="flex h-full w-full bg-black text-white pt-24">
       {/* Sidebar */}
       <aside className="w-80 bg-zinc-900 border-r border-zinc-800 flex flex-col p-4">
         <div className="mb-4">
@@ -130,7 +158,12 @@ export default function ProcessWalkthroughLibrary() {
             <h2 className="text-xl font-bold mb-1">{selectedEntity.name} – {selectedProcess.name}</h2>
             <div className="text-gray-400 text-sm mb-2">{selectedProcess.description}</div>
           </div>
-          <RiveAnimation step={currentStep} />
+          {/* Show Ornua Rive animation only for Ornua's Business Model process */}
+          {selectedEntity.id === 'ornua' && selectedProcess.id === 'business-model' ? (
+            <OrnuaRiveAnimation />
+          ) : (
+            <RiveAnimation step={currentStep} />
+          )}
           {/* Step Navigation */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex gap-2">
