@@ -55,6 +55,7 @@ from lightrag.kg.shared_storage import (
 )
 from fastapi.security import OAuth2PasswordRequestForm
 from lightrag.api.auth import auth_handler
+from typing import AsyncGenerator, Any, Union
 
 # use the .env that is inside the current folder
 # allows to use different .env file for each lightrag instance
@@ -246,7 +247,7 @@ def create_app(args):
         history_messages=None,
         keyword_extraction=False,
         **kwargs,
-    ) -> str:
+    ) -> Union[str, AsyncGenerator[str, Any], None]:
         keyword_extraction = kwargs.pop("keyword_extraction", None)
         if keyword_extraction:
             kwargs["response_format"] = GPTKeywordExtractionFormat
