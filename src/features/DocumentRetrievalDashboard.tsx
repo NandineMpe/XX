@@ -143,96 +143,186 @@ const columns: ColumnDef<any, any>[] = [
   },
 ];
 
+// Add a simple Tooltip component for accessibility
+const Tooltip = ({ text, children }: { text: string; children: React.ReactNode }) => (
+  <span className="relative group">
+    {children}
+    <span className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition bg-zinc-800 text-xs text-white rounded px-2 py-1 absolute z-10 left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap shadow-lg">
+      {text}
+    </span>
+  </span>
+);
+
 export default function DocumentRetrievalDashboard() {
   const [selected, setSelected] = useState<any | null>(null);
   const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterAuditor, setFilterAuditor] = useState('');
+  const [filterDate, setFilterDate] = useState('');
 
-  // Filter logic
+  // Unique status and auditor options for filters
+  const statusOptions = Array.from(new Set(mockRequests.map(r => r.status)));
+  const auditorOptions = Array.from(new Set(mockRequests.map(r => r.auditor)));
+
+  // Enhanced filter logic
   const filtered = useMemo(() => {
     return mockRequests.filter((r) =>
-      r.document.toLowerCase().includes(search.toLowerCase()) ||
-      r.auditor.toLowerCase().includes(search.toLowerCase()) ||
-      r.status.toLowerCase().includes(search.toLowerCase()) ||
-      r.date.includes(search)
+      (r.document.toLowerCase().includes(search.toLowerCase()) ||
+        r.auditor.toLowerCase().includes(search.toLowerCase()) ||
+        r.status.toLowerCase().includes(search.toLowerCase()) ||
+        r.date.includes(search)) &&
+      (filterStatus ? r.status === filterStatus : true) &&
+      (filterAuditor ? r.auditor === filterAuditor : true) &&
+      (filterDate ? r.date === filterDate : true)
     );
-  }, [search]);
+  }, [search, filterStatus, filterAuditor, filterDate]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">Supporting Document Retrieval</h1>
-      <div className="mb-4 flex items-center gap-4">
-        <input
-          className="border rounded px-3 py-2 w-72 text-sm focus:outline-none focus:ring focus:border-blue-300"
-          placeholder="Search by document, auditor, status, or date..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
+    <div className="flex h-full w-full bg-black text-white pt-24">
+      <div className="w-full max-w-7xl mx-auto py-8 px-4">
+        <h1 className="text-2xl font-bold mb-6">Supporting Document Retrieval</h1>
+        {/* Search/Filter Bar */}
+        <div className="mb-4 flex flex-wrap items-center gap-4">
+          <input
+            className="border rounded px-3 py-2 w-64 text-sm focus:outline-none focus:ring focus:border-blue-300 bg-zinc-900 border-zinc-700 text-white"
+            placeholder="Search by document, auditor, status, or date..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <select
+            className="border rounded px-2 py-2 text-sm bg-zinc-900 border-zinc-700 text-white"
+            value={filterStatus}
+            onChange={e => setFilterStatus(e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            {statusOptions.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+          <select
+            className="border rounded px-2 py-2 text-sm bg-zinc-900 border-zinc-700 text-white"
+            value={filterAuditor}
+            onChange={e => setFilterAuditor(e.target.value)}
+          >
+            <option value="">All Auditors</option>
+            {auditorOptions.map(auditor => (
+              <option key={auditor} value={auditor}>{auditor}</option>
+            ))}
+          </select>
+          <input
+            type="date"
+            className="border rounded px-2 py-2 text-sm bg-zinc-900 border-zinc-700 text-white"
+            value={filterDate}
+            onChange={e => setFilterDate(e.target.value)}
+          />
+        </div>
+        {/* Table with tooltips */}
+        <DataTable
+          columns={columns.map(col => {
+            if (col.accessorKey === 'status') {
+              return {
+                ...col,
+                cell: ({ row }) => {
+                  const meta = statusMeta[row.original.status];
+                  return (
+                    <Tooltip text={meta.label}>
+                      <span className="flex items-center gap-1">
+                        {meta.icon}
+                        {meta.badge && <Badge variant="secondary" className="ml-1">Email</Badge>}
+                      </span>
+                    </Tooltip>
+                  );
+                },
+              };
+            }
+            if (col.id === 'actions') {
+              return {
+                ...col,
+                cell: ({ row }) => {
+                  const actions = statusActions[row.original.status] || [];
+                  return (
+                    <div className="flex gap-2">
+                      {actions.map((action) => (
+                        <Tooltip key={action} text={action === 'Retry' ? 'Retry automated retrieval' : action === 'Resend Email' ? 'Resend approval email to client' : action}>
+                          <button className="text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">
+                            {action}
+                          </button>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  );
+                },
+              };
+            }
+            return col;
+          })}
+          data={filtered}
         />
-      </div>
-      <DataTable columns={columns} data={filtered} />
-      {/* Detail Dialog */}
-      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-        <DialogContent>
-          {selected && (
-            <div>
-              <DialogHeader>
-                <DialogTitle>{selected.document}</DialogTitle>
-                <DialogDescription>
-                  Requested by <b>{selected.auditor}</b> on {format(new Date(selected.date), 'yyyy-MM-dd')}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4 space-y-2">
-                <div className="font-semibold">Audit Trail</div>
-                <ul className="text-xs space-y-1">
-                  {selected.auditTrail.map((item: any, i: number) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <span>{statusMeta[item.status].icon}</span>
-                      <span>{statusMeta[item.status].label}</span>
-                      <span className="text-gray-400 ml-2">{format(new Date(item.at), 'yyyy-MM-dd HH:mm')}</span>
-                      {item.email && <Badge variant="secondary">Email: {item.email}</Badge>}
-                      {item.error && <span className="text-red-500 ml-2">{item.error}</span>}
-                    </li>
-                  ))}
-                </ul>
-                <div className="font-semibold mt-4">Attachments / Logs</div>
-                {selected.attachments.length ? (
+        {/* Detail Dialog */}
+        <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
+          <DialogContent>
+            {selected && (
+              <div>
+                <DialogHeader>
+                  <DialogTitle>{selected.document}</DialogTitle>
+                  <DialogDescription>
+                    Requested by <b>{selected.auditor}</b> on {format(new Date(selected.date), 'yyyy-MM-dd')}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-4 space-y-2">
+                  <div className="font-semibold">Audit Trail</div>
                   <ul className="text-xs space-y-1">
-                    {selected.attachments.map((a: any, i: number) => (
-                      <li key={i}><a href={a.url} className="text-blue-600 underline">{a.name}</a></li>
+                    {selected.auditTrail.map((item: any, i: number) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <span>{statusMeta[item.status].icon}</span>
+                        <span>{statusMeta[item.status].label}</span>
+                        <span className="text-gray-400 ml-2">{format(new Date(item.at), 'yyyy-MM-dd HH:mm')}</span>
+                        {item.email && <Badge variant="secondary">Email: {item.email}</Badge>}
+                        {item.error && <span className="text-red-500 ml-2">{item.error}</span>}
+                      </li>
                     ))}
                   </ul>
-                ) : (
-                  <div className="text-gray-400 text-xs">Pending</div>
-                )}
-                {/* Status-specific info */}
-                {selected.status === STATUS.WAITING_EMAIL && (
-                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Mail className="w-4 h-4 text-yellow-500" />
-                      <span className="font-medium">Waiting for Client Email Approval</span>
+                  <div className="font-semibold mt-4">Attachments / Logs</div>
+                  {selected.attachments.length ? (
+                    <ul className="text-xs space-y-1">
+                      {selected.attachments.map((a: any, i: number) => (
+                        <li key={i}><a href={a.url} className="text-blue-600 underline">{a.name}</a></li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="text-gray-400 text-xs">Pending</div>
+                  )}
+                  {/* Status-specific info */}
+                  {selected.status === STATUS.WAITING_EMAIL && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Mail className="w-4 h-4 text-yellow-500" />
+                        <span className="font-medium">Waiting for Client Email Approval</span>
+                      </div>
+                      <div className="text-xs">Email sent to <b>{selected.email}</b> on {format(new Date(selected.lastUpdate), 'yyyy-MM-dd HH:mm')}</div>
+                      <button className="mt-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">Resend Email</button>
+                      <div className="text-xs text-gray-500 mt-2">Approval must be completed via secure email link. No in-app approval/upload.</div>
                     </div>
-                    <div className="text-xs">Email sent to <b>{selected.email}</b> on {format(new Date(selected.lastUpdate), 'yyyy-MM-dd HH:mm')}</div>
-                    <button className="mt-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">Resend Email</button>
-                    <div className="text-xs text-gray-500 mt-2">Approval must be completed via secure email link. No in-app approval/upload.</div>
-                  </div>
-                )}
-                {selected.status === STATUS.CLIENT_APPROVED && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-xs">
-                    Client approved via email at {format(new Date(selected.lastUpdate), 'yyyy-MM-dd HH:mm')}, document queued for auditor.
-                  </div>
-                )}
-                {selected.status === STATUS.FAILED && (
-                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-xs">
-                    <div className="font-medium text-red-600 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Failed / Needs Manual Intervention</div>
-                    <div className="mt-1">{selected.error}</div>
-                    <button className="mt-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">Retry</button>
-                    <button className="ml-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">View Log</button>
-                  </div>
-                )}
+                  )}
+                  {selected.status === STATUS.CLIENT_APPROVED && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-xs">
+                      Client approved via email at {format(new Date(selected.lastUpdate), 'yyyy-MM-dd HH:mm')}, document queued for auditor.
+                    </div>
+                  )}
+                  {selected.status === STATUS.FAILED && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-xs">
+                      <div className="font-medium text-red-600 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Failed / Needs Manual Intervention</div>
+                      <div className="mt-1">{selected.error}</div>
+                      <button className="mt-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">Retry</button>
+                      <button className="ml-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">View Log</button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 } 
