@@ -3,8 +3,9 @@ import DataTable from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { ColumnDef } from '@tanstack/react-table';
-import { Mail, RefreshCw, FileText, AlertTriangle, CheckCircle, Clock, Loader2, Send, XCircle, Search, Slash } from 'lucide-react';
+import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search } from 'lucide-react';
 import { format } from 'date-fns';
+import { useDocumentRequestStore, DocumentRequest } from '@/stores/documentRequests';
 
 // Status definitions
 const STATUS = {
@@ -26,74 +27,17 @@ const statusMeta = {
 };
 
 // Mock data
-const mockRequests = [
-  {
-    id: '1',
-    auditor: 'Jane Smith',
-    document: '2023 Bank Statement',
-    date: '2024-06-01',
-    source: 'PBC Automation',
-    method: 'Auto-Email',
-    status: STATUS.WAITING_EMAIL,
-    lastUpdate: '2024-06-01T10:00:00Z',
-    email: 'client@example.com',
-    auditTrail: [
-      { status: STATUS.REQUESTED, at: '2024-06-01T08:00:00Z' },
-      { status: STATUS.IN_PROGRESS, at: '2024-06-01T08:05:00Z' },
-      { status: STATUS.WAITING_EMAIL, at: '2024-06-01T10:00:00Z', email: 'client@example.com' },
-    ],
-    attachments: [],
-    error: null,
-  },
-  {
-    id: '2',
-    auditor: 'John Doe',
-    document: 'Payroll Q1 2024',
-    date: '2024-05-28',
-    source: 'Manual',
-    method: 'Manual Upload',
-    status: STATUS.SENT,
-    lastUpdate: '2024-05-29T09:00:00Z',
-    email: null,
-    auditTrail: [
-      { status: STATUS.REQUESTED, at: '2024-05-28T07:00:00Z' },
-      { status: STATUS.IN_PROGRESS, at: '2024-05-28T07:10:00Z' },
-      { status: STATUS.CLIENT_APPROVED, at: '2024-05-28T15:00:00Z' },
-      { status: STATUS.SENT, at: '2024-05-29T09:00:00Z' },
-    ],
-    attachments: [{ name: 'payroll.pdf', url: '#' }],
-    error: null,
-  },
-  {
-    id: '3',
-    auditor: 'Jane Smith',
-    document: 'Vendor Invoices',
-    date: '2024-05-25',
-    source: 'PBC Automation',
-    method: 'Auto-Email',
-    status: STATUS.FAILED,
-    lastUpdate: '2024-05-25T12:00:00Z',
-    email: 'client@example.com',
-    auditTrail: [
-      { status: STATUS.REQUESTED, at: '2024-05-25T09:00:00Z' },
-      { status: STATUS.IN_PROGRESS, at: '2024-05-25T09:10:00Z' },
-      { status: STATUS.WAITING_EMAIL, at: '2024-05-25T10:00:00Z', email: 'client@example.com' },
-      { status: STATUS.FAILED, at: '2024-05-25T12:00:00Z', error: 'Email bounced' },
-    ],
-    attachments: [],
-    error: 'Email bounced',
-  },
-];
+// Remove: const mockRequests = [...];
 
 const statusActions = {
   [STATUS.WAITING_EMAIL]: ['Resend Email'],
   [STATUS.FAILED]: ['Retry', 'View Log'],
 };
 
-const columns: ColumnDef<any, any>[] = [
+const columns: ColumnDef<DocumentRequest, any>[] = [
   {
     header: '',
-    accessorKey: 'status',
+    accessorFn: (row) => row.status,
     cell: ({ row }) => {
       const meta = statusMeta[row.original.status];
       return (
@@ -105,14 +49,14 @@ const columns: ColumnDef<any, any>[] = [
     },
     size: 40,
   },
-  { header: 'Auditor', accessorKey: 'auditor' },
-  { header: 'Document Requested', accessorKey: 'document' },
-  { header: 'Date', accessorKey: 'date', cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd') },
-  { header: 'Source/Trigger', accessorKey: 'source' },
-  { header: 'Retrieval Method', accessorKey: 'method' },
+  { header: 'Auditor', accessorFn: (row) => row.auditor },
+  { header: 'Document Requested', accessorFn: (row) => row.document },
+  { header: 'Date', accessorFn: (row) => row.date, cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd') },
+  { header: 'Source/Trigger', accessorFn: (row) => row.source },
+  { header: 'Retrieval Method', accessorFn: (row) => row.method },
   {
     header: 'Current Status',
-    accessorKey: 'status',
+    accessorFn: (row) => row.status,
     cell: ({ getValue }) => {
       const meta = statusMeta[getValue()];
       return (
@@ -123,7 +67,7 @@ const columns: ColumnDef<any, any>[] = [
       );
     },
   },
-  { header: 'Last Update', accessorKey: 'lastUpdate', cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd HH:mm') },
+  { header: 'Last Update', accessorFn: (row) => row.lastUpdate, cell: ({ getValue }) => format(new Date(getValue()), 'yyyy-MM-dd HH:mm') },
   {
     header: '',
     id: 'actions',
@@ -154,7 +98,8 @@ const Tooltip = ({ text, children }: { text: string; children: React.ReactNode }
 );
 
 export default function DocumentRetrievalDashboard() {
-  const [selected, setSelected] = useState<any | null>(null);
+  const requests = useDocumentRequestStore((s) => s.requests);
+  const [selected, setSelected] = useState<DocumentRequest | null>(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterAuditor, setFilterAuditor] = useState('');
@@ -162,12 +107,12 @@ export default function DocumentRetrievalDashboard() {
   const [searchFocused, setSearchFocused] = useState(false);
 
   // Unique status and auditor options for filters
-  const statusOptions = Array.from(new Set(mockRequests.map(r => r.status)));
-  const auditorOptions = Array.from(new Set(mockRequests.map(r => r.auditor)));
+  const statusOptions = Array.from(new Set(requests.map(r => r.status)));
+  const auditorOptions = Array.from(new Set(requests.map(r => r.auditor)));
 
   // Enhanced filter logic
   const filtered = useMemo(() => {
-    return mockRequests.filter((r) =>
+    return requests.filter((r) =>
       (r.document.toLowerCase().includes(search.toLowerCase()) ||
         r.auditor.toLowerCase().includes(search.toLowerCase()) ||
         r.status.toLowerCase().includes(search.toLowerCase()) ||
@@ -176,7 +121,7 @@ export default function DocumentRetrievalDashboard() {
       (filterAuditor ? r.auditor === filterAuditor : true) &&
       (filterDate ? r.date === filterDate : true)
     );
-  }, [search, filterStatus, filterAuditor, filterDate]);
+  }, [requests, search, filterStatus, filterAuditor, filterDate]);
 
   return (
     <div className="flex h-full w-full bg-black text-white pt-24">
@@ -243,45 +188,8 @@ export default function DocumentRetrievalDashboard() {
         </div>
         {/* Table with tooltips */}
         <DataTable
-          columns={columns.map(col => {
-            if (col.accessorKey === 'status') {
-              return {
-                ...col,
-                cell: ({ row }) => {
-                  const meta = statusMeta[row.original.status];
-                  return (
-                    <Tooltip text={meta.label}>
-                      <span className="flex items-center gap-1">
-                        {meta.icon}
-                        {meta.badge && <Badge variant="secondary" className="ml-1">Email</Badge>}
-                      </span>
-                    </Tooltip>
-                  );
-                },
-              };
-            }
-            if (col.id === 'actions') {
-              return {
-                ...col,
-                cell: ({ row }) => {
-                  const actions = statusActions[row.original.status] || [];
-                  return (
-                    <div className="flex gap-2">
-                      {actions.map((action) => (
-                        <Tooltip key={action} text={action === 'Retry' ? 'Retry automated retrieval' : action === 'Resend Email' ? 'Resend approval email to client' : action}>
-                          <button className="text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">
-                            {action}
-                          </button>
-                        </Tooltip>
-                      ))}
-                    </div>
-                  );
-                },
-              };
-            }
-            return col;
-          })}
-          data={filtered}
+          columns={columns}
+          data={filtered as DocumentRequest[]}
         />
         {/* Detail Dialog */}
         <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
