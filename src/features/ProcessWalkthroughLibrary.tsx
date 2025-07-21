@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useRive } from '@rive-app/react-canvas';
+import RiveComponent from '@rive-app/react-canvas';
 import Button from '@/components/ui/Button';
 import { useDocumentRequestStore } from '@/stores/documentRequests';
 import { v4 as uuidv4 } from 'uuid';
@@ -100,6 +100,17 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   );
 }
 
+function OrnuaBusinessModel() {
+  return (
+    <div style={{ width: 600, height: 400 }}>
+      <RiveComponent
+        src='https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_business_model.riv'
+        style={{ width: '100%', height: '100%' }}
+      />
+    </div>
+  );
+}
+
 export default function ProcessWalkthroughLibrary() {
   const [selectedEntity, setSelectedEntity] = useState(entities[0]);
   const [selectedProcess, setSelectedProcess] = useState(selectedEntity.processes[0]);
@@ -107,11 +118,6 @@ export default function ProcessWalkthroughLibrary() {
   const [toast, setToast] = useState<string | null>(null);
 
   const addRequest = useDocumentRequestStore((s) => s.addRequest);
-
-  const { RiveComponent } = useRive({
-    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_business_model.riv',
-    autoplay: true,
-  });
 
   // Helper to handle document request
   const handleRequestDoc = (doc: any, process: any, step: any) => {
@@ -194,8 +200,8 @@ export default function ProcessWalkthroughLibrary() {
           </div>
           {/* Show Ornua Rive animation only for Ornua's Business Model process */}
           {selectedProcess.id === 'business-model' ? (
-            <div className='w-full h-96 bg-gray-900 flex items-center justify-center rounded-lg border border-gray-700 mb-6'>
-              <RiveComponent style={{ width: '100%', height: '22rem', background: 'transparent' }} />
+            <div className='w-full flex items-center justify-center rounded-lg border border-gray-700 mb-6 bg-gray-900'>
+              <OrnuaBusinessModel />
             </div>
           ) : null}
           {/* Step Navigation */}
