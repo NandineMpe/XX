@@ -3,7 +3,7 @@ import DataTable from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { ColumnDef } from '@tanstack/react-table';
-import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search } from 'lucide-react';
+import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDocumentRequestStore, DocumentRequest } from '@/stores/documentRequests';
 
@@ -32,6 +32,41 @@ const statusMeta = {
 const statusActions = {
   [STATUS.WAITING_EMAIL]: ['Resend Email'],
   [STATUS.FAILED]: ['Retry', 'View Log'],
+};
+
+// Handle document download function
+const handleDownload = (request: DocumentRequest) => {
+  // Check if there are attachments available
+  if (request.attachments && request.attachments.length > 0) {
+    // If multiple attachments, download the first one or show a selection
+    const attachment = request.attachments[0];
+    
+    // Create a temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = attachment.url;
+    link.download = attachment.name || `${request.document}_${request.auditor}.pdf`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } else if (request.status === STATUS.SENT) {
+    // For documents retrieved via n8n webhook that are marked as SENT
+    // This would typically have a download URL in the request data
+    const downloadUrl = (request as any).downloadUrl || (request as any).fileUrl;
+    
+    if (downloadUrl) {
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${request.document}_${request.auditor}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Fallback: show a message that download is not available
+      alert('Download URL not available for this document. Please contact support.');
+    }
+  }
 };
 
 const columns: ColumnDef<DocumentRequest, any>[] = [
@@ -103,6 +138,32 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
     },
   },
   {
+    header: 'Download',
+    id: 'download',
+    cell: ({ row }) => {
+      const request = row.original;
+      // Show download button if document is available (status is SENT or has attachments)
+      const hasAttachments = request.attachments && request.attachments.length > 0;
+      const isAvailable = request.status === STATUS.SENT || hasAttachments;
+      
+      if (!isAvailable) {
+        return <span className="text-gray-400 text-xs">Not available</span>;
+      }
+      
+      return (
+        <button 
+          className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+          onClick={() => handleDownload(request)}
+          title="Download document"
+        >
+          <Download size={12} />
+          Download
+        </button>
+      );
+    },
+    size: 100,
+  },
+  {
     header: '',
     id: 'actions',
     cell: ({ row }) => {
@@ -159,13 +220,13 @@ export default function DocumentRetrievalDashboard() {
             style={{ minWidth: 220 }}
           >
             <input
-              className="outline-none w-full border-none bg-transparent text-gray-300 pr-8 text-sm placeholder-gray-400"
-              placeholder="Search by document, auditor, status, or date..."
+              className='outline-none w-full border-none bg-transparent text-gray-300 pr-8 text-sm placeholder-gray-400'
+              placeholder='Search by document, auditor, status, or date...'
               value={search}
               onChange={e => setSearch(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
-              type="text"
+              type='text'
             />
             {/* Slash icon for shortcut hint */}
             {!search && !searchFocused && (

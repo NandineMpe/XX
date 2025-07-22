@@ -57,7 +57,33 @@ export const ChatMessage = ({ message, onExport }: ChatMessageProps) => { // Rem
   const handleCopyMarkdown = useCallback(async () => {
     if (message.content) {
       try {
-        await navigator.clipboard.writeText(message.content)
+        // Convert markdown to plain text by stripping formatting
+        const plainText = message.content
+          // Remove code blocks
+          .replace(/```[\s\S]*?```/g, '')
+          // Remove inline code
+          .replace(/`([^`]+)`/g, '$1')
+          // Remove headers
+          .replace(/^#{1,6}\s+/gm, '')
+          // Remove bold/italic
+          .replace(/\*\*([^*]+)\*\*/g, '$1')
+          .replace(/\*([^*]+)\*/g, '$1')
+          // Remove links but keep text
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          // Remove images
+          .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+          // Remove horizontal rules
+          .replace(/^---$/gm, '')
+          // Remove blockquotes
+          .replace(/^>\s+/gm, '')
+          // Remove list markers
+          .replace(/^[\s]*[-*+]\s+/gm, '')
+          .replace(/^[\s]*\d+\.\s+/gm, '')
+          // Clean up extra whitespace
+          .replace(/\n\s*\n/g, '\n\n')
+          .trim()
+
+        await navigator.clipboard.writeText(plainText)
       } catch (err) {
         console.error(t('chat.copyError'), err)
       }
@@ -121,7 +147,7 @@ export const ChatMessage = ({ message, onExport }: ChatMessageProps) => { // Rem
               className="text-xs h-7 px-2"
             >
               <CopyIcon className="w-3 h-3 mr-1" />
-              Copy
+              Copy Text
             </Button>
             {onExport && (
               <Button
