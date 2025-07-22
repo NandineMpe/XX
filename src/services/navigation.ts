@@ -65,7 +65,7 @@ class NavigationService {
     useAuthStore.getState().logout();
 
     // Redirect to backend login page
-    window.location.href = 'https://lightrag-production-71c6.up.railway.app/webui/login';
+    window.location.href = 'https://lightrag-production-71c6.up.railway.app/webui/#/login';
   }
 
   navigateToHome() {

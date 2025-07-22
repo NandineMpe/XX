@@ -97,7 +97,7 @@ const LandingPage = () => {
     { name: 'Augentik In Action', url: '#action', icon: <Home /> },
     { name: 'Our Vision', url: '#vision', icon: <User /> },
     { name: 'Integrations', url: '#integrations', icon: <Layers /> },
-    { name: 'Sign In', url: 'https://lightrag-production-71c6.up.railway.app/webui/login', icon: <LogIn /> },
+    { name: 'Sign In', url: 'https://lightrag-production-71c6.up.railway.app/webui/#/login', icon: <LogIn /> },
   ]
 
   return (
