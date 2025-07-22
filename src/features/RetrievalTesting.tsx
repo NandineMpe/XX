@@ -5,7 +5,7 @@ import { errorMessage } from '@/lib/utils'
 import { useSettingsStore } from '@/stores/settings'
 import { useDebounce } from '@/hooks/useDebounce'
 import { ChatMessage, MessageWithError } from '@/components/retrieval/ChatMessage'
-import { Search, MoreHorizontal, Plus } from 'lucide-react'
+import { Search, MoreHorizontal, Plus, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { QueryMode } from '@/api/lightrag'
 import { Send, Paperclip, X, Sparkles } from 'lucide-react';
@@ -42,6 +42,7 @@ export default function RetrievalTesting() {
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('') // Search query for chat history
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null) // Track current conversation
   // Removed unused isRecording, setIsRecording, mediaRecorder, setMediaRecorder
   const [useLLM] = useState(true) // Toggle for LLM usage
   // Reference to track if we should follow scroll during streaming (using ref for synchronous updates)
@@ -93,6 +94,7 @@ export default function RetrievalTesting() {
   // Load a conversation into the chat
   const loadConversation = useCallback((conversation: typeof conversations[0]) => {
     setMessages(conversation.messages);
+    setCurrentConversationId(conversation.id);
   }, []);
 
   // Export answer to various formats
@@ -124,7 +126,37 @@ export default function RetrievalTesting() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+    setCurrentConversationId(null);
   }, []);
+
+  // Delete a specific conversation
+  const deleteConversation = useCallback((chatId: string) => {
+    // Find the conversation to delete
+    const conversationToDelete = conversations.find(conv => conv.id === chatId);
+    if (!conversationToDelete) return;
+
+    // Remove messages from the conversation from retrievalHistory
+    const messageIdsToRemove = conversationToDelete.messages.map(msg => msg.id);
+    const updatedHistory = useSettingsStore.getState().retrievalHistory.filter(
+      msg => !messageIdsToRemove.includes(msg.id)
+    );
+    
+    // Update the settings store
+    useSettingsStore.getState().setRetrievalHistory(updatedHistory);
+    
+    // If this was the currently loaded conversation, clear the current chat
+    if (currentConversationId === chatId) {
+      createNewChat();
+    }
+  }, [currentConversationId, createNewChat, conversations]);
+
+  // Clear all conversations
+  const clearAllConversations = useCallback(() => {
+    // Clear all retrieval history
+    useSettingsStore.getState().setRetrievalHistory([]);
+    // Clear current chat
+    createNewChat();
+  }, [createNewChat]);
 
   // Scroll to bottom function - restored smooth scrolling with better handling
   const scrollToBottom = useCallback(() => {
@@ -552,6 +584,16 @@ export default function RetrievalTesting() {
         >
           <Plus className="w-4 h-4" /> New Chat
         </button>
+        
+        {/* Clear All Conversations Button */}
+        {conversations.length > 0 && (
+          <button 
+            className="rounded-full bg-red-900/20 text-red-400 font-semibold py-2 mb-4 w-full hover:bg-red-900/30 transition flex items-center justify-center gap-2 border border-red-800/50"
+            onClick={clearAllConversations}
+          >
+            <Trash2 className="w-4 h-4" /> Clear All
+          </button>
+        )}
         <div className="relative mb-4">
           <input
             className="w-full rounded-full bg-zinc-900 border border-zinc-700 text-white pl-10 pr-4 py-2 text-sm focus:outline-none"
@@ -569,13 +611,24 @@ export default function RetrievalTesting() {
               <ul className="divide-y divide-zinc-800">
                 {groupedConversations.today.map(chat => (
                   <li key={chat.id}>
-                    <button
-                      className={'w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left hover:bg-zinc-900'}
-                      onClick={() => loadConversation(chat)}
-                    >
-                      <span className="truncate flex-1">{chat.preview}</span>
-                      <span className="ml-2 text-zinc-400"><MoreHorizontal size={18} /></span>
-                    </button>
+                    <div className="flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-zinc-900">
+                      <button
+                        className="flex-1 text-left truncate"
+                        onClick={() => loadConversation(chat)}
+                      >
+                        <span className="truncate">{chat.preview}</span>
+                      </button>
+                      <button
+                        className="ml-2 text-zinc-400 hover:text-red-400 transition-colors p-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteConversation(chat.id);
+                        }}
+                        title="Delete conversation"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -588,13 +641,24 @@ export default function RetrievalTesting() {
               <ul className="divide-y divide-zinc-800">
                 {groupedConversations.yesterday.map(chat => (
                   <li key={chat.id}>
-                    <button
-                      className={'w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left hover:bg-zinc-900'}
-                      onClick={() => loadConversation(chat)}
-                    >
-                      <span className="truncate flex-1">{chat.preview}</span>
-                      <span className="ml-2 text-zinc-400"><MoreHorizontal size={18} /></span>
-                    </button>
+                    <div className="flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-zinc-900">
+                      <button
+                        className="flex-1 text-left truncate"
+                        onClick={() => loadConversation(chat)}
+                      >
+                        <span className="truncate">{chat.preview}</span>
+                      </button>
+                      <button
+                        className="ml-2 text-zinc-400 hover:text-red-400 transition-colors p-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteConversation(chat.id);
+                        }}
+                        title="Delete conversation"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -607,13 +671,24 @@ export default function RetrievalTesting() {
               <ul className="divide-y divide-zinc-800">
                 {groupedConversations.previous7.map(chat => (
                   <li key={chat.id}>
-                    <button
-                      className={'w-full flex items-center justify-between px-4 py-3 rounded-lg transition text-left hover:bg-zinc-900'}
-                      onClick={() => loadConversation(chat)}
-                    >
-                      <span className="truncate flex-1">{chat.preview}</span>
-                      <span className="ml-2 text-zinc-400"><MoreHorizontal size={18} /></span>
-                    </button>
+                    <div className="flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-zinc-900">
+                      <button
+                        className="flex-1 text-left truncate"
+                        onClick={() => loadConversation(chat)}
+                      >
+                        <span className="truncate">{chat.preview}</span>
+                      </button>
+                      <button
+                        className="ml-2 text-zinc-400 hover:text-red-400 transition-colors p-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteConversation(chat.id);
+                        }}
+                        title="Delete conversation"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
