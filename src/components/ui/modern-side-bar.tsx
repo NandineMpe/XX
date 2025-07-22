@@ -91,16 +91,16 @@ export function Sidebar({
       {/* Sidebar */}
       <div
         className={`
-          h-full bg-gray-900 border-r border-gray-700 transition-all duration-300 ease-in-out flex flex-col
+          h-full bg-black border-r border-gray-800 transition-all duration-300 ease-in-out flex flex-col
           ${isCollapsed ? "w-28" : "w-78"}
           ${className}
         `}
       >
         {/* Header with logo and collapse button */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-700 bg-gray-800/60">
+        <div className="flex items-center justify-between p-5 border-b border-gray-800 bg-black/60">
           {!isCollapsed && (
             <div className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center shadow-sm border border-gray-600">
+              <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center shadow-sm border border-gray-700">
                 <span className="text-white font-bold text-base">O</span>
               </div>
               <div className="flex flex-col">
@@ -111,7 +111,7 @@ export function Sidebar({
           )}
 
           {isCollapsed && (
-            <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center mx-auto shadow-sm border border-gray-600">
+            <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center mx-auto shadow-sm border border-gray-700">
               <span className="text-white font-bold text-base">O</span>
             </div>
           )}
@@ -119,7 +119,7 @@ export function Sidebar({
           {/* Desktop collapse button */}
           <button
             onClick={toggleCollapse}
-            className="hidden md:flex p-1.5 rounded-md hover:bg-gray-700 transition-all duration-200"
+            className="hidden md:flex p-1.5 rounded-md hover:bg-gray-900 transition-all duration-200"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isCollapsed ? (
@@ -132,16 +132,16 @@ export function Sidebar({
 
         {/* Entity Selection */}
         {!isCollapsed && (
-          <div className="px-4 py-3 border-b border-gray-700">
+          <div className="px-4 py-3 border-b border-gray-800">
             <label className="block text-xs mb-2 text-gray-300 font-medium">Entity</label>
             <select
-              className="w-full rounded-md bg-gray-800 border border-gray-600 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+              className="w-full rounded-md bg-black border border-gray-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-200"
               value={selectedEntity?.id}
               onChange={e => handleEntityChange(e.target.value)}
               style={{ color: 'white' }}
             >
               {entities.map(entity => (
-                <option key={entity.id} value={entity.id} className="bg-gray-800 text-white">{entity.name}</option>
+                <option key={entity.id} value={entity.id} className="bg-black text-white">{entity.name}</option>
               ))}
             </select>
           </div>
@@ -157,7 +157,7 @@ export function Sidebar({
                 placeholder="Search processes..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                className="w-full pl-9 pr-4 py-2 bg-black border border-gray-700 rounded-md text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all duration-200"
               />
             </div>
           </div>
@@ -184,7 +184,7 @@ export function Sidebar({
                       w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-md text-left transition-all duration-200 group
                       ${isActive
                         ? "bg-black/20 text-white border border-gray-500/30 shadow-lg"
-                        : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                        : "text-gray-300 hover:bg-black/20 hover:text-white"
                       }
                       ${isCollapsed ? "justify-center px-2" : ""}
                     `}
@@ -210,7 +210,7 @@ export function Sidebar({
                             px-1.5 py-0.5 text-xs font-medium rounded-full
                             ${isActive
                               ? "bg-black/30 text-white border border-gray-600"
-                              : "bg-gray-700 text-gray-300"
+                              : "bg-black/20 text-gray-300"
                             }
                           `}>
                             {process.steps.length}
@@ -230,14 +230,14 @@ export function Sidebar({
 
                     {/* Tooltip for collapsed state */}
                     {isCollapsed && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 border border-gray-600">
+                      <div className="absolute left-full ml-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 border border-gray-700">
                         {process.name}
                         {process.steps && process.steps.length > 0 && (
-                          <span className="ml-1.5 px-1 py-0.5 bg-gray-700 rounded-full text-[10px]">
+                          <span className="ml-1.5 px-1 py-0.5 bg-black/30 rounded-full text-[10px]">
                             {process.steps.length}
                           </span>
                         )}
-                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-1.5 h-1.5 bg-gray-800 rotate-45 border-l border-b border-gray-600" />
+                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-1.5 h-1.5 bg-black rotate-45 border-l border-b border-gray-700" />
                       </div>
                     )}
                   </button>
@@ -248,11 +248,11 @@ export function Sidebar({
         </nav>
 
         {/* Bottom section with profile */}
-        <div className="mt-auto border-t border-gray-700">
+        <div className="mt-auto border-t border-gray-800">
           {/* Profile Section */}
-          <div className={`border-b border-gray-700 bg-gray-800/30 ${isCollapsed ? 'py-3 px-2' : 'p-3'}`}>
+          <div className={`border-b border-gray-800 bg-black/30 ${isCollapsed ? 'py-3 px-2' : 'p-3'}`}>
             {!isCollapsed ? (
-              <div className="flex items-center px-3 py-2 rounded-md bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+              <div className="flex items-center px-3 py-2 rounded-md bg-black hover:bg-black/50 transition-colors duration-200">
                 <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
                   <span className="text-gray-200 font-medium text-sm">SS</span>
                 </div>
@@ -268,7 +268,7 @@ export function Sidebar({
                   <div className="w-9 h-9 bg-gray-600 rounded-full flex items-center justify-center">
                     <span className="text-gray-200 font-medium text-sm">SS</span>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900" />
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-black" />
                 </div>
               </div>
             )}
