@@ -323,7 +323,7 @@ export default function ProcessWalkthroughLibrary() {
     const now = new Date();
     addRequest({
       id: uuidv4(),
-      auditor: 'Nandini Mpe',
+      auditor: 'Sam Salt',
       document: doc.name,
       date: now.toISOString().slice(0, 10),
       source: selectedEntity.name,

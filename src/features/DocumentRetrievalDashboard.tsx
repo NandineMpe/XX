@@ -107,12 +107,8 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
   {
     header: 'Source/Trigger',
     id: 'source',
-    accessorFn: (row) => row.source ?? '',
-  },
-  {
-    header: 'Retrieval Method',
-    id: 'method',
-    accessorFn: (row) => row.method ?? '',
+    accessorFn: () => 'Walkthrough',
+    cell: () => 'Walkthrough',
   },
   {
     header: 'Current Status',
