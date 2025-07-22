@@ -3,6 +3,7 @@ import { useRive } from '@rive-app/react-canvas';
 import Button from '@/components/ui/Button';
 import { useDocumentRequestStore } from '@/stores/documentRequests';
 import { v4 as uuidv4 } from 'uuid';
+import { Sidebar } from '@/components/ui/modern-side-bar';
 // Mock config/data
 const entities = [
   {
@@ -286,29 +287,24 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
 function OrnuaBusinessModel() {
   const { RiveComponent, rive } = useRive({
-    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/Ornua%20BM.riv',
-    autoplay: false,
+    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm.riv',
+    autoplay: true,
+    stateMachines: 'State Machine 1',
   });
 
   React.useEffect(() => {
     if (rive && rive.ready) {
+      // Automatically play the state machine
       rive.play();
     }
   }, [rive]);
 
-  const handlePause = () => {
-    if (rive) rive.pause();
-  };
-  const handlePlay = () => {
-    if (rive) rive.play();
-  };
-
   return (
-    <div style={{ width: 600, height: 400, position: 'relative' }}>
-      <RiveComponent style={{ width: '100%', height: '100%' }} />
-      <div style={{ position: 'absolute', bottom: 10, right: 10, display: 'flex', gap: 8 }}>
-        <button onClick={handlePlay} style={{ padding: '4px 12px', borderRadius: 4, background: '#22c55e', color: 'white', border: 'none', cursor: 'pointer' }}>Play</button>
-        <button onClick={handlePause} style={{ padding: '4px 12px', borderRadius: 4, background: '#ef4444', color: 'white', border: 'none', cursor: 'pointer' }}>Pause</button>
+    <div className="w-full flex justify-center mb-6">
+      <div className="max-w-4xl w-full rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg p-4 flex items-center justify-center" style={{ margin: '0 auto' }}>
+        <div style={{ width: '100%', height: 500, position: 'relative' }}>
+          <RiveComponent style={{ width: '100%', height: '100%' }} />
+        </div>
       </div>
     </div>
   );
@@ -347,45 +343,20 @@ export default function ProcessWalkthroughLibrary() {
       {/* Toast Notification */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       {/* Sidebar */}
-      <aside className="w-80 bg-[var(--sidebar-background)] text-[var(--sidebar-foreground)] border-r border-[var(--sidebar-border)] flex flex-col p-4 shadow-lg pt-24">
-        <div className="mb-4">
-          <label className="block text-xs mb-1">Entity</label>
-          <select
-            className="w-full rounded bg-[var(--input)] border border-[var(--border)] px-2 py-1 text-sm focus:ring-2 focus:ring-[var(--sidebar-ring)] focus:outline-none text-[var(--sidebar-foreground)]"
-            value={selectedEntity.id}
-            onChange={e => {
-              const entity = entities.find(ent => ent.id === e.target.value)!;
-              setSelectedEntity(entity);
-              setSelectedProcess(entity.processes[0]);
-              setCurrentStep(0);
-            }}
-          >
-            {entities.map(ent => (
-              <option key={ent.id} value={ent.id}>{ent.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <div className="text-xs text-[var(--sidebar-foreground)] mb-2">Processes</div>
-          <ul>
-            {selectedEntity.processes.map((process) => (
-              <li key={process.id}>
-                <Button
-                  variant={selectedProcess.id === process.id ? 'default' : 'outline'}
-                  className={`w-full text-left px-2 py-2 rounded mb-1 font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sidebar-ring)]`}
-                  onClick={() => {
-                    setSelectedProcess(process);
-                    setCurrentStep(0);
-                  }}
-                  aria-current={selectedProcess.id === process.id ? 'step' : undefined}
-                >
-                  {process.name}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </aside>
+      <Sidebar
+        entities={entities}
+        selectedEntity={selectedEntity}
+        selectedProcess={selectedProcess}
+        onEntityChange={(entity) => {
+          setSelectedEntity(entity);
+          setSelectedProcess(entity.processes[0]);
+          setCurrentStep(0);
+        }}
+        onProcessChange={(process) => {
+          setSelectedProcess(process);
+          setCurrentStep(0);
+        }}
+      />
       {/* Main Content */}
       <main className="flex-1 p-8">
         {/* Glassmorphic Progress Bar for Stages */}
