@@ -389,10 +389,6 @@ export default function ProcessWalkthroughLibrary() {
           </div>
             </div>
 
-        <h1 className="text-3xl font-bold mb-4">{selectedEntity.name}</h1>
-        <h2 className="text-2xl font-semibold mb-4">{selectedProcess.name}</h2>
-        <p className="text-lg mb-8 text-gray-300">{selectedProcess.description}</p>
-
         {/* Rive player for Business Model process */}
         {selectedProcess.id === 'business-model' && (
           <div className="w-full flex justify-center mb-12">
