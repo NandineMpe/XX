@@ -53,11 +53,6 @@ class NavigationService {
    * Navigate to login page and reset application state
    */
   navigateToLogin() {
-    if (!this.navigate) {
-      console.error('Navigation function not set');
-      return;
-    }
-
     // Store current username before logout for comparison during next login
     const currentUsername = useAuthStore.getState().username;
     if (currentUsername) {
@@ -69,7 +64,8 @@ class NavigationService {
     this.resetAllApplicationState(true);
     useAuthStore.getState().logout();
 
-    this.navigate('/login');
+    // Redirect to backend login page
+    window.location.href = 'https://lightrag-production-71c6.up.railway.app/webui/login';
   }
 
   navigateToHome() {

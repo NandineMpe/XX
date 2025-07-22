@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import { Link } from "react-router-dom"
 import { LogIn } from "lucide-react"
 
 interface NavItem {
@@ -54,9 +53,9 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
           const isActive = activeTab === item.name
           if (item.name === "Sign In") {
             return (
-              <Link
+              <a
                 key={item.name}
-                to={item.url}
+                href={item.url}
                 onClick={() => setActiveTab(item.name)}
                 className={cn(
                   "relative cursor-pointer text-lg font-semibold px-6 py-2 rounded-full transition-colors flex items-center gap-2",
@@ -79,7 +78,7 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
                     </div>
                   </div>
                 )}
-              </Link>
+              </a>
             )
           }
           return (
