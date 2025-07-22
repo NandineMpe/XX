@@ -339,7 +339,7 @@ export default function ProcessWalkthroughLibrary() {
   const step = selectedProcess.steps[currentStep];
 
   return (
-    <div className="flex h-full w-full bg-black text-white pt-24">
+    <div className="flex h-full w-full bg-black text-white">
       {/* Toast Notification */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       {/* Sidebar */}
@@ -358,7 +358,7 @@ export default function ProcessWalkthroughLibrary() {
         }}
       />
       {/* Main Content */}
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 pt-24">
         {/* Glassmorphic Progress Bar for Stages */}
         <div className="w-full max-w-3xl mx-auto mb-8">
           <div className="flex items-center justify-between gap-2 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg border border-white/20" style={{ position: 'relative' }}>

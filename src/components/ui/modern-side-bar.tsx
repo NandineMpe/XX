@@ -88,33 +88,11 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile hamburger button */}
-      <button
-        onClick={toggleSidebar}
-        className="fixed top-6 left-6 z-50 p-3 rounded-lg bg-gray-800 shadow-lg border border-gray-700 md:hidden hover:bg-gray-700 transition-all duration-200"
-        aria-label="Toggle sidebar"
-      >
-        {isOpen ? 
-          <X className="h-5 w-5 text-white" /> : 
-          <Menu className="h-5 w-5 text-white" />
-        }
-      </button>
-
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300" 
-          onClick={toggleSidebar} 
-        />
-      )}
-
       {/* Sidebar */}
       <div
         className={`
-          fixed top-0 left-0 h-full bg-gray-900 border-r border-gray-700 z-40 transition-all duration-300 ease-in-out flex flex-col
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          h-full bg-gray-900 border-r border-gray-700 transition-all duration-300 ease-in-out flex flex-col
           ${isCollapsed ? "w-28" : "w-78"}
-          md:translate-x-0 md:static md:z-auto
           ${className}
         `}
       >
@@ -296,17 +274,6 @@ export function Sidebar({
             )}
           </div>
         </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div
-        className={`
-          transition-all duration-300 ease-in-out w-full
-          ${isCollapsed ? "md:ml-20" : "md:ml-72"}
-        `}
-      >
-        {/* Your content remains the same */}
-        
       </div>
     </>
   );
