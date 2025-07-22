@@ -365,7 +365,7 @@ export default function ProcessWalkthroughLibrary() {
               {selectedProcess.steps.map((s, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
                 <button
-                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 transition-all duration-200 font-bold text-lg ${i === currentStep ? 'bg-white/80 text-black border-primary shadow-lg scale-110' : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:text-primary'}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 transition-all duration-200 font-bold text-lg ${i === currentStep ? 'bg-white/80 text-black border-white shadow-lg scale-110' : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:text-white'}`}
                   style={{ backdropFilter: 'blur(8px)' }}
                   onClick={() => setCurrentStep(i)}
                   aria-current={i === currentStep ? 'step' : undefined}
@@ -373,7 +373,7 @@ export default function ProcessWalkthroughLibrary() {
                 >
                   {i + 1}
                 </button>
-                <span className={`mt-2 text-xs font-medium ${i === currentStep ? 'text-primary' : 'text-white/70'}`}>{s.title}</span>
+                <span className={`mt-2 text-xs font-medium ${i === currentStep ? 'text-white' : 'text-white/70'}`}>{s.title}</span>
               </div>
             ))}
             {/* Glass bar effect */}

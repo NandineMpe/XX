@@ -62,9 +62,12 @@ function TabsNavigation() {
         <NavigationTab value="audit-queries" currentTab={currentTab} onClick={() => setCurrentTab('audit-queries')}>
           Audit Query Assistant
         </NavigationTab>
-        <NavigationTab value="knowledge-graph" currentTab={currentTab} onClick={() => setCurrentTab('knowledge-graph')}>
-          Data Connections
+        <NavigationTab value="audit-co-pilot" currentTab={currentTab} onClick={() => setCurrentTab('audit-co-pilot')}>
+          Audit Co-Pilot
         </NavigationTab>
+        {/* <NavigationTab value="knowledge-graph" currentTab={currentTab} onClick={() => setCurrentTab('knowledge-graph')}>
+          Data Connections
+        </NavigationTab> */}
       </TabsList>
     </div>
   )

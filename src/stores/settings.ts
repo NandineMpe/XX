@@ -6,7 +6,7 @@ import { Message, QueryRequest } from '@/api/lightrag'
 
 type Theme = 'dark' | 'light' | 'system'
 type Language = 'en' | 'zh' | 'fr' | 'ar' | 'zh_TW'
-export type TabType = 'audit-queries' | 'knowledge-graph' | 'support' | 'process-walkthrough';
+export type TabType = 'audit-queries' | 'audit-co-pilot' | 'support' | 'process-walkthrough';
 
 interface SettingsState {
   // Document manager settings
@@ -98,7 +98,7 @@ const useSettingsStoreBase = create<SettingsState>()(
 
       apiKey: null,
 
-      currentTab: 'knowledge-graph',
+      currentTab: 'audit-queries',
       showFileName: false,
 
       retrievalHistory: [],
