@@ -112,6 +112,20 @@ export default function RetrievalTesting() {
     URL.revokeObjectURL(url);
   }, []);
 
+  // Create a new chat session
+  const createNewChat = useCallback(() => {
+    // Clear current messages
+    setMessages([]);
+    // Clear input
+    setInputValue('');
+    // Reset loading state
+    setIsLoading(false);
+    // Scroll to top
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, []);
+
   // Scroll to bottom function - restored smooth scrolling with better handling
   const scrollToBottom = useCallback(() => {
     // Set flag to indicate this is a programmatic scroll
@@ -532,7 +546,10 @@ export default function RetrievalTesting() {
       </div>
       {/* Chat History Sidebar - Modern, grouped, clean design */}
       <aside className="w-80 bg-black/80 border-l border-zinc-800 p-4 flex flex-col h-full">
-        <button className="rounded-full bg-zinc-800 text-white font-semibold py-2 mb-4 w-full hover:bg-zinc-700 transition flex items-center justify-center gap-2">
+        <button 
+          className="rounded-full bg-zinc-800 text-white font-semibold py-2 mb-4 w-full hover:bg-zinc-700 transition flex items-center justify-center gap-2"
+          onClick={createNewChat}
+        >
           <Plus className="w-4 h-4" /> New Chat
         </button>
         <div className="relative mb-4">
