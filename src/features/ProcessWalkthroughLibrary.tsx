@@ -104,8 +104,14 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 function OrnuaBusinessModel() {
   const { RiveComponent, rive } = useRive({
     src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/Ornua%20BM.riv',
-    autoplay: true,
+    autoplay: false,
   });
+
+  React.useEffect(() => {
+    if (rive && rive.ready) {
+      rive.play();
+    }
+  }, [rive]);
 
   const handlePause = () => {
     if (rive) rive.pause();
@@ -158,7 +164,7 @@ export default function ProcessWalkthroughLibrary() {
       {/* Toast Notification */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       {/* Sidebar */}
-      <aside className="w-80 bg-[var(--sidebar-background)] text-[var(--sidebar-foreground)] border-r border-[var(--sidebar-border)] flex flex-col p-4 shadow-lg">
+      <aside className="w-80 bg-[var(--sidebar-background)] text-[var(--sidebar-foreground)] border-r border-[var(--sidebar-border)] flex flex-col p-4 shadow-lg pt-24">
         <div className="mb-4">
           <label className="block text-xs mb-1">Entity</label>
           <select
@@ -197,14 +203,46 @@ export default function ProcessWalkthroughLibrary() {
       </aside>
       {/* Main Content */}
       <main className="flex-1 p-8">
+        {/* Glassmorphic Progress Bar for Stages */}
+        <div className="w-full max-w-3xl mx-auto mb-8">
+          <div className="flex items-center justify-between gap-2 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg border border-white/20" style={{ position: 'relative' }}>
+            {selectedProcess.steps.map((s, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <button
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 transition-all duration-200 font-bold text-lg ${i === currentStep ? 'bg-white/80 text-black border-primary shadow-lg scale-110' : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:text-primary'}`}
+                  style={{ backdropFilter: 'blur(8px)' }}
+                  onClick={() => setCurrentStep(i)}
+                  aria-current={i === currentStep ? 'step' : undefined}
+                  title={s.title}
+                >
+                  {i + 1}
+                </button>
+                <span className={`mt-2 text-xs font-medium ${i === currentStep ? 'text-primary' : 'text-white/70'}`}>{s.title}</span>
+              </div>
+            ))}
+            {/* Glass bar effect */}
+            <div className="absolute left-0 top-1/2 w-full h-2 bg-white/20 rounded-full -z-10" style={{ transform: 'translateY(-50%)', backdropFilter: 'blur(8px)' }} />
+            <div
+              className="absolute left-0 top-1/2 h-2 bg-gradient-to-r from-primary to-blue-400 rounded-full -z-10 transition-all duration-300"
+              style={{
+                width: `${((currentStep + 1) / selectedProcess.steps.length) * 100}%`,
+                transform: 'translateY(-50%)',
+                opacity: 0.7,
+              }}
+            />
+          </div>
+        </div>
+
         <h1 className="text-2xl font-bold mb-4">{selectedEntity.name}</h1>
         <h2 className="text-xl font-semibold mb-4">{selectedProcess.name}</h2>
         <p className="text-lg mb-4">{selectedProcess.description}</p>
 
         {/* Rive player for Business Model process */}
         {selectedProcess.id === 'business-model' && (
-          <div className="w-full flex items-center justify-center rounded-lg border border-gray-700 mb-6 bg-gray-900">
-            <OrnuaBusinessModel />
+          <div className="w-full flex justify-center mb-6">
+            <div className="max-w-xl w-full rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg p-4 flex items-center justify-center" style={{ margin: '0 auto' }}>
+              <OrnuaBusinessModel />
+            </div>
           </div>
         )}
 
@@ -214,8 +252,20 @@ export default function ProcessWalkthroughLibrary() {
             <h3 className="text-lg font-bold mb-2">Key Documents</h3>
             <ul className="list-disc pl-5">
               {step.docs.map((doc, index) => (
-                <li key={index} className="text-sm mb-1">
-                  <span className="font-medium">{doc.name}</span> <span className="italic">[{doc.type === 'view' ? 'View' : 'Request'}]</span> - {doc.description}
+                <li key={index} className="text-sm mb-1 flex items-center gap-2">
+                  {doc.type === 'view' ? (
+                    <span
+                      className="font-medium underline text-blue-400 cursor-pointer hover:text-blue-300 transition"
+                      title="Click to view document"
+                      tabIndex={0}
+                      onClick={() => {/* TODO: Implement view logic if available */}}
+                    >
+                      {doc.name}
+                    </span>
+                  ) : (
+                    <span className="font-medium">{doc.name}</span>
+                  )}
+                  <span className="italic">[{doc.type === 'view' ? 'View' : 'Request'}]</span> - {doc.description}
                   {doc.type === 'request' && (
                     <Button
                       variant="outline"
