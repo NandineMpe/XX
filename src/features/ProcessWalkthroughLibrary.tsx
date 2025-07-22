@@ -197,7 +197,7 @@ export default function ProcessWalkthroughLibrary() {
               >
                 Business Model
               </Button>
-            </li>
+              </li>
           </ul>
         </div>
       </aside>
@@ -206,7 +206,7 @@ export default function ProcessWalkthroughLibrary() {
         {/* Glassmorphic Progress Bar for Stages */}
         <div className="w-full max-w-3xl mx-auto mb-8">
           <div className="flex items-center justify-between gap-2 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg border border-white/20" style={{ position: 'relative' }}>
-            {selectedProcess.steps.map((s, i) => (
+              {selectedProcess.steps.map((s, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
                 <button
                   className={`w-8 h-8 flex items-center justify-center rounded-full border-2 transition-all duration-200 font-bold text-lg ${i === currentStep ? 'bg-white/80 text-black border-primary shadow-lg scale-110' : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:text-primary'}`}
@@ -231,7 +231,7 @@ export default function ProcessWalkthroughLibrary() {
               }}
             />
           </div>
-        </div>
+            </div>
 
         <h1 className="text-2xl font-bold mb-4">{selectedEntity.name}</h1>
         <h2 className="text-xl font-semibold mb-4">{selectedProcess.name}</h2>
@@ -275,12 +275,12 @@ export default function ProcessWalkthroughLibrary() {
                       Request
                     </Button>
                   )}
-                </li>
-              ))}
-            </ul>
-          </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
         )}
       </main>
     </div>
   );
-}
+} 
