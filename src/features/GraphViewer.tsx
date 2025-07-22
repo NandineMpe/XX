@@ -23,6 +23,7 @@ import LegendButton from '@/components/graph/LegendButton'
 
 import { useSettingsStore } from '@/stores/settings'
 import { useGraphStore } from '@/stores/graph'
+import useLightragGraph from '@/hooks/useLightragGraph'
 
 import '@react-sigma/core/lib/style.css'
 import '@react-sigma/graph-search/lib/style.css'
@@ -109,6 +110,9 @@ const GraphEvents = () => {
 const GraphViewer = () => {
   const [sigmaSettings, setSigmaSettings] = useState(defaultSigmaSettings)
   const sigmaRef = useRef<any>(null)
+
+  // Initialize graph data
+  useLightragGraph()
 
   const selectedNode = useGraphStore.use.selectedNode()
   const focusedNode = useGraphStore.use.focusedNode()
