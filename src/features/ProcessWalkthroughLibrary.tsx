@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import RiveComponent from '@rive-app/react-canvas';
+import { useRive } from '@rive-app/react-canvas';
 import Button from '@/components/ui/Button';
 import { useDocumentRequestStore } from '@/stores/documentRequests';
 import { v4 as uuidv4 } from 'uuid';
@@ -101,12 +101,25 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 function OrnuaBusinessModel() {
+  const { RiveComponent, rive } = useRive({
+    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/Ornua%20BM.riv',
+    autoplay: true,
+  });
+
+  const handlePause = () => {
+    if (rive) rive.pause();
+  };
+  const handlePlay = () => {
+    if (rive) rive.play();
+  };
+
   return (
-    <div style={{ width: 600, height: 400 }}>
-      <RiveComponent
-        src='https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_business_model.riv'
-        style={{ width: '100%', height: '100%' }}
-      />
+    <div style={{ width: 600, height: 400, position: 'relative' }}>
+      <RiveComponent style={{ width: '100%', height: '100%' }} />
+      <div style={{ position: 'absolute', bottom: 10, right: 10, display: 'flex', gap: 8 }}>
+        <button onClick={handlePlay} style={{ padding: '4px 12px', borderRadius: 4, background: '#22c55e', color: 'white', border: 'none', cursor: 'pointer' }}>Play</button>
+        <button onClick={handlePause} style={{ padding: '4px 12px', borderRadius: 4, background: '#ef4444', color: 'white', border: 'none', cursor: 'pointer' }}>Pause</button>
+      </div>
     </div>
   );
 }
@@ -168,116 +181,4 @@ export default function ProcessWalkthroughLibrary() {
             <li>
               <Button
                 variant={selectedProcess.id === 'business-model' ? 'default' : 'outline'}
-                className={`w-full text-left px-2 py-2 rounded mb-1 font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sidebar-ring)]`}
-                onClick={() => {
-                  setSelectedProcess(selectedEntity.processes[0]);
-                  setCurrentStep(0);
-                }}
-                aria-current={selectedProcess.id === 'business-model' ? 'step' : undefined}
-              >
-                Business Model
-              </Button>
-            </li>
-            <li>
-              <div className="w-full text-left px-2 py-2 rounded mb-1 font-medium text-[var(--muted-foreground)] cursor-not-allowed opacity-60 select-none">
-                Impairment Process
-              </div>
-            </li>
-            <li>
-              <div className="w-full text-left px-2 py-2 rounded mb-1 font-medium text-[var(--muted-foreground)] cursor-not-allowed opacity-60 select-none">
-                Inventory Process
-              </div>
-            </li>
-          </ul>
-        </div>
-      </aside>
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center p-8 overflow-y-auto bg-[var(--background)]">
-        <div className="w-full max-w-3xl">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold mb-1 tracking-tight text-[var(--primary)] drop-shadow">{selectedEntity.name} – {selectedProcess.name}</h2>
-            <div className="text-[var(--muted-foreground)] text-base mb-2 italic">{selectedProcess.description}</div>
-          </div>
-          {/* Show Ornua Rive animation only for Ornua's Business Model process */}
-          {selectedProcess.id === 'business-model' ? (
-            <div className='w-full flex items-center justify-center rounded-lg border border-gray-700 mb-6 bg-gray-900'>
-              <OrnuaBusinessModel />
-            </div>
-          ) : null}
-          {/* Step Navigation */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex gap-2">
-              {selectedProcess.steps.map((s: any, i: number) => (
-                <Button
-                  key={i}
-                  variant={i === currentStep ? 'default' : 'outline'}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] ${i === currentStep ? '' : 'hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]'}`}
-                  onClick={() => setCurrentStep(i)}
-                  aria-current={i === currentStep ? 'step' : undefined}
-                >
-                  {s.title}
-                </Button>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="px-3 py-1 rounded text-xs"
-                disabled={currentStep === 0}
-                onClick={() => setCurrentStep(currentStep - 1)}
-              >Back</Button>
-              <Button
-                variant="outline"
-                className="px-3 py-1 rounded text-xs"
-                disabled={currentStep === selectedProcess.steps.length - 1}
-                onClick={() => setCurrentStep(currentStep + 1)}
-              >Next</Button>
-            </div>
-          </div>
-          {/* Step Narrative Panel */}
-          <div className="bg-[var(--card)] text-[var(--card-foreground)] rounded-lg p-6 mb-4 shadow-lg border border-[var(--border)]">
-            <h3 className="text-lg font-semibold mb-2 text-[var(--primary)] drop-shadow">{step.title}</h3>
-            <div className="mb-2 text-[var(--muted-foreground)]">{step.explanation}</div>
-            <div className="mb-2">
-              <div className="font-semibold text-sm mb-1">Key Controls / Points of Interest</div>
-              <ul className="list-disc ml-6 text-sm text-[var(--foreground)]">
-                {step.controls.map((ctrl: string, i: number) => <li key={i}>{ctrl}</li>)}
-              </ul>
-            </div>
-            <div className="mb-2">
-              <div className="font-semibold text-sm mb-1">Supporting Documents</div>
-              <ul className="list-none ml-0 text-sm">
-                {step.docs.map((doc: any, i: number) => (
-                  <li key={i} className="flex items-center gap-2 mb-1 group">
-                    <span
-                      className="text-[var(--primary)] underline cursor-pointer group-hover:text-[var(--primary-foreground)]"
-                      title={doc.description}
-                      tabIndex={0}
-                    >{doc.name}</span>
-                    {doc.type === 'preview' && <span className="text-xs text-[var(--muted-foreground)]">Preview</span>}
-                    {doc.type === 'view' && <span className="text-xs text-[var(--muted-foreground)]">View</span>}
-                    {doc.type === 'request' && (
-                      <Button
-                        variant="default"
-                        className="ml-2 text-xs px-2 py-1 rounded"
-                        onClick={() => handleRequestDoc(doc, selectedProcess, step)}
-                        title="Request this document"
-                      >Request</Button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          {/* Progress Bar */}
-          <div className="w-full h-2 bg-[var(--muted)] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[var(--primary)] transition-all"
-              style={{ width: `${((currentStep + 1) / selectedProcess.steps.length) * 100}%` }}
-            />
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-} 
+                className={`w-full text-left px-2 py-2 rounded mb-1 font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sidebar-ring)]`
