@@ -1,6 +1,6 @@
 import { ButtonVariantType } from '@/components/ui/Button'
 
-export const backendBaseUrl = import.meta.env.VITE_BACKEND_URL
+export const backendBaseUrl = import.meta.env.VITE_BACKEND_URL || 'https://lightrag-production-71c6.up.railway.app'
 export const webuiPrefix = '/webui/'
 
 export const controlButtonVariant: ButtonVariantType = 'ghost'
