@@ -405,14 +405,11 @@ export default function RetrievalTesting() {
 
   // Quick suggestions for onboarding and fast actions
   const quickSuggestions = [
-    'List all transactions over $10,000',
-    'Show me recent audit exceptions',
-    'Summarize last quarter\'s consolidation entries',
-    'What are the top 5 risks this month?',
-    'Find unusual journal entries',
-    'Compare current vs previous period',
-    'Identify related party transactions',
-    'Check for duplicate payments'
+    'Show inventory in-transit at year-end',
+    'Identify payments to members outside of the Value Payment',
+    'List all foreign exchange hedge contracts',
+    'Show all journal entries posted by the sales team',
+    'Generate a tariff summary by shipping route'
   ];
 
   // Focus input on mount and after sending

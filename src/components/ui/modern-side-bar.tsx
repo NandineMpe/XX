@@ -100,7 +100,7 @@ export function Sidebar({
         <div className="flex items-center justify-between p-5 border-b border-gray-700 bg-gray-800/60">
           {!isCollapsed && (
             <div className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center shadow-sm border border-gray-600">
                 <span className="text-white font-bold text-base">O</span>
               </div>
               <div className="flex flex-col">
@@ -111,7 +111,7 @@ export function Sidebar({
           )}
 
           {isCollapsed && (
-            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center mx-auto shadow-sm">
+            <div className="w-9 h-9 bg-black rounded-lg flex items-center justify-center mx-auto shadow-sm border border-gray-600">
               <span className="text-white font-bold text-base">O</span>
             </div>
           )}
@@ -135,7 +135,7 @@ export function Sidebar({
           <div className="px-4 py-3 border-b border-gray-700">
             <label className="block text-xs mb-2 text-gray-300 font-medium">Entity</label>
             <select
-              className="w-full rounded-md bg-gray-800 border border-gray-600 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              className="w-full rounded-md bg-gray-800 border border-gray-600 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
               value={selectedEntity?.id}
               onChange={e => handleEntityChange(e.target.value)}
               style={{ color: 'white' }}
@@ -157,7 +157,7 @@ export function Sidebar({
                 placeholder="Search processes..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full pl-9 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
               />
             </div>
           </div>
@@ -183,7 +183,7 @@ export function Sidebar({
                     className={`
                       w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-md text-left transition-all duration-200 group
                       ${isActive
-                        ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
+                        ? "bg-black/20 text-white border border-gray-500/30 shadow-lg"
                         : "text-gray-300 hover:bg-gray-800 hover:text-white"
                       }
                       ${isCollapsed ? "justify-center px-2" : ""}
@@ -195,7 +195,7 @@ export function Sidebar({
                         className={`
                           h-4.5 w-4.5 flex-shrink-0
                           ${isActive 
-                            ? "text-blue-400" 
+                            ? "text-white" 
                             : "text-gray-400 group-hover:text-gray-200"
                           }
                         `}
@@ -209,7 +209,7 @@ export function Sidebar({
                           <span className={`
                             px-1.5 py-0.5 text-xs font-medium rounded-full
                             ${isActive
-                              ? "bg-blue-600/30 text-blue-300"
+                              ? "bg-black/30 text-white border border-gray-600"
                               : "bg-gray-700 text-gray-300"
                             }
                           `}>
@@ -221,8 +221,8 @@ export function Sidebar({
 
                     {/* Badge for collapsed state */}
                     {isCollapsed && process.steps && process.steps.length > 0 && (
-                      <div className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center rounded-full bg-blue-600/30 border border-gray-700">
-                        <span className="text-[10px] font-medium text-blue-300">
+                      <div className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center rounded-full bg-black/30 border border-gray-700">
+                        <span className="text-[10px] font-medium text-white">
                           {process.steps.length > 9 ? '9+' : process.steps.length}
                         </span>
                       </div>
