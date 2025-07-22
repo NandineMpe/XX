@@ -289,6 +289,11 @@ export const queryTextStream = async (
     headers['X-API-Key'] = apiKey;
   }
 
+  // Debug logging
+  console.log('queryTextStream - backendBaseUrl:', backendBaseUrl);
+  console.log('queryTextStream - full URL:', `${backendBaseUrl}/query/stream`);
+  console.log('queryTextStream - request:', request);
+
   try {
     const response = await fetch(`${backendBaseUrl}/query/stream`, {
       method: 'POST',
