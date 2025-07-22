@@ -181,4 +181,62 @@ export default function ProcessWalkthroughLibrary() {
             <li>
               <Button
                 variant={selectedProcess.id === 'business-model' ? 'default' : 'outline'}
-                className={`w-full text-left px-2 py-2 rounded mb-1 font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sidebar-ring)]`
+                className={`w-full text-left px-2 py-2 rounded mb-1 font-medium focus:outline-none focus:ring-2 focus:ring-[var(--sidebar-ring)]`}
+                onClick={() => {
+                  setSelectedProcess(selectedEntity.processes[0]);
+                  setCurrentStep(0);
+                }}
+                aria-current={selectedProcess.id === 'business-model' ? 'step' : undefined}
+              >
+                Business Model
+              </Button>
+            </li>
+          </ul>
+        </div>
+      </aside>
+      {/* Main Content */}
+      <main className="flex-1 p-8">
+        <h1 className="text-2xl font-bold mb-4">{selectedEntity.name}</h1>
+        <h2 className="text-xl font-semibold mb-4">{selectedProcess.name}</h2>
+        <p className="text-lg mb-4">{selectedProcess.description}</p>
+
+        {step && (
+          <div className="mt-8">
+            <h3 className="text-lg font-bold mb-2">{step.title}</h3>
+            <p className="text-base mb-4">{step.explanation}</p>
+            <ul className="list-disc pl-5 mb-4">
+              {step.controls.map((control, index) => (
+                <li key={index} className="text-sm mb-1">{control}</li>
+              ))}
+            </ul>
+            <h4 className="text-base font-semibold mb-2">Documents</h4>
+            <ul className="list-disc pl-5">
+              {step.docs.map((doc, index) => (
+                <li key={index} className="text-sm mb-1">
+                  <span className="font-medium">{doc.name}</span> - {doc.description}
+                  <Button
+                    variant="outline"
+                    className="ml-2 text-xs"
+                    onClick={() => handleRequestDoc(doc, selectedProcess, step)}
+                  >
+                    Request
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="mt-8 flex justify-between">
+          {currentStep > 0 && (
+            <Button variant="outline" onClick={() => setCurrentStep(prev => prev - 1)}>Previous</Button>
+          )}
+          {currentStep < selectedProcess.steps.length - 1 && (
+            <Button variant="outline" onClick={() => setCurrentStep(prev => prev + 1)}>Next</Button>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
