@@ -1,12 +1,9 @@
 import { ButtonVariantType } from '@/components/ui/Button'
 
-const envBackendUrl = import.meta.env.VITE_BACKEND_URL;
-const fallbackUrl = 'https://lightrag-production-71c6.up.railway.app';
-export const backendBaseUrl = envBackendUrl || fallbackUrl;
+// Hardcode the backend URL for production to avoid undefined issues
+export const backendBaseUrl = 'https://lightrag-production-71c6.up.railway.app';
 
 // Debug logging
-console.log('Environment VITE_BACKEND_URL:', envBackendUrl);
-console.log('Fallback URL:', fallbackUrl);
 console.log('Final backendBaseUrl:', backendBaseUrl);
 
 export const webuiPrefix = '/webui/'

@@ -15,7 +15,7 @@ import type { Element } from 'hast'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneLight, oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
-import { LoaderIcon, CopyIcon, DownloadIcon, AlertTriangleIcon } from 'lucide-react'
+import { LoaderIcon, CopyIcon, DownloadIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export type MessageWithError = Message & {
@@ -31,11 +31,10 @@ export type MessageWithError = Message & {
 interface ChatMessageProps {
   message: MessageWithError
   onExport?: (message: MessageWithError) => void
-  onEscalate?: (message: MessageWithError) => void
 }
 
 // Restore original component definition and export
-export const ChatMessage = ({ message, onExport, onEscalate }: ChatMessageProps) => { // Remove isComplete prop
+export const ChatMessage = ({ message, onExport }: ChatMessageProps) => { // Remove isComplete prop
   const { t } = useTranslation()
   const { theme } = useTheme()
   const [katexPlugin, setKatexPlugin] = useState<any>(null)
@@ -113,7 +112,7 @@ export const ChatMessage = ({ message, onExport, onEscalate }: ChatMessageProps)
         </ReactMarkdown>
         
         {/* Action buttons for assistant messages */}
-        {message.role === 'assistant' && !message.isError && (
+        {message.role === 'assistant' && (
           <div className="flex gap-2 mt-3 pt-2 border-t border-border/50">
             <Button
               variant="ghost"
@@ -133,17 +132,6 @@ export const ChatMessage = ({ message, onExport, onEscalate }: ChatMessageProps)
               >
                 <DownloadIcon className="w-3 h-3 mr-1" />
                 Export
-              </Button>
-            )}
-            {onEscalate && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEscalate(message)}
-                className="text-xs h-7 px-2 text-orange-600 hover:text-orange-700"
-              >
-                <AlertTriangleIcon className="w-3 h-3 mr-1" />
-                Escalate
               </Button>
             )}
           </div>

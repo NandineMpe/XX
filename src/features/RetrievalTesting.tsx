@@ -112,14 +112,6 @@ export default function RetrievalTesting() {
     URL.revokeObjectURL(url);
   }, []);
 
-  // Escalate answer for review
-  const escalateAnswer = useCallback((message: MessageWithError) => {
-    // This would typically send to a review queue or notification system
-    console.log('Escalating answer for review:', message.content);
-    // For now, just show an alert
-    alert('Answer escalated for review. This would typically notify supervisors or trigger a review workflow.');
-  }, []);
-
   // Scroll to bottom function - restored smooth scrolling with better handling
   const scrollToBottom = useCallback(() => {
     // Set flag to indicate this is a programmatic scroll
@@ -526,7 +518,6 @@ export default function RetrievalTesting() {
                         {<ChatMessage 
                           message={message} 
                           onExport={exportAnswer}
-                          onEscalate={escalateAnswer}
                         />}
                       </div>
                     ))
