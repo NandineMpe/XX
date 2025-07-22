@@ -358,9 +358,9 @@ export default function ProcessWalkthroughLibrary() {
         }}
       />
       {/* Main Content */}
-      <main className="flex-1 p-8 pt-24">
+      <main className="flex-1 p-8 pt-32">
         {/* Glassmorphic Progress Bar for Stages */}
-        <div className="w-full max-w-3xl mx-auto mb-8">
+        <div className="w-full max-w-4xl mx-auto mb-8">
           <div className="flex items-center justify-between gap-2 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg border border-white/20" style={{ position: 'relative' }}>
               {selectedProcess.steps.map((s, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
@@ -379,7 +379,7 @@ export default function ProcessWalkthroughLibrary() {
             {/* Glass bar effect */}
             <div className="absolute left-0 top-1/2 w-full h-2 bg-white/20 rounded-full -z-10" style={{ transform: 'translateY(-50%)', backdropFilter: 'blur(8px)' }} />
             <div
-              className="absolute left-0 top-1/2 h-2 bg-gradient-to-r from-primary to-blue-400 rounded-full -z-10 transition-all duration-300"
+              className="absolute left-0 top-1/2 h-2 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full -z-10 transition-all duration-300"
               style={{
                 width: `${((currentStep + 1) / selectedProcess.steps.length) * 100}%`,
                 transform: 'translateY(-50%)',
@@ -389,14 +389,14 @@ export default function ProcessWalkthroughLibrary() {
           </div>
             </div>
 
-        <h1 className="text-2xl font-bold mb-4">{selectedEntity.name}</h1>
-        <h2 className="text-xl font-semibold mb-4">{selectedProcess.name}</h2>
-        <p className="text-lg mb-4">{selectedProcess.description}</p>
+        <h1 className="text-3xl font-bold mb-4">{selectedEntity.name}</h1>
+        <h2 className="text-2xl font-semibold mb-4">{selectedProcess.name}</h2>
+        <p className="text-lg mb-8 text-gray-300">{selectedProcess.description}</p>
 
         {/* Rive player for Business Model process */}
         {selectedProcess.id === 'business-model' && (
-          <div className="w-full flex justify-center mb-6">
-            <div className="max-w-xl w-full rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg p-4 flex items-center justify-center" style={{ margin: '0 auto' }}>
+          <div className="w-full flex justify-center mb-12">
+            <div className="w-full max-w-5xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg p-6 flex items-center justify-center">
               <OrnuaBusinessModel />
             </div>
           </div>
@@ -404,37 +404,48 @@ export default function ProcessWalkthroughLibrary() {
 
         {/* Key Documents for the current step only */}
         {step && (
-          <div className="mt-8">
-            <h3 className="text-lg font-bold mb-2">Key Documents</h3>
-            <ul className="list-disc pl-5">
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold mb-6 text-white">Key Documents</h3>
+            <div className="grid gap-4">
               {step.docs.map((doc, index) => (
-                <li key={index} className="text-sm mb-1 flex items-center gap-2">
-                  {doc.type === 'view' ? (
-                    <span
-                      className="font-medium underline text-blue-400 cursor-pointer hover:text-blue-300 transition"
-                      title="Click to view document"
-                      tabIndex={0}
-                      onClick={() => {/* TODO: Implement view logic if available */}}
-                    >
-                      {doc.name}
-                    </span>
-                  ) : (
-                    <span className="font-medium">{doc.name}</span>
-                  )}
-                  <span className="italic">[{doc.type === 'view' ? 'View' : 'Request'}]</span> - {doc.description}
-                  {doc.type === 'request' && (
-                    <Button
-                      variant="outline"
-                      className="ml-2 text-xs"
-                      onClick={() => handleRequestDoc(doc, selectedProcess, step)}
-                    >
-                      Request
-                    </Button>
-                  )}
-                  </li>
-                ))}
-              </ul>
+                <div key={index} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-200">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="text-lg font-semibold text-white">{doc.name}</h4>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          doc.type === 'view' 
+                            ? 'bg-gray-500/20 text-gray-300 border border-gray-500/30' 
+                            : 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+                        }`}>
+                          {doc.type === 'view' ? 'View' : 'Request'}
+                        </span>
+                      </div>
+                      <p className="text-gray-300 text-sm leading-relaxed">{doc.description}</p>
+                    </div>
+                    <div className="ml-4">
+                      {doc.type === 'view' ? (
+                        <button
+                          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors duration-200"
+                          onClick={() => {/* TODO: Implement view logic if available */}}
+                        >
+                          View Document
+                        </button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="px-4 py-2 border-orange-500/30 text-orange-300 hover:bg-orange-500/10 transition-colors duration-200"
+                          onClick={() => handleRequestDoc(doc, selectedProcess, step)}
+                        >
+                          Request Document
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
         )}
       </main>
     </div>
