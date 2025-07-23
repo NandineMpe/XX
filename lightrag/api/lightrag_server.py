@@ -187,17 +187,33 @@ def create_app(args):
         return [origin.strip() for origin in origins_str.split(",")]
 
     # Add CORS middleware
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[
+    cors_origins = get_cors_origins()
+    if cors_origins == ["*"]:
+        # If CORS_ORIGINS is set to "*", allow all origins
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    else:
+        # Use configured origins plus defaults
+        default_origins = [
             "https://augentik.com",
             "https://www.augentik.com",
             "http://localhost:5173",
-        ],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+            "https://lightrag-production-6328.up.railway.app",
+        ]
+        all_origins = list(set(cors_origins + default_origins))
+        
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=all_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
     # Create combined auth dependency for all endpoints
     combined_auth = get_combined_auth_dependency(api_key)
