@@ -31,6 +31,9 @@ RUN pip install --user --no-cache-dir pypdf2 python-docx python-pptx openpyxl
 # Final stage
 FROM python:3.11-slim
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy only necessary files from builder
@@ -51,6 +54,10 @@ ENV INPUT_DIR=/app/data/inputs
 
 # Expose the default port
 EXPOSE 9621
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:9621/health || exit 1
 
 # Set entrypoint
 ENTRYPOINT ["python", "-m", "lightrag.api.lightrag_server"]

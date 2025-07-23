@@ -17,6 +17,7 @@ from ascii_colors import ASCIIColors
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from datetime import datetime
 from lightrag.api.utils_api import (
     get_combined_auth_dependency,
     display_splash_screen,
@@ -440,9 +441,83 @@ def create_app(args):
             "webui_description": webui_description,
         }
 
-    @app.get("/health", dependencies=[Depends(combined_auth)])
-    async def get_status():
-        """Get current system status"""
+    @app.get("/health")
+    async def health_check():
+        """Health check endpoint for load balancers and monitoring systems"""
+        try:
+            # Basic health check - just verify the application is running
+            health_status = {
+                "status": "healthy",
+                "timestamp": datetime.now().isoformat(),
+                "service": "LightRAG API",
+                "version": __api_version__,
+            }
+            
+            # Try to check database connectivity if RAG is initialized
+            try:
+                if hasattr(rag, 'storages_status'):
+                    storage_status = await rag.get_storages_status()
+                    health_status["storage_status"] = {
+                        "kv_storage": storage_status.kv_storage,
+                        "vector_storage": storage_status.vector_storage,
+                        "graph_storage": storage_status.graph_storage,
+                        "doc_status_storage": storage_status.doc_status_storage,
+                    }
+            except Exception as storage_error:
+                logger.warning(f"Storage health check failed: {str(storage_error)}")
+                health_status["storage_status"] = "unavailable"
+            
+            return health_status
+        except Exception as e:
+            logger.error(f"Health check failed: {str(e)}")
+            raise HTTPException(status_code=503, detail="Service unavailable")
+
+    @app.get("/ready")
+    async def readiness_check():
+        """Readiness check endpoint for Kubernetes and container orchestration"""
+        try:
+            # Check if the application is ready to serve requests
+            # This includes checking if databases are connected and initialized
+            
+            readiness_status = {
+                "status": "ready",
+                "timestamp": datetime.now().isoformat(),
+                "service": "LightRAG API",
+            }
+            
+            # Check storage connectivity
+            try:
+                if hasattr(rag, 'storages_status'):
+                    storage_status = await rag.get_storages_status()
+                    all_storages_ready = all([
+                        storage_status.kv_storage,
+                        storage_status.vector_storage,
+                        storage_status.graph_storage,
+                        storage_status.doc_status_storage,
+                    ])
+                    
+                    if not all_storages_ready:
+                        readiness_status["status"] = "not_ready"
+                        readiness_status["reason"] = "Storage systems not fully connected"
+                        raise HTTPException(status_code=503, detail="Storage systems not ready")
+                        
+            except Exception as storage_error:
+                readiness_status["status"] = "not_ready"
+                readiness_status["reason"] = f"Storage check failed: {str(storage_error)}"
+                raise HTTPException(status_code=503, detail="Storage systems unavailable")
+            
+            return readiness_status
+            
+        except HTTPException:
+            # Re-raise HTTP exceptions as-is
+            raise
+        except Exception as e:
+            logger.error(f"Readiness check failed: {str(e)}")
+            raise HTTPException(status_code=503, detail="Service not ready")
+
+    @app.get("/health/detailed", dependencies=[Depends(combined_auth)])
+    async def get_detailed_status():
+        """Get detailed system status (requires authentication)"""
         try:
             pipeline_status = await get_namespace_data("pipeline_status")
 
@@ -480,7 +555,7 @@ def create_app(args):
                 "webui_description": webui_description,
             }
         except Exception as e:
-            logger.error(f"Error getting health status: {str(e)}")
+            logger.error(f"Error getting detailed health status: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))
 
     # Custom StaticFiles class for smart caching
