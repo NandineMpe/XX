@@ -323,13 +323,13 @@ class ClientManager:
                     config.get("postgres", "host", fallback="localhost"),
                 ),
             ),
-            "port": os.environ.get(
+            "port": int(os.environ.get(
                 "POSTGRES_PORT",  # LightRAG standard
                 os.environ.get(
                     "PGPORT",  # Railway standard
                     config.get("postgres", "port", fallback=5432),
                 ),
-            ),
+            )),
             "user": os.environ.get(
                 "POSTGRES_USER",  # LightRAG standard
                 os.environ.get(
@@ -355,10 +355,10 @@ class ClientManager:
                 "POSTGRES_WORKSPACE",
                 config.get("postgres", "workspace", fallback="default"),
             ),
-            "max_connections": os.environ.get(
+            "max_connections": int(os.environ.get(
                 "POSTGRES_MAX_CONNECTIONS",
                 config.get("postgres", "max_connections", fallback=20),
-            ),
+            )),
         }
 
     @classmethod
