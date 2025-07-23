@@ -64,6 +64,8 @@ class PostgreSQLDB:
 
     async def initdb(self):
         try:
+            logger.info(f"PostgreSQL, Attempting to connect to database at {self.host}:{self.port}/{self.database}")
+            
             self.pool = await asyncpg.create_pool(  # type: ignore
                 user=self.user,
                 password=self.password,
@@ -75,12 +77,14 @@ class PostgreSQLDB:
             )
 
             logger.info(
-                f"PostgreSQL, Connected to database at {self.host}:{self.port}/{self.database}"
+                f"PostgreSQL, Successfully connected to database at {self.host}:{self.port}/{self.database}"
             )
         except Exception as e:
             logger.error(
-                f"PostgreSQL, Failed to connect database at {self.host}:{self.port}/{self.database}, Got:{e}"
+                f"PostgreSQL, Failed to connect database at {self.host}:{self.port}/{self.database}"
             )
+            logger.error(f"Connection details - Host: {self.host}, Port: {self.port}, Database: {self.database}, User: {self.user}")
+            logger.error(f"Error: {e}")
             raise
 
     @staticmethod
@@ -289,24 +293,63 @@ class ClientManager:
         config = configparser.ConfigParser()
         config.read("config.ini", "utf-8")
 
+        # Support both Railway's PostgreSQL variables and LightRAG's standard variables
+        # Railway provides: PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
+        # LightRAG expects: POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DATABASE
+        
+        # Check if DATABASE_URL is provided (Railway format)
+        database_url = os.environ.get("DATABASE_URL")
+        if database_url:
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(database_url)
+                return {
+                    "host": parsed.hostname or "localhost",
+                    "port": parsed.port or 5432,
+                    "user": parsed.username or "postgres",
+                    "password": parsed.password,
+                    "database": parsed.path.lstrip('/') or "postgres",
+                    "workspace": os.environ.get("POSTGRES_WORKSPACE", "default"),
+                    "max_connections": os.environ.get("POSTGRES_MAX_CONNECTIONS", 20),
+                }
+            except Exception as e:
+                logger.warning(f"Failed to parse DATABASE_URL: {e}, falling back to individual variables")
+        
         return {
             "host": os.environ.get(
-                "POSTGRES_HOST",
-                config.get("postgres", "host", fallback="localhost"),
+                "POSTGRES_HOST",  # LightRAG standard
+                os.environ.get(
+                    "PGHOST",  # Railway standard
+                    config.get("postgres", "host", fallback="localhost"),
+                ),
             ),
             "port": os.environ.get(
-                "POSTGRES_PORT", config.get("postgres", "port", fallback=5432)
+                "POSTGRES_PORT",  # LightRAG standard
+                os.environ.get(
+                    "PGPORT",  # Railway standard
+                    config.get("postgres", "port", fallback=5432),
+                ),
             ),
             "user": os.environ.get(
-                "POSTGRES_USER", config.get("postgres", "user", fallback="postgres")
+                "POSTGRES_USER",  # LightRAG standard
+                os.environ.get(
+                    "PGUSER",  # Railway standard
+                    config.get("postgres", "user", fallback="postgres"),
+                ),
             ),
             "password": os.environ.get(
-                "POSTGRES_PASSWORD",
-                config.get("postgres", "password", fallback=None),
+                "POSTGRES_PASSWORD",  # LightRAG standard
+                os.environ.get(
+                    "PGPASSWORD",  # Railway standard
+                    config.get("postgres", "password", fallback=None),
+                ),
             ),
             "database": os.environ.get(
-                "POSTGRES_DATABASE",
-                config.get("postgres", "database", fallback="postgres"),
+                "POSTGRES_DATABASE",  # LightRAG standard
+                os.environ.get(
+                    "PGDATABASE",  # Railway standard
+                    config.get("postgres", "database", fallback="postgres"),
+                ),
             ),
             "workspace": os.environ.get(
                 "POSTGRES_WORKSPACE",
