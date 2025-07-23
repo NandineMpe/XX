@@ -1699,7 +1699,26 @@ def check_storage_env_vars(storage_name: str) -> None:
     from lightrag.kg import STORAGE_ENV_REQUIREMENTS
 
     required_vars = STORAGE_ENV_REQUIREMENTS.get(storage_name, [])
-    missing_vars = [var for var in required_vars if var not in os.environ]
+    missing_vars = []
+    
+    for var in required_vars:
+        # Check if the variable exists directly
+        if var in os.environ:
+            continue
+            
+        # For PostgreSQL variables, check Railway equivalents
+        if var == "POSTGRES_DATABASE" and "PGDATABASE" in os.environ:
+            continue
+        if var == "POSTGRES_USER" and "PGUSER" in os.environ:
+            continue
+        if var == "POSTGRES_PASSWORD" and "PGPASSWORD" in os.environ:
+            continue
+        if var == "POSTGRES_HOST" and "PGHOST" in os.environ:
+            continue
+        if var == "POSTGRES_PORT" and "PGPORT" in os.environ:
+            continue
+            
+        missing_vars.append(var)
 
     if missing_vars:
         raise ValueError(
