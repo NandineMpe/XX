@@ -36,7 +36,7 @@ const LoginPage = () => {
         resp.webui_title || null,
         resp.webui_description || null
       );
-      window.location.href = 'https://lightrag-production-71c6.up.railway.app/webui/';
+      window.location.href = 'https://lightrag-production-6328.up.railway.app/webui/';
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || 'Login failed. Please check your credentials.');
     } finally {

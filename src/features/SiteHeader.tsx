@@ -96,7 +96,7 @@ export default function SiteHeader() {
         </a>
         <div className='flex items-center'>
           <span className='mx-1 text-xs text-gray-400'>|</span>
-          <span className='font-medium text-lg cursor-default text-white' style={{ fontFamily: "'Playfair Display', serif" }}>
+          <span className='font-medium text-lg cursor-default text-white' style={{ fontFamily: '\'Playfair Display\', serif' }}>
             Client Side Audit Management
           </span>
         </div>

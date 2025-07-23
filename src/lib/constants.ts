@@ -1,7 +1,7 @@
 import { ButtonVariantType } from '@/components/ui/Button'
 
 // Hardcode the backend URL for production to avoid undefined issues
-export const backendBaseUrl = 'https://lightrag-production-71c6.up.railway.app';
+export const backendBaseUrl = 'https://lightrag-production-6328.up.railway.app';
 
 // Debug logging
 console.log('Final backendBaseUrl:', backendBaseUrl);

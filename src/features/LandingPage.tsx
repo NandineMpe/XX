@@ -27,8 +27,8 @@ const TABS = [
     key: 'supporting',
     label: 'Supporting Documents',
     heading: 'Intelligent Supporting Document Retrieval',
-    subheading: 'Eliminate the back-and-forth of audit season by letting your system handle routine documentation requests with built-in agentic automation.',
-    description: `When your external auditors send a request our system automatically reads and classifies the request, locates the appropriate documents from your internal repositories, and routes the results to you for one-click approval before sending them out. This system saves hours of manual searching, reduces delays in "Provided By Client" (PBC) items, and ensures consistency across audit cycles. It's especially helpful during peak periods when multiple auditors are reaching out across multiple entities.\n\nBy reducing your team's audit burden, this feature allows you to stay focused on the business—not your inbox.`,
+    subheading: 'Automates the response to auditor document requests.',
+    description: `When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.`,
     steps: [
       {
         title: 'Automated Document Requests',
@@ -47,9 +47,9 @@ const TABS = [
   {
     key: 'walkthroughs',
     label: 'Walkthroughs',
-    heading: 'Process Walkthrough',
-    subheading: 'Minimize repeat explanations and improve auditor understanding with structured, visual walkthroughs of your company\'s key processes and account flows.',
-    description: `Auditors often arrive with limited context—especially junior staff rotating in and out of engagements. This module helps eliminate the client-side burden of re-explaining business processes year after year. It centralizes your most frequently asked process overviews into visual, easy-to-understand formats auditors can access independently, at any stage of the audit.\n\nFrom "how does your group recognize revenue?" to "can we get a walkthrough of your inventory controls?"—these questions no longer need to go through your CFO or operational leads.\n\nGranular Audit-Friendly Content\nKey controls\nTiming of recognition\nSystem dependencies\nAssociated documentation (e.g., sample invoices, internal policies, reconciliations)`,
+    heading: 'Process Walkthrough Library',
+    subheading: 'Centralizes frequently requested process overviews into visual, easy-to-understand formats.',
+    description: `This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.`,
     steps: [
       {
         title: 'Walkthrough Templates',
@@ -67,10 +67,10 @@ const TABS = [
   },
   {
     key: 'consolidation',
-    label: 'Consolidation Queries',
-    heading: 'Consolidation Query Assistant',
-    subheading: 'Streamline the most time-consuming part of the audit with intelligent responses to accounting treatment queries—powered by your actual consolidation data.',
-    description: `In large, listed entities, consolidation-related questions account for the majority of auditor interaction—often 60–70% of audit time. This module allows audit teams to independently ask questions about accounting treatments, eliminations, and group-level balances, and receive structured, client-approved explanations—without having to pull your team into repetitive back-and-forths.\n\nConsolidation questions are often complex, but most aren't unique. This tool standardizes responses to the most common queries—saving your Group Finance and Controllership teams hours each audit cycle. You maintain full oversight, while routine accounting explanations are handled at scale and with consistency.\n\nAuditors get what they need—accurate, transparent explanations—without needing to ping you for every number they can't immediately reconcile.\n\nThe system formulates a tailored explanation using:\nPrior-year audit responses\nGroup reporting policies\nMapped consolidation entries (e.g. trial balances, elimination journals, disclosures)\n\nAdditional Features\nIncludes linked support, such as relevant consolidation schedules, working papers, and accounting memos—pulled from connected systems like your group reporting tool or shared drives.\nIf the query requires input from Group Finance or isn't fully covered by documented policy, it gets routed to the correct subject-matter owner—with pre-filled context and suggested responses—to reduce your time spent manually interpreting vague audit questions.`,
+    label: 'Audit Queries',
+    heading: 'Audit Query Assistant',
+    subheading: 'Addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time.',
+    description: `This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications. The system formulates tailored explanations using prior-year audit responses, group reporting policies, and mapped consolidation entries.`,
     steps: [
       {
         title: 'Query Analysis',
@@ -97,7 +97,7 @@ const LandingPage = () => {
     { name: 'Augentik In Action', url: '#action', icon: <Home /> },
     { name: 'Our Vision', url: '#vision', icon: <User /> },
     { name: 'Integrations', url: '#integrations', icon: <Layers /> },
-    { name: 'Sign In', url: 'https://lightrag-production-71c6.up.railway.app/webui/#/login', icon: <LogIn /> },
+    { name: 'Sign In', url: 'https://lightrag-production-6328.up.railway.app/webui/#/login', icon: <LogIn /> },
   ]
 
   return (
