@@ -3,6 +3,9 @@ import { ButtonVariantType } from '@/components/ui/Button'
 // Hardcode the backend URL for production to avoid undefined issues
 export const backendBaseUrl = 'https://lightrag-production-6328.up.railway.app';
 
+// IFRS Compliance Checklist microservice URL
+export const ifrsMicroserviceUrl = 'https://web-production-89b97.up.railway.app';
+
 // Debug logging
 console.log('Final backendBaseUrl:', backendBaseUrl);
 

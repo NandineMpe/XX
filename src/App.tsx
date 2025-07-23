@@ -16,6 +16,7 @@ import { InvalidApiKeyError, RequireApiKeError } from '@/api/lightrag'
 import RetrievalTesting from '@/features/RetrievalTesting'
 import DocumentRetrievalDashboard from '@/features/DocumentRetrievalDashboard';
 import ProcessWalkthroughLibrary from '@/features/ProcessWalkthroughLibrary';
+import AuditCoPilot from '@/features/AuditCoPilot';
 
 import { Tabs, TabsContent } from '@/components/ui/Tabs'
 
@@ -207,12 +208,7 @@ function App() {
                   <RetrievalTesting />
                 </TabsContent>
                 <TabsContent value='audit-co-pilot' className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
-                  <div className="flex h-full w-full items-center justify-center bg-black text-white">
-                    <div className="text-center">
-                      <h1 className="text-3xl font-bold mb-4">Audit Co-Pilot</h1>
-                      <p className="text-gray-400">Coming soon...</p>
-                    </div>
-                  </div>
+                  <AuditCoPilot />
                 </TabsContent>
                 <TabsContent value='support' className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
                   <DocumentRetrievalDashboard />

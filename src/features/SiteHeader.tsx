@@ -92,11 +92,11 @@ export default function SiteHeader() {
             className='w-20 h-20 mr-6 object-contain'
             style={{ minWidth: 80, minHeight: 80, maxWidth: 120, maxHeight: 120 }}
           />
-          <span className='font-bold md:inline-block text-white text-2xl' style={{ fontFamily: "'Playfair Display', serif" }}>Augentik</span>
+          <span className='font-bold md:inline-block text-white text-2xl' style={{ fontFamily: 'Playfair Display, serif' }}>Augentik</span>
         </a>
         <div className='flex items-center'>
           <span className='mx-1 text-xs text-gray-400'>|</span>
-          <span className='font-medium text-lg cursor-default text-white' style={{ fontFamily: '\'Playfair Display\', serif' }}>
+          <span className='font-medium text-lg cursor-default text-white' style={{ fontFamily: 'Playfair Display, serif' }}>
             Client Side Audit Management
           </span>
         </div>
