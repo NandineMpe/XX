@@ -53,11 +53,11 @@ ENV WORKING_DIR=/app/data/rag_storage
 ENV INPUT_DIR=/app/data/inputs
 
 # Expose the default port
-EXPOSE 9621
+EXPOSE 8080
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:9621/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Set entrypoint
 ENTRYPOINT ["python", "-m", "lightrag.api.lightrag_server"]
