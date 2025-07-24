@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Spline from '@splinetool/react-spline';
+import { useRive, Layout, Fit, Alignment } from '@rive-app/react-canvas';
 import styles from './LandingNavButtons.module.css';
 import { TubelightNavBar } from "@/components/ui/tubelight-navbar"
 import { Home, User, Layers, LogIn } from "lucide-react"
@@ -93,6 +94,17 @@ const LandingPage = () => {
   const [activeTab, setActiveTab] = useState('supporting');
   const tab = TABS.find(t => t.key === activeTab) || TABS[0];
 
+  // Rive animation for walkthroughs
+  const { RiveComponent: WalkthroughRive } = useRive({
+    src: 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/walkthrough.riv',
+    stateMachines: 'State Machine 1',
+    layout: new Layout({
+      fit: Fit.Cover,
+      alignment: Alignment.Center,
+    }),
+    autoplay: true,
+  });
+
   const navItems = [
     { name: 'Augentik In Action', url: '#action', icon: <Home /> },
     { name: 'Our Vision', url: '#vision', icon: <User /> },
@@ -127,13 +139,39 @@ const LandingPage = () => {
               </button>
             ))}
           </div>
-          <SectionWithMockup
-            title={tab.heading}
-            description={tab.description}
-            primaryImageSrc={""}
-            secondaryImageSrc={""}
-            reverseLayout={activeTab === 'walkthroughs'}
-          />
+          {activeTab === 'walkthroughs' ? (
+            // Custom walkthroughs section with Rive animation
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-8 w-full items-center">
+              {/* Text Content */}
+              <div className="flex flex-col items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0">
+                <div className="space-y-2 md:space-y-1">
+                  <h2 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
+                    {tab.heading}
+                  </h2>
+                </div>
+                <p className="text-[#868f97] text-sm md:text-[15px] leading-6">
+                  {tab.description}
+                </p>
+              </div>
+
+              {/* Rive Animation */}
+              <div className="relative mt-10 md:mt-0 mx-auto w-full max-w-[471px]">
+                <div className="relative w-full h-[637px] bg-[#ffffff0a] rounded-[32px] backdrop-blur-[15px] backdrop-brightness-[100%] border-0 z-10 overflow-hidden">
+                  <div className="p-0 h-full">
+                    <WalkthroughRive className="w-full h-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <SectionWithMockup
+              title={tab.heading}
+              description={tab.description}
+              primaryImageSrc={""}
+              secondaryImageSrc={""}
+              reverseLayout={false}
+            />
+          )}
         </div>
       </section>
 
