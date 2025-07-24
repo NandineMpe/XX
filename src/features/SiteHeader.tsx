@@ -5,7 +5,7 @@ import { TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { useSettingsStore } from '@/stores/settings'
 import { useAuthStore } from '@/stores/state'
 import { cn } from '@/lib/utils'
-import { useTranslation } from 'react-i18next'
+
 import { navigationService } from '@/services/navigation'
 import { LogOutIcon } from 'lucide-react'
 
@@ -48,7 +48,6 @@ function NavigationTab({ value, currentTab, children, onClick }: NavigationTabPr
 function TabsNavigation() {
   const currentTab = useSettingsStore.use.currentTab()
   const setCurrentTab = useSettingsStore.use.setCurrentTab()
-  const { t } = useTranslation()
 
   return (
     <div className="flex h-8 self-center">
@@ -74,7 +73,6 @@ function TabsNavigation() {
 }
 
 export default function SiteHeader() {
-  const { t } = useTranslation()
   const { isGuestMode, username } = useAuthStore()
 
   const handleLogout = () => {
@@ -107,7 +105,7 @@ export default function SiteHeader() {
         <TabsNavigation />
         {isGuestMode && (
           <div className='ml-2 self-center px-2 py-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 rounded-md'>
-            {t('login.guestMode', 'Guest Mode')}
+            Guest Mode
           </div>
         )}
       </div>
@@ -120,7 +118,7 @@ export default function SiteHeader() {
             variant='ghost'
             size='icon'
             side='bottom'
-            tooltip={`${t('header.logout')} (${username})`}
+            tooltip={`Logout (${username})`}
             onClick={handleLogout}
           >
             <LogOutIcon className='size-4 text-white' aria-hidden='true' />
