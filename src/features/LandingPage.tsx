@@ -95,10 +95,18 @@ const LandingPage = () => {
   const tab = TABS.find(t => t.key === activeTab) || TABS[0];
 
   // Rive animation for walkthroughs
-  const { RiveComponent: WalkthroughRive } = useRive({
+  const { RiveComponent: WalkthroughRive, rive } = useRive({
     src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm.riv',
     autoplay: true,
+    stateMachines: 'State Machine 1',
   });
+
+  React.useEffect(() => {
+    if (rive && rive.ready) {
+      // Automatically play the state machine
+      rive.play();
+    }
+  }, [rive]);
 
   const navItems = [
     { name: 'Augentik In Action', url: '#action', icon: <Home /> },
