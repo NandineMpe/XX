@@ -6,6 +6,7 @@ import Separator from '@/components/ui/Separator';
 import { CheckCircle, Circle, AlertCircle, ExternalLink, Play, Clock, CheckSquare, Database, FileText, Calculator, CheckSquare2, AlertTriangle, TrendingUp, Terminal, Cpu, HardDrive } from 'lucide-react';
 import { ifrsMicroserviceUrl } from '@/lib/constants';
 import AuditStartButton from '@/components/ui/AuditStartButton';
+import IFRSComplianceDashboard from '@/components/compliance/IFRSComplianceDashboard';
 
 interface AuditProcedure {
   id: string;
@@ -88,6 +89,7 @@ const AuditCoPilot: React.FC = () => {
   const [processLogs, setProcessLogs] = useState<ProcessLog[]>([]);
   const [complianceResults, setComplianceResults] = useState<ComplianceResult[]>([]);
   const [showComplianceTable, setShowComplianceTable] = useState(false);
+  const [showIFRSDashboard, setShowIFRSDashboard] = useState(false);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -127,6 +129,11 @@ const AuditCoPilot: React.FC = () => {
   };
 
   const handleStartProcedure = async (procedure: AuditProcedure) => {
+    if (procedure.id === 'ifrs-compliance') {
+      setShowIFRSDashboard(true);
+      return;
+    }
+
     setIsLoading(true);
     setActiveProcess(procedure.id);
     setProcessLogs([]);
@@ -137,9 +144,7 @@ const AuditCoPilot: React.FC = () => {
     ));
 
     try {
-      if (procedure.id === 'ifrs-compliance') {
-        await executeIFRSComplianceAudit();
-      } else if (procedure.id === 'operating-expenses') {
+      if (procedure.id === 'operating-expenses') {
         await executeOperatingExpensesAudit();
       } else {
         // Simulate other procedures
@@ -354,6 +359,14 @@ const AuditCoPilot: React.FC = () => {
 
   const complianceProcedures = procedures.filter(p => p.category === 'compliance');
   const fsliProcedures = procedures.filter(p => p.category === 'fsli');
+
+  if (showIFRSDashboard) {
+    return (
+      <IFRSComplianceDashboard
+        onBack={() => setShowIFRSDashboard(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
