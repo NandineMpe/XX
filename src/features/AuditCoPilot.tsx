@@ -227,70 +227,129 @@ const AuditCoPilot: React.FC = () => {
 
   const executeOperatingExpensesAudit = async () => {
     addProcessLog('Initializing Operating Expenses Audit...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    addProcessLog('> Connecting to financial system...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 800));
+    addProcessLog('> Establishing secure connection to financial system...', 'command');
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    addProcessLog('✓ SSL handshake completed', 'success');
+    addProcessLog('✓ Authentication successful - User: AUDIT_SYSTEM_01', 'success');
     addProcessLog('✓ Financial system connection established', 'success');
     
     addProcessLog('> Accessing general ledger database...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    addProcessLog('✓ Database connection pool initialized', 'success');
+    addProcessLog('✓ Schema validation completed', 'success');
     addProcessLog('✓ General ledger access granted', 'success');
     
     addProcessLog('> Querying account 94110 (Operating Expenses)...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 6000));
+    addProcessLog('✓ SQL query executed: SELECT * FROM GL_TRANSACTIONS WHERE ACCOUNT = "94110"', 'info');
     addProcessLog('✓ Retrieved 2,847 transactions for account 94110', 'success');
+    addProcessLog('✓ Total transaction volume: $4,287,650.00', 'info');
+    
+    addProcessLog('> Performing data integrity checks...', 'command');
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    addProcessLog('✓ Duplicate transaction check: PASSED', 'success');
+    addProcessLog('✓ Date range validation: PASSED', 'success');
+    addProcessLog('✓ Currency consistency check: PASSED', 'success');
     
     addProcessLog('> Sorting transactions by amount (highest to lowest)...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    addProcessLog('✓ Sort algorithm: QuickSort (O(n log n))', 'info');
+    addProcessLog('✓ Memory allocation: 2.3MB', 'info');
     addProcessLog('✓ Transactions sorted successfully', 'success');
     
     addProcessLog('> Applying statistical sampling methodology...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    addProcessLog('✓ Sample size determined: 10 transactions', 'success');
+    await new Promise(resolve => setTimeout(resolve, 7000));
+    addProcessLog('✓ Population size: 2,847 transactions', 'info');
+    addProcessLog('✓ Confidence level: 95%', 'info');
+    addProcessLog('✓ Tolerable error rate: 5%', 'info');
+    addProcessLog('✓ Expected error rate: 2%', 'info');
+    addProcessLog('✓ Sample size calculated: 10 transactions', 'success');
+    addProcessLog('✓ Sampling method: Systematic random sampling', 'info');
     
     addProcessLog('> Extracting haphazard sample of 10 transactions...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    addProcessLog('✓ Random seed generated: 0x7A3B9C2F', 'info');
     addProcessLog('✓ Sample transactions selected:', 'info');
-    addProcessLog('  - Invoice #INV-2023-001: $45,230.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-015: $32,150.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-089: $28,750.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-156: $22,400.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-234: $18,900.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-312: $15,600.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-445: $12,300.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-567: $9,800.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-678: $7,200.00', 'info');
-    addProcessLog('  - Invoice #INV-2023-789: $5,100.00', 'info');
+    addProcessLog('  - Invoice #INV-2023-001: $45,230.00 (Marketing Services)', 'info');
+    addProcessLog('  - Invoice #INV-2023-015: $32,150.00 (IT Infrastructure)', 'info');
+    addProcessLog('  - Invoice #INV-2023-089: $28,750.00 (Legal Services)', 'info');
+    addProcessLog('  - Invoice #INV-2023-156: $22,400.00 (Consulting Fees)', 'info');
+    addProcessLog('  - Invoice #INV-2023-234: $18,900.00 (Office Supplies)', 'info');
+    addProcessLog('  - Invoice #INV-2023-312: $15,600.00 (Travel Expenses)', 'info');
+    addProcessLog('  - Invoice #INV-2023-445: $12,300.00 (Utilities)', 'info');
+    addProcessLog('  - Invoice #INV-2023-567: $9,800.00 (Insurance)', 'info');
+    addProcessLog('  - Invoice #INV-2023-678: $7,200.00 (Maintenance)', 'info');
+    addProcessLog('  - Invoice #INV-2023-789: $5,100.00 (Training)', 'info');
+    addProcessLog('✓ Sample total: $197,430.00 (4.6% of population)', 'info');
     
     addProcessLog('> Accessing supporting documentation...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 8000));
+    addProcessLog('✓ Connecting to document management system...', 'info');
+    addProcessLog('✓ API endpoint: /api/documents/retrieve', 'info');
+    addProcessLog('✓ Document retrieval in progress...', 'info');
     addProcessLog('✓ Invoice details retrieved from document management system', 'success');
+    addProcessLog('✓ All 10 supporting documents located and downloaded', 'success');
     
-    addProcessLog('> Comparing transaction descriptions to invoice details...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    addProcessLog('> Performing detailed transaction analysis...', 'command');
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    addProcessLog('✓ Transaction #1: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #2: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #3: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #4: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #5: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #6: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #7: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #8: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #9: Description match - VERIFIED', 'success');
+    addProcessLog('✓ Transaction #10: Description match - VERIFIED', 'success');
     addProcessLog('✓ All 10 sample descriptions match supporting documentation', 'success');
     
     addProcessLog('> Reconciling amounts and computing taxes...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    await new Promise(resolve => setTimeout(resolve, 8000));
+    addProcessLog('✓ Amount reconciliation in progress...', 'info');
+    addProcessLog('✓ Tax calculation engine initialized', 'info');
+    addProcessLog('✓ VAT rate: 20% (UK Standard Rate)', 'info');
     addProcessLog('✓ Amount reconciliation completed', 'success');
     addProcessLog('✓ Tax calculations verified', 'success');
+    addProcessLog('✓ All amounts reconciled within ±0.01 tolerance', 'success');
     
     addProcessLog('> Calculating differences and assessing against thresholds...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 6000));
+    addProcessLog('✓ Materiality threshold: $21,438.25 (0.5% of total)', 'info');
+    addProcessLog('✓ Performance materiality: $16,078.69 (0.375% of total)', 'info');
+    addProcessLog('✓ Calculating variances...', 'info');
+    addProcessLog('✓ Maximum variance found: $0.00', 'success');
     addProcessLog('✓ No material differences identified', 'success');
     addProcessLog('✓ All variances within acceptable thresholds', 'success');
     
+    addProcessLog('> Performing analytical procedures...', 'command');
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    addProcessLog('✓ Trend analysis: Operating expenses increased 8.2% YoY', 'info');
+    addProcessLog('✓ Ratio analysis: Operating expenses to revenue = 12.4%', 'info');
+    addProcessLog('✓ Benchmark comparison: Industry average = 13.1%', 'info');
+    addProcessLog('✓ Analytical procedures: NO EXCEPTIONS', 'success');
+    
     addProcessLog('> Concluding on materiality...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    addProcessLog('✓ Materiality assessment completed', 'success');
     addProcessLog('✓ No material misstatements identified', 'success');
+    addProcessLog('✓ Audit risk: LOW', 'success');
     
     addProcessLog('> Preparing audit trail documentation...', 'command');
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 7000));
+    addProcessLog('✓ Generating audit working papers...', 'info');
+    addProcessLog('✓ Documenting sampling methodology...', 'info');
+    addProcessLog('✓ Recording analytical procedures...', 'info');
+    addProcessLog('✓ Creating audit summary report...', 'info');
     addProcessLog('✓ Audit trail completed and saved', 'success');
+    addProcessLog('✓ Working papers archived: AUDIT_2024_OPEX_001', 'success');
     
     addProcessLog('✓ Operating Expenses Audit completed successfully', 'success');
     addProcessLog('✓ Conclusion: No material misstatements. Operating expenses fairly stated.', 'success');
+    addProcessLog('✓ Audit duration: 2 minutes 15 seconds', 'info');
+    addProcessLog('✓ Procedures performed: 15/15', 'success');
   };
 
   const complianceProcedures = procedures.filter(p => p.category === 'compliance');
@@ -331,11 +390,8 @@ const AuditCoPilot: React.FC = () => {
             <p className="text-2xl text-white mb-4 font-light" style={{ fontFamily: "'Playfair Display', serif" }}>
               Intelligent Compliance Assessment & Financial Statement Verification
             </p>
-            <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Augentik's advanced audit co-pilot orchestrates comprehensive financial examinations through 
-              intelligent automation, real-time compliance monitoring, and precision-driven analysis. 
-              Experience the future of audit assurance where every procedure is executed with surgical precision 
-              and every finding is documented with forensic accuracy.
+            <p className="text-lg text-white max-w-3xl mx-auto leading-relaxed">
+              Audit Agents, Always On, Always Auditing.
             </p>
           </div>
         </div>
@@ -454,97 +510,92 @@ const AuditCoPilot: React.FC = () => {
             </div>
           )}
 
-          {/* Compliance Checklists Section */}
-          <div>
-            <h3 className="text-2xl font-bold mb-6 text-white">
-              Compliance Checklists
-            </h3>
-            <div className="space-y-4">
-              {complianceProcedures.map((procedure) => (
-                <Card key={procedure.id} className="bg-gray-800/50 border-gray-700 hover:bg-gray-800/70 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-4 mb-2">
-                          {getStatusIcon(procedure.status)}
-                          <div>
-                            <h4 className="text-lg font-semibold text-white">{procedure.name}</h4>
-                            <p className="text-gray-300 text-sm">{procedure.description}</p>
-                          </div>
-                          {getStatusBadge(procedure.status)}
+          {/* Audit Procedures Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Compliance Checklists Section */}
+            <div className="bg-gray-800/30 rounded-lg border border-gray-700/50">
+              <div className="px-4 py-3 border-b border-gray-700/50">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <CheckSquare className="h-5 w-5 text-green-400" />
+                  Compliance Checklists
+                </h3>
+              </div>
+              <div className="p-2">
+                {complianceProcedures.map((procedure) => (
+                  <div key={procedure.id} className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-700/30 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        {getStatusIcon(procedure.status)}
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-medium text-white truncate">{procedure.name}</h4>
+                          <p className="text-xs text-gray-400 truncate">{procedure.description}</p>
                         </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-400">
-                          <span className="flex items-center space-x-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{procedure.estimatedTime}</span>
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        {procedure.microserviceUrl && (
-                          <Button
-                            variant="outline"
-                            onClick={() => window.open(procedure.microserviceUrl, '_blank')}
-                            className="border-purple-400 text-purple-400 hover:bg-purple-400 hover:text-white"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Open Service
-                          </Button>
-                        )}
-                        <AuditStartButton
-                          onClick={() => handleStartProcedure(procedure)}
-                          disabled={isLoading || procedure.status === 'in-progress'}
-                          isRunning={procedure.status === 'in-progress'}
-                        >
-                          {procedure.status === 'in-progress' ? 'Running...' : 'Start Audit'}
-                        </AuditStartButton>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Clock className="h-3 w-3" />
+                        <span>{procedure.estimatedTime}</span>
+                      </div>
+                      {procedure.microserviceUrl && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(procedure.microserviceUrl, '_blank')}
+                          className="h-6 w-6 p-0 text-purple-400 hover:text-purple-300"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <AuditStartButton
+                        onClick={() => handleStartProcedure(procedure)}
+                        disabled={isLoading || procedure.status === 'in-progress'}
+                        isRunning={procedure.status === 'in-progress'}
+                      >
+                        {procedure.status === 'in-progress' ? 'Running' : 'Start'}
+                      </AuditStartButton>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <Separator className="bg-gray-700" />
-
-          {/* FSLIs Section */}
-          <div>
-            <h3 className="text-2xl font-bold mb-6 text-white">
-              FSLIs (Financial Statement Line Items)
-            </h3>
-            <div className="space-y-4">
-              {fsliProcedures.map((procedure) => (
-                <Card key={procedure.id} className="bg-gray-800/50 border-gray-700 hover:bg-gray-800/70 transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-4 mb-2">
-                          {getStatusIcon(procedure.status)}
-                          <div>
-                            <h4 className="text-lg font-semibold text-white">{procedure.name}</h4>
-                            <p className="text-gray-300 text-sm">{procedure.description}</p>
-                          </div>
-                          {getStatusBadge(procedure.status)}
+            {/* FSLIs Section */}
+            <div className="bg-gray-800/30 rounded-lg border border-gray-700/50">
+              <div className="px-4 py-3 border-b border-gray-700/50">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Database className="h-5 w-5 text-blue-400" />
+                  FSLIs (Financial Statement Line Items)
+                </h3>
+              </div>
+              <div className="p-2">
+                {fsliProcedures.map((procedure) => (
+                  <div key={procedure.id} className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-700/30 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        {getStatusIcon(procedure.status)}
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-medium text-white truncate">{procedure.name}</h4>
+                          <p className="text-xs text-gray-400 truncate">{procedure.description}</p>
                         </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-400">
-                          <span className="flex items-center space-x-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{procedure.estimatedTime}</span>
-                          </span>
-                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                      <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <Clock className="h-3 w-3" />
+                        <span>{procedure.estimatedTime}</span>
                       </div>
                       <AuditStartButton
                         onClick={() => handleStartProcedure(procedure)}
                         disabled={isLoading || procedure.status === 'in-progress'}
                         isRunning={procedure.status === 'in-progress'}
                       >
-                        {procedure.status === 'in-progress' ? 'Running...' : 'Start Audit'}
+                        {procedure.status === 'in-progress' ? 'Running' : 'Start'}
                       </AuditStartButton>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
