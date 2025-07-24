@@ -94,7 +94,7 @@ const AuditCoPilot: React.FC = () => {
       case 'completed':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'in-progress':
-        return <Clock className="h-5 w-5 text-blue-500 animate-spin" />;
+        return <Clock className="h-5 w-5 text-gray-300 animate-spin" />;
       case 'failed':
         return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
@@ -107,7 +107,7 @@ const AuditCoPilot: React.FC = () => {
       case 'completed':
         return <Badge variant="default" className="bg-green-500">Completed</Badge>;
       case 'in-progress':
-        return <Badge variant="default" className="bg-blue-500">In Progress</Badge>;
+        return <Badge variant="default" className="bg-gray-600">In Progress</Badge>;
       case 'failed':
         return <Badge variant="destructive">Failed</Badge>;
       default:
@@ -405,18 +405,18 @@ const AuditCoPilot: React.FC = () => {
             <div className="mb-8">
               <Card className="bg-gray-800/50 border-gray-700">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-white flex items-center space-x-2">
-                      <Terminal className="h-5 w-5 text-cyan-400" />
-                      <span>Audit Process Console</span>
-                    </CardTitle>
-                    {activeProcess && (
-                      <div className="flex items-center space-x-2">
-                        <div className="h-3 w-3 bg-cyan-500 rounded-full animate-pulse"></div>
-                        <span className="text-cyan-400 text-sm">Live</span>
-                      </div>
-                    )}
-                  </div>
+                                      <div className="flex items-center justify-between">
+                      <CardTitle className="text-white flex items-center space-x-2">
+                        <Terminal className="h-5 w-5 text-gray-300" />
+                        <span>Audit Process Console</span>
+                      </CardTitle>
+                      {activeProcess && (
+                        <div className="flex items-center space-x-2">
+                          <div className="h-3 w-3 bg-gray-400 rounded-full animate-pulse"></div>
+                          <span className="text-gray-300 text-sm">Live</span>
+                        </div>
+                      )}
+                    </div>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-black/80 rounded-lg p-4 font-mono text-sm max-h-96 overflow-y-auto">
@@ -427,7 +427,7 @@ const AuditCoPilot: React.FC = () => {
                           log.type === 'success' ? 'text-green-400' :
                           log.type === 'error' ? 'text-red-400' :
                           log.type === 'warning' ? 'text-yellow-400' :
-                          log.type === 'command' ? 'text-cyan-400' :
+                          log.type === 'command' ? 'text-gray-300' :
                           'text-gray-300'
                         }`}>
                           {log.message}
@@ -563,10 +563,10 @@ const AuditCoPilot: React.FC = () => {
             {/* FSLIs Section */}
             <div className="bg-gray-800/30 rounded-lg border border-gray-700/50">
               <div className="px-4 py-3 border-b border-gray-700/50">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <Database className="h-5 w-5 text-blue-400" />
-                  FSLIs (Financial Statement Line Items)
-                </h3>
+                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Database className="h-5 w-5 text-gray-300" />
+              FSLIs (Financial Statement Line Items)
+            </h3>
               </div>
               <div className="p-2">
                 {fsliProcedures.map((procedure) => (
