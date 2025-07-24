@@ -325,15 +325,17 @@ const AuditCoPilot: React.FC = () => {
       <section className="px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-              Audit Procedures
+            <h2 className="text-5xl font-bold mb-6 text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Autonomous Audit Execution
             </h2>
-            <p className="text-xl text-gray-300 mb-2">
-              Performed autonomously, throughout the financial year
+            <p className="text-2xl text-white mb-4 font-light" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Intelligent Compliance Assessment & Financial Statement Verification
             </p>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Our AI-powered audit agent continuously monitors and executes audit procedures, 
-              ensuring comprehensive coverage and timely completion of all critical audit areas.
+            <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Augentik's advanced audit co-pilot orchestrates comprehensive financial examinations through 
+              intelligent automation, real-time compliance monitoring, and precision-driven analysis. 
+              Experience the future of audit assurance where every procedure is executed with surgical precision 
+              and every finding is documented with forensic accuracy.
             </p>
           </div>
         </div>
