@@ -1,7 +1,7 @@
 import React from 'react';
 import { TrendingUp, AlertTriangle, CheckCircle, XCircle, HelpCircle, FileText, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import Badge from '@/components/ui/Badge';
 
 export interface ComplianceResult {
   requirement_id: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Progress } from '@/components/ui/Progress';
+import Progress from '@/components/ui/Progress';
 
 interface AssessmentProgressProps {
   progress: number;
