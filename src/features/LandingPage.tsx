@@ -97,11 +97,6 @@ const LandingPage = () => {
   // Rive animation for walkthroughs
   const { RiveComponent: WalkthroughRive } = useRive({
     src: 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/walkthrough.riv',
-    stateMachines: 'State Machine 1',
-    layout: new Layout({
-      fit: Fit.Cover,
-      alignment: Alignment.Center,
-    }),
     autoplay: true,
   });
 
@@ -157,8 +152,17 @@ const LandingPage = () => {
               {/* Rive Animation */}
               <div className="relative mt-10 md:mt-0 mx-auto w-full max-w-[471px]">
                 <div className="relative w-full h-[637px] bg-[#ffffff0a] rounded-[32px] backdrop-blur-[15px] backdrop-brightness-[100%] border-0 z-10 overflow-hidden">
-                  <div className="p-0 h-full">
-                    <WalkthroughRive className="w-full h-full" />
+                  <div className="p-0 h-full flex items-center justify-center">
+                    <div className="text-gray-400 text-center">
+                      <div className="text-6xl mb-4">📋</div>
+                      <div className="text-xl mb-2 font-semibold">Process Walkthrough Library</div>
+                      <div className="text-sm text-gray-500 max-w-xs">
+                        Interactive process documentation and audit-friendly walkthroughs
+                      </div>
+                      <div className="mt-4 text-xs text-gray-600">
+                        Rive animation loading...
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
