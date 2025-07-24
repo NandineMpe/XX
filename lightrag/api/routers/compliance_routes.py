@@ -29,33 +29,68 @@ router = APIRouter(
 
 class IFRSRequirementRequest(BaseModel):
     """Request model for IFRS requirement"""
-    standard_name: str = Field(description="IFRS standard name (e.g., 'IFRS 1', 'IAS 16')")
-    requirement_text: str = Field(description="The IFRS requirement text")
+    standard_name: str = Field(min_length=1, description="IFRS standard name (e.g., 'IFRS 1', 'IAS 16')")
+    requirement_text: str = Field(min_length=1, description="The IFRS requirement text")
     requirement_id: Optional[str] = Field(default=None, description="Optional requirement ID")
     category: Optional[str] = Field(default=None, description="Requirement category")
     priority: Optional[str] = Field(default=None, description="Requirement priority")
 
+    @field_validator("standard_name", "requirement_text")
+    @classmethod
+    def validate_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Field cannot be empty")
+        return v.strip()
+
 class ComplianceAssessmentRequest(BaseModel):
     """Request model for compliance assessment"""
-    entity_name: str = Field(description="Name of the entity being assessed")
-    entity_business_description: str = Field(description="Description of entity's business activities")
-    ifrs_requirements: List[IFRSRequirementRequest] = Field(description="List of IFRS requirements to assess")
-    afs_content: str = Field(description="Content of the annual financial statements")
+    entity_name: str = Field(min_length=1, description="Name of the entity being assessed")
+    entity_business_description: str = Field(min_length=1, description="Description of entity's business activities")
+    ifrs_requirements: List[IFRSRequirementRequest] = Field(min_length=1, description="List of IFRS requirements to assess")
+    afs_content: str = Field(min_length=1, description="Content of the annual financial statements")
     ifrs_standards_context: Optional[str] = Field(default=None, description="Additional IFRS context")
     max_concurrent: Optional[int] = Field(default=5, ge=1, le=20, description="Maximum concurrent assessments")
 
+    @field_validator("entity_name", "entity_business_description", "afs_content")
+    @classmethod
+    def validate_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Field cannot be empty")
+        return v.strip()
+
+    @field_validator("ifrs_requirements")
+    @classmethod
+    def validate_requirements_list(cls, v):
+        if not v or len(v) == 0:
+            raise ValueError("At least one IFRS requirement must be provided")
+        return v
+
 class SingleRequirementAssessmentRequest(BaseModel):
     """Request model for single requirement assessment"""
-    entity_name: str = Field(description="Name of the entity being assessed")
-    entity_business_description: str = Field(description="Description of entity's business activities")
+    entity_name: str = Field(min_length=1, description="Name of the entity being assessed")
+    entity_business_description: str = Field(min_length=1, description="Description of entity's business activities")
     ifrs_requirement: IFRSRequirementRequest = Field(description="IFRS requirement to assess")
-    afs_content: str = Field(description="Content of the annual financial statements")
+    afs_content: str = Field(min_length=1, description="Content of the annual financial statements")
     ifrs_standards_context: Optional[str] = Field(default=None, description="Additional IFRS context")
+
+    @field_validator("entity_name", "entity_business_description", "afs_content")
+    @classmethod
+    def validate_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Field cannot be empty")
+        return v.strip()
 
 class IFRSRequirementsUploadRequest(BaseModel):
     """Request model for uploading IFRS requirements from text"""
-    ifrs_text: str = Field(description="Text containing IFRS requirements")
+    ifrs_text: str = Field(min_length=1, description="Text containing IFRS requirements")
     requirements_delimiter: Optional[str] = Field(default="##", description="Delimiter for separating requirements")
+
+    @field_validator("ifrs_text")
+    @classmethod
+    def validate_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("IFRS text cannot be empty")
+        return v.strip()
 
 class ComplianceAssessmentResponse(BaseModel):
     """Response model for compliance assessment"""
@@ -91,6 +126,22 @@ class IFRSRequirementsResponse(BaseModel):
     requirements: List[Dict[str, Any]] = Field(description="List of parsed IFRS requirements")
     total_count: int = Field(description="Total number of requirements")
 
+class EntityExtractionRequest(BaseModel):
+    """Request model for entity information extraction"""
+    afs_content: str = Field(min_length=1, description="Content of the annual financial statements")
+
+    @field_validator("afs_content")
+    @classmethod
+    def validate_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Financial statement content cannot be empty")
+        return v.strip()
+
+class EntityExtractionResponse(BaseModel):
+    """Response model for entity information extraction"""
+    entity_name: str = Field(description="Extracted entity name")
+    business_description: str = Field(description="Extracted business description")
+
 def create_compliance_routes(
     rag: LightRAG,
     api_key: Optional[str] = None
@@ -116,6 +167,19 @@ def create_compliance_routes(
         Perform comprehensive IFRS compliance assessment
         """
         try:
+            # Validate request
+            if not request.entity_name or not request.entity_name.strip():
+                raise HTTPException(status_code=400, detail="Entity name is required")
+            
+            if not request.entity_business_description or not request.entity_business_description.strip():
+                raise HTTPException(status_code=400, detail="Entity business description is required")
+            
+            if not request.afs_content or not request.afs_content.strip():
+                raise HTTPException(status_code=400, detail="Financial statement content is required")
+            
+            if not request.ifrs_requirements or len(request.ifrs_requirements) == 0:
+                raise HTTPException(status_code=400, detail="At least one IFRS requirement must be provided")
+            
             # Convert request requirements to IFRSRequirement objects
             ifrs_requirements = [
                 IFRSRequirement(
@@ -175,6 +239,16 @@ def create_compliance_routes(
         Assess a single IFRS requirement
         """
         try:
+            # Validate request
+            if not request.entity_name or not request.entity_name.strip():
+                raise HTTPException(status_code=400, detail="Entity name is required")
+            
+            if not request.entity_business_description or not request.entity_business_description.strip():
+                raise HTTPException(status_code=400, detail="Entity business description is required")
+            
+            if not request.afs_content or not request.afs_content.strip():
+                raise HTTPException(status_code=400, detail="Financial statement content is required")
+            
             # Convert request requirement to IFRSRequirement object
             ifrs_requirement = IFRSRequirement(
                 standard_name=request.ifrs_requirement.standard_name,
@@ -285,6 +359,10 @@ def create_compliance_routes(
         Parse IFRS requirements from text format
         """
         try:
+            # Validate request
+            if not request.ifrs_text or not request.ifrs_text.strip():
+                raise HTTPException(status_code=400, detail="IFRS text content is required")
+            
             requirements = await compliance_assessor.load_ifrs_requirements_from_text(
                 ifrs_text=request.ifrs_text,
                 requirements_delimiter=request.requirements_delimiter
@@ -315,23 +393,28 @@ def create_compliance_routes(
     
     @router.post(
         "/entity/extract",
+        response_model=EntityExtractionResponse,
         dependencies=[Depends(combined_auth)]
     )
     async def extract_entity_info(
-        afs_content: str = Field(..., description="Content of the annual financial statements")
+        request: EntityExtractionRequest
     ):
         """
         Extract entity name and business description from financial statements
         """
         try:
+            # Validate request
+            if not request.afs_content or not request.afs_content.strip():
+                raise HTTPException(status_code=400, detail="Financial statement content is required")
+            
             entity_name, business_description = await compliance_assessor.extract_entity_info_from_afs(
-                afs_content=afs_content
+                afs_content=request.afs_content
             )
             
-            return {
-                "entity_name": entity_name,
-                "business_description": business_description
-            }
+            return EntityExtractionResponse(
+                entity_name=entity_name,
+                business_description=business_description
+            )
             
         except Exception as e:
             logging.error(f"Entity info extraction failed: {str(e)}")
