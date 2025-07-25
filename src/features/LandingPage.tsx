@@ -215,7 +215,7 @@ const LandingPage = () => {
                   )}
                 </div>
                 <div className='text-center mt-4'>
-                  <p className='text-sm text-gray-400 italic'>Pick Sam Up To Begin Business Model Walkthrough</p>
+                  <p className='text-sm text-gray-400 italic'>Interactive Business Model Walkthrough - Click to Explore</p>
                 </div>
               </div>
             ) : (
