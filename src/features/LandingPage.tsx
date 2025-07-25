@@ -107,27 +107,15 @@ const LandingPage = () => {
 
   // Rive animation for walkthroughs
   const { RiveComponent: WalkthroughRive, rive } = useRive({
-    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm%20%281%29.riv',
+    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm.riv',
     autoplay: true,
     stateMachines: 'State Machine 1',
-    onStateChange: (event) => {
-      console.log('Rive state changed:', event);
-    },
   });
 
   React.useEffect(() => {
     if (rive) {
-      // Ensure the animation starts immediately
+      // Automatically play the state machine
       rive.play();
-      // Force the state machine to start
-      try {
-        const inputs = rive.stateMachineInputs('State Machine 1');
-        if (inputs && inputs.length > 0) {
-          inputs[0].value = true;
-        }
-      } catch {
-        console.log('Rive state machine already running');
-      }
     }
   }, [rive]);
 
@@ -244,7 +232,7 @@ const LandingPage = () => {
                   </div>
                 </div>
                 <div className='text-center mt-4'>
-                  <p className='text-sm text-gray-400 italic'>Interactive Business Model Walkthrough - Click to Explore</p>
+                  <p className='text-sm text-gray-400 italic'>Pick Sam up to begin walkthrough</p>
                 </div>
               </div>
             ) : (
