@@ -117,9 +117,19 @@ const LandingPage = () => {
   });
 
   React.useEffect(() => {
-    if (rive && rive.ready) {
-      // Automatically play the state machine
-      rive.play();
+    if (rive) {
+      // Ensure the animation plays immediately when loaded
+      try {
+        rive.play();
+        // Force the state machine to start
+        const inputs = rive.stateMachineInputs('State Machine 1');
+        if (inputs && inputs.length > 0) {
+          // Trigger any initial inputs if needed
+          console.log('Rive animation loaded and playing');
+        }
+      } catch (error) {
+        console.error('Error playing Rive animation:', error);
+      }
     }
   }, [rive]);
 
@@ -201,14 +211,14 @@ const LandingPage = () => {
         <div className="max-w-4xl w-full mx-auto flex flex-col items-center">
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-8">
             {TABS.map((tabOption) => (
-                              <button
-                  key={tabOption.key}
-                  onClick={() => setActiveTab(tabOption.key)}
-                  className={`px-4 md:px-6 py-2 rounded-full font-semibold text-base md:text-lg transition-colors focus:outline-none ${activeTab === tabOption.key ? 'bg-purple-900/40 text-white' : 'bg-black/40 text-gray-300 hover:bg-purple-900/20'}`}
-                  style={{ fontFamily: 'Playfair Display, serif' }}
-                >
-                  {tabOption.label}
-                </button>
+              <button
+                key={tabOption.key}
+                onClick={() => setActiveTab(tabOption.key)}
+                className={`px-4 md:px-6 py-2 rounded-full font-semibold text-base md:text-lg transition-colors focus:outline-none ${activeTab === tabOption.key ? 'bg-purple-900/40 text-white' : 'bg-black/40 text-gray-300 hover:bg-purple-900/20'}`}
+                style={{ fontFamily: 'Playfair Display, serif' }}
+              >
+                {tabOption.label}
+              </button>
             ))}
           </div>
           <div className='w-full relative z-10'>
@@ -278,27 +288,8 @@ const LandingPage = () => {
                 <div className='text-center mb-8'>
                   <h3 className='text-2xl md:text-3xl font-bold text-white mb-4'>Document Retrieval</h3>
                   <p className='text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto'>
-                    When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.
+                    When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in &ldquo;Provided By Client&rdquo; (PBC) items while ensuring consistency across audit cycles.
                   </p>
-                </div>
-                
-                {/* Feature highlights in a grid layout */}
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mt-8'>
-                  <div className='bg-white/5 backdrop-blur-md border border-white/10 rounded-lg p-6'>
-                    <div className='text-2xl mb-3'>📧</div>
-                    <h4 className='text-lg font-semibold mb-2'>Automated Document Requests</h4>
-                    <p className='text-sm text-gray-300'>Our AI reads auditor emails and automatically categorizes document requests for efficient processing.</p>
-                  </div>
-                  <div className='bg-white/5 backdrop-blur-md border border-white/10 rounded-lg p-6'>
-                    <div className='text-2xl mb-3'>🔍</div>
-                    <h4 className='text-lg font-semibold mb-2'>Intelligent Document Retrieval</h4>
-                    <p className='text-sm text-gray-300'>The system searches your files and emails to locate the exact documents needed for each request.</p>
-                  </div>
-                  <div className='bg-white/5 backdrop-blur-md border border-white/10 rounded-lg p-6'>
-                    <div className='text-2xl mb-3'>✅</div>
-                    <h4 className='text-lg font-semibold mb-2'>One-Click Approval & Delivery</h4>
-                    <p className='text-sm text-gray-300'>Review suggested documents and approve with a single click, eliminating manual file handling.</p>
-                  </div>
                 </div>
               </div>
             ) : (
