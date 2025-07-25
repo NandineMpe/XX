@@ -141,6 +141,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+  
+  /* Hide scrollbar by default */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+  
+  html::-webkit-scrollbar {
+    display: none; /* WebKit browsers */
+  }
+  
+  /* Show scrollbar on hover for better UX */
+  body:hover {
+    scrollbar-width: thin;
+  }
+  
+  body:hover::-webkit-scrollbar {
+    display: block;
+    width: 8px;
   }
 }
 
@@ -171,4 +193,23 @@
 /* Utility class to ensure main content starts below the navbar */
 .main-content-below-navbar {
   padding-top: 6rem; /* Adjust to match navbar height */
+}
+
+/* Scrolling banner animation */
+@keyframes scroll-banner {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-banner {
+  animation: scroll-banner 30s linear infinite;
+}
+
+/* Pause animation on hover for better UX */
+.animate-scroll-banner:hover {
+  animation-play-state: paused;
 }

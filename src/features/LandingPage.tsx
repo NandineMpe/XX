@@ -116,14 +116,24 @@ const LandingPage = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start">
       {/* Tubelight Navbar */}
       <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
       {/* Hero Section with Spline filling the area, below navbar */}
-      <section className="w-full flex flex-col items-center justify-center pt-32 pb-0 px-0 bg-black relative" style={{ minHeight: '100vh', height: '100vh', overflow: 'hidden' }}>
+      <section className="w-full flex flex-col items-center justify-center pt-32 pb-0 px-0 bg-black relative" style={{ minHeight: '100vh' }}>
         <div className="absolute inset-0 w-full h-full">
           <Spline scene={splineUrl} style={{ width: '100%', height: '100%' }} />
+        </div>
+        
+        {/* Scroll nudge indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="flex flex-col items-center text-white/60">
+            <div className="text-sm mb-2">Scroll to explore</div>
+            <div className="w-6 h-10 border-2 border-white/60 rounded-full flex justify-center">
+              <div className="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -210,22 +220,104 @@ const LandingPage = () => {
           <div className="uppercase text-xs tracking-widest text-gray-400 mb-2 relative z-10">Integrations</div>
           <h2 className="text-3xl font-bold mb-2 text-center relative z-10">Built to plug right into your stack</h2>
           <p className="text-base text-gray-300 mb-8 text-center relative z-10">Integrate with the tools you already use and deploy to your own infrastructure, communication, or documentation.</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8 w-full items-center justify-items-center relative z-10">
-            {INTEGRATION_LOGOS.map((logo, idx) => (
-              <img
-                key={idx}
-                src={logo.src}
-                alt={logo.alt}
-                className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition duration-200"
-                loading="lazy"
-              />
-            ))}
+          
+          {/* Scrolling Logos Banner */}
+          <div className="relative z-10 w-full overflow-hidden">
+            <div className="flex animate-scroll-banner">
+              {/* First set of logos */}
+              {INTEGRATION_LOGOS.map((logo, idx) => (
+                <div key={`first-${idx}`} className="flex-shrink-0 mx-8">
+                  <img
+                    src={logo.src}
+                    alt={logo.alt}
+                    className="h-12 w-auto object-contain grayscale hover:grayscale-0 transition duration-300"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+              {/* Duplicate set for seamless loop */}
+              {INTEGRATION_LOGOS.map((logo, idx) => (
+                <div key={`second-${idx}`} className="flex-shrink-0 mx-8">
+                  <img
+                    src={logo.src}
+                    alt={logo.alt}
+                    className="h-12 w-auto object-contain grayscale hover:grayscale-0 transition duration-300"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
       {/* Footer */}
-      <footer className="w-full bg-black text-gray-400 py-6 text-center mt-12 border-t border-gray-800" style={{ fontFamily: "'Playfair Display', serif" }}>
-        A Dreamweaver Venture Studio company
+      <footer className="w-full bg-black text-gray-400 py-12 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Company Info */}
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center mb-4">
+                <img
+                  src="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Logo.png"
+                  alt="Augentik Logo"
+                  className="w-16 h-16 mr-4 object-contain"
+                />
+                <div>
+                  <h3 className="text-white text-lg font-semibold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    Augentik
+                  </h3>
+                  <p className="text-sm text-gray-500">Intelligent Audit Automation</p>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                Transforming audit processes through intelligent automation, real-time compliance monitoring, 
+                and precision-driven analysis. Experience the future of audit assurance.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-white font-semibold mb-4">Product</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#action" className="hover:text-white transition-colors">Features</a></li>
+                <li><a href="#vision" className="hover:text-white transition-colors">Our Vision</a></li>
+                <li><a href="#integrations" className="hover:text-white transition-colors">Integrations</a></li>
+                <li><a href="https://lightrag-production-6328.up.railway.app/webui/#/login" className="hover:text-white transition-colors">Sign In</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+            <div className="text-sm text-gray-500 mb-4 md:mb-0">
+              <p>© 2025 Augentik. All rights reserved.</p>
+              <p className="mt-1">
+                A Dreamweaver Venture Studio Company (by{' '}
+                <a href="https://ideatostartup.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
+                  ideatostartup.io
+                </a>
+                )
+              </p>
+            </div>
+            
+            <div className="flex items-center space-x-6 text-sm">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Status</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Support</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Documentation</a>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

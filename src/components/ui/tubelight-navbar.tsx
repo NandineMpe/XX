@@ -31,6 +31,28 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: NavItem) => {
+    e.preventDefault()
+    setActiveTab(item.name)
+    
+    // Handle external links
+    if (item.url.startsWith('http')) {
+      window.open(item.url, '_blank')
+      return
+    }
+    
+    // Handle internal anchor links with smooth scrolling
+    const targetId = item.url.replace('#', '')
+    const targetElement = document.getElementById(targetId)
+    
+    if (targetElement) {
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }
+
   return (
     <div
       className={cn(
@@ -56,7 +78,7 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
               <a
                 key={item.name}
                 href={item.url}
-                onClick={() => setActiveTab(item.name)}
+                onClick={(e) => handleNavClick(e, item)}
                 className={cn(
                   "relative cursor-pointer text-lg font-semibold px-6 py-2 rounded-full transition-colors flex items-center gap-2",
                   "text-white/80 hover:text-primary",
@@ -85,7 +107,7 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
             <a
               key={item.name}
               href={item.url}
-              onClick={() => setActiveTab(item.name)}
+              onClick={(e) => handleNavClick(e, item)}
               className={cn(
                 "relative cursor-pointer text-lg font-semibold px-6 py-2 rounded-full transition-colors",
                 "text-white/80 hover:text-primary",
