@@ -96,7 +96,7 @@ const LandingPage = () => {
 
   // Rive animation for walkthroughs
   const { RiveComponent: WalkthroughRive, rive } = useRive({
-    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm.riv',
+    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm%20%281%29.riv',
     autoplay: true,
     stateMachines: 'State Machine 1',
   });

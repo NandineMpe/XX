@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, FileText, X, AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
+import { ifrsComplianceAPI } from '@/api/ifrsCompliance';
 
 interface AssessmentFormProps {
   onSubmit: (data: AssessmentFormData) => void;
@@ -45,8 +45,37 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ onSubmit, isSubmitting 
     if (file) {
       setFormData(prev => ({ ...prev, financialStatements: file }));
       setErrors(prev => ({ ...prev, financialStatements: '' }));
+      
+      // Auto-extract entity information from financial statements
+      autoExtractEntityInfo(file);
     }
   }, []);
+
+  const autoExtractEntityInfo = async (file: File) => {
+    try {
+      const entityInfo = await ifrsComplianceAPI.extractEntityInfo(file);
+      setFormData(prev => ({
+        ...prev,
+        entityName: entityInfo.entityName || prev.entityName,
+        businessDescription: entityInfo.businessDescription || prev.businessDescription
+      }));
+    } catch (error) {
+      console.error('Failed to extract entity info:', error);
+      // Don't show error to user as this is optional
+    }
+  };
+
+  const autoParseRequirements = async () => {
+    if (!formData.ifrsRequirements) return;
+    
+    try {
+      const { requirements } = await ifrsComplianceAPI.parseRequirements(formData.ifrsRequirements);
+      console.log('Parsed requirements:', requirements);
+      // You could display these in a modal or add them to the form
+    } catch (error) {
+      console.error('Failed to parse requirements:', error);
+    }
+  };
 
   const { getRootProps: getIFRSRootProps, getInputProps: getIFRSInputProps, isDragActive: isIFRSDragActive } = useDropzone({
     onDrop: onDropIFRS,
@@ -220,6 +249,21 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ onSubmit, isSubmitting 
                   <AlertCircle className="h-4 w-4" />
                   {errors.ifrsRequirements}
                 </p>
+              )}
+              
+              {formData.ifrsRequirements && (
+                <div className="mt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={autoParseRequirements}
+                    className="flex items-center gap-2 text-blue-400 border-blue-400 hover:bg-blue-400/10"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Auto-Parse Requirements
+                  </Button>
+                </div>
               )}
             </div>
 
