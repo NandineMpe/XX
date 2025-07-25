@@ -110,9 +110,6 @@ const LandingPage = () => {
   React.useEffect(() => {
     // Try multiple approaches to ensure page starts at top
     const forceScrollToTop = () => {
-      console.log('Attempting to scroll to top...');
-      console.log('Current scroll position:', window.scrollY);
-      
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
@@ -121,8 +118,6 @@ const LandingPage = () => {
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
-      
-      console.log('After scroll attempt:', window.scrollY);
     };
     
     // Immediate attempt
@@ -379,17 +374,6 @@ const LandingPage = () => {
           </svg>
         </button>
       )}
-      
-      {/* Manual scroll to top button (always visible for testing) */}
-      <button
-        onClick={scrollToTop}
-        className="fixed top-8 right-8 z-50 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-        aria-label="Manual scroll to top"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-        </svg>
-      </button>
     </div>
   );
 };
