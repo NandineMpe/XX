@@ -176,7 +176,7 @@ const LandingPage = () => {
       <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
       {/* Hero Section with Spline filling the area, below navbar */}
-      <section className="w-full flex flex-col items-center justify-center pt-32 pb-20 px-0 bg-black relative min-h-screen hero-section">
+      <section className="w-full flex flex-col items-center justify-center pt-20 md:pt-32 pb-12 md:pb-20 px-0 bg-black relative min-h-screen hero-section">
         <div className="absolute inset-0 w-full h-full spline-container">
           <Spline scene={splineUrl} style={{ width: '100%', height: '100%' }} />
         </div>
@@ -193,34 +193,34 @@ const LandingPage = () => {
       </section>
 
       {/* Augentik In Action Section with Tabs */}
-      <section id="action" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
+      <section id="action" className="w-full flex flex-col items-center justify-center py-12 md:py-20 px-4 bg-black text-white relative z-10">
         <div className="max-w-4xl w-full mx-auto flex flex-col items-center">
-          <div className="flex space-x-4 mb-8">
+          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-8">
             {TABS.map((tabOption) => (
-              <button
-                key={tabOption.key}
-                onClick={() => setActiveTab(tabOption.key)}
-                className={`px-6 py-2 rounded-full font-semibold text-lg transition-colors focus:outline-none ${activeTab === tabOption.key ? 'bg-purple-900/40 text-white' : 'bg-black/40 text-gray-300 hover:bg-purple-900/20'}`}
-                style={{ fontFamily: 'Playfair Display, serif' }}
-              >
-                {tabOption.label}
-              </button>
+                              <button
+                  key={tabOption.key}
+                  onClick={() => setActiveTab(tabOption.key)}
+                  className={`px-4 md:px-6 py-2 rounded-full font-semibold text-base md:text-lg transition-colors focus:outline-none ${activeTab === tabOption.key ? 'bg-purple-900/40 text-white' : 'bg-black/40 text-gray-300 hover:bg-purple-900/20'}`}
+                  style={{ fontFamily: 'Playfair Display, serif' }}
+                >
+                  {tabOption.label}
+                </button>
             ))}
           </div>
           <div className='w-full relative z-10'>
             {activeTab === 'walkthroughs' ? (
               <div className='w-full'>
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center'>
                   {/* Left Column - Text Content */}
-                  <div className='space-y-6'>
-                    <h3 className='text-2xl font-bold text-white'>Process Walkthrough Library</h3>
-                    <p className='text-gray-300 leading-relaxed'>
+                  <div className='space-y-4 md:space-y-6'>
+                    <h3 className='text-xl md:text-2xl font-bold text-white'>Process Walkthrough Library</h3>
+                    <p className='text-sm md:text-base text-gray-300 leading-relaxed'>
                       This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.
                     </p>
                   </div>
                   
                   {/* Right Column - Rive Animation */}
-                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[500px] flex items-center justify-center'>
+                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[300px] md:h-[500px] flex items-center justify-center'>
                     {rive ? (
                       <WalkthroughRive
                         className='w-full h-full'
@@ -249,19 +249,15 @@ const LandingPage = () => {
       </section>
 
       {/* Our Vision Section */}
-      <section id="vision" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
+      <section id="vision" className="w-full flex flex-col items-center justify-center py-12 md:py-20 px-4 bg-black text-white relative z-10">
         <div className="max-w-4xl w-full mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-4xl font-bold mb-6 tracking-tight">Our Vision</h2>
           </div>
           
           <div className="mb-12 text-center">
-            <p className="text-lg leading-relaxed text-gray-300 mb-6">
-              The traditional audit model is broken. Finance teams spend months preparing for annual audits, drowning in document requests, explaining the same processes year after year, and waiting an entire year to discover irregularities and misstatements that could have been caught in real-time. At Augentik, we envision a fundamentally different future.
-            </p>
-            <p className="text-lg leading-relaxed text-gray-300">
-              We envision a world where audit intelligence is embedded into the fabric of business operations, where compliance is continuously monitored, and where the audit process adds value rather than consuming it.
-            </p>
+            <h3 className="text-2xl font-semibold text-gray-300 mb-2">Our Vision</h3>
+            <p className="text-lg text-gray-400">The Road to Audit Singularity</p>
           </div>
 
           {/* Timeline Section */}
@@ -270,8 +266,8 @@ const LandingPage = () => {
       </section>
 
       {/* Integrations Section */}
-      <section id="integrations" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
-        <div className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg bg-black/80 p-10 flex flex-col items-center relative overflow-hidden">
+      <section id="integrations" className="w-full flex flex-col items-center justify-center py-12 md:py-20 px-4 bg-black text-white relative z-10">
+        <div className="max-w-4xl w-full mx-auto rounded-2xl shadow-lg bg-black/80 p-6 md:p-10 flex flex-col items-center relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none">
             {/* Sparkles removed */}
           </div>
@@ -309,9 +305,9 @@ const LandingPage = () => {
         </div>
       </section>
       {/* Footer */}
-      <footer className="w-full bg-black text-gray-400 py-12 border-t border-gray-800">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <footer className="w-full bg-black text-gray-400 py-8 md:py-12 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
             {/* Company Info */}
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center mb-4">
@@ -367,6 +363,7 @@ const LandingPage = () => {
                 </a>
                 )
               </p>
+              <p className="text-sm text-gray-500 mt-1">Where Ideas Come to Life</p>
             </div>
             
             <div className="flex items-center space-x-6 text-sm">

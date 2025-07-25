@@ -113,21 +113,18 @@ const AuditTimeline: React.FC = () => {
   };
 
   return (
-    <div ref={timelineRef} className="w-full py-20 relative overflow-hidden">
+    <div ref={timelineRef} className="w-full py-12 relative overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         {/* Timeline Header */}
-        <div className="text-center mb-20">
-          <h3 className="text-4xl font-bold mb-6 text-white">
-            The Road to Audit Singularity
-          </h3>
-          <p className="text-xl text-gray-300 mb-8">
+        <div className="text-center mb-12 md:mb-20">
+          <p className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8">
             Reimagining audit from burden to advantage—where continuous intelligence meets human expertise
           </p>
-          <div className="max-w-4xl mx-auto space-y-6">
-            <p className="text-lg text-gray-300 leading-relaxed">
+          <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
+            <p className="text-base md:text-lg text-gray-300 leading-relaxed">
               The traditional audit model is broken. Finance teams spend months preparing for annual audits, drowning in document requests, explaining the same processes year after year, and waiting an entire year to discover irregularities that could have been caught in real-time.
             </p>
-            <p className="text-lg text-gray-300 leading-relaxed">
+            <p className="text-base md:text-lg text-gray-300 leading-relaxed">
               Our vision is to eliminate the burden of being audited while saving finance teams both time and money. On day 1000 of our journey, we see a revolutionary audit ecosystem: continuous, round-the-clock audit intelligence. One auditor, one machine, one audit—completed continuously, audited in a fraction of the time.
             </p>
           </div>
@@ -135,7 +132,7 @@ const AuditTimeline: React.FC = () => {
 
         {/* Timeline Container */}
         <div className="w-full max-w-6xl mx-auto relative">
-          <div className="relative h-48 my-10">
+          <div className="relative h-32 md:h-48 my-6 md:my-10">
             {/* Background Timeline Line */}
             <div className="absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 transform -translate-y-1/2 rounded-full" />
             
@@ -153,7 +150,7 @@ const AuditTimeline: React.FC = () => {
             {MILESTONES.map((milestone, index) => (
               <div
                 key={milestone.id}
-                className={`absolute top-1/2 transform -translate-y-1/2 cursor-pointer transition-all duration-300 ${
+                className={`absolute top-1/2 transform -translate-y-1/2 cursor-pointer transition-all duration-300 group ${
                   index === 0 ? 'left-[10%]' : 
                   index === 1 ? 'left-[30%]' : 
                   index === 2 ? 'left-[50%]' : 'left-[80%]'
@@ -200,9 +197,9 @@ const AuditTimeline: React.FC = () => {
           </div>
 
           {/* Timeline Legend with Glassmorphism */}
-          <div className="flex justify-center mt-16">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-8 py-6 shadow-lg">
-              <div className="flex gap-10 flex-wrap justify-center">
+          <div className="flex justify-center mt-12 md:mt-16">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-6 md:px-8 py-4 md:py-6 shadow-lg">
+              <div className="flex gap-6 md:gap-10 flex-wrap justify-center">
                 <div className="flex items-center gap-3 text-sm text-gray-300">
                   <div className="w-4 h-4 rounded-full bg-purple-600 shadow-lg shadow-purple-500/50"></div>
                   <span className="font-medium">Completed</span>
