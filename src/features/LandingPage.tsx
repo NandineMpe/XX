@@ -107,7 +107,7 @@ const LandingPage = () => {
 
   // Rive animation for walkthroughs
   const { RiveComponent: WalkthroughRive, rive } = useRive({
-    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm.riv',
+    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm%20%281%29.riv',
     autoplay: true,
     stateMachines: 'State Machine 1',
   });
@@ -233,6 +233,37 @@ const LandingPage = () => {
                 </div>
                 <div className='text-center mt-4'>
                   <p className='text-sm text-gray-400 italic'>Pick Sam up to begin walkthrough</p>
+                </div>
+              </div>
+            ) : activeTab === 'consolidation' ? (
+              <div className='w-full'>
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center'>
+                  {/* Left Column - Text Content */}
+                  <div className='space-y-4 md:space-y-6'>
+                    <h3 className='text-xl md:text-2xl font-bold text-white'>Audit Query Assistant</h3>
+                    <p className='text-sm md:text-base text-gray-300 leading-relaxed'>
+                      This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications.
+                    </p>
+                  </div>
+                  
+                  {/* Right Column - Video */}
+                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[300px] md:h-[500px] flex items-center justify-center'>
+                    <video
+                      className='w-full h-full object-cover'
+                      controls
+                      preload='metadata'
+                      poster='https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/video-poster.jpg'
+                    >
+                      <source 
+                        src='https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/Revenue%20Query.mp4' 
+                        type='video/mp4' 
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                </div>
+                <div className='text-center mt-4'>
+                  <p className='text-sm text-gray-400 italic'>Watch the Audit Query Assistant in action</p>
                 </div>
               </div>
             ) : (
