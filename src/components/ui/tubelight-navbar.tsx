@@ -41,6 +41,15 @@ export function TubelightNavBar({ items, className, logoUrl }: NavBarProps) {
       return
     }
     
+    // Handle home navigation (scroll to top)
+    if (item.url === '#top') {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+      return
+    }
+    
     // Handle internal anchor links with smooth scrolling
     const targetId = item.url.replace('#', '')
     const targetElement = document.getElementById(targetId)

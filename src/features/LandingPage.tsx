@@ -106,7 +106,8 @@ const LandingPage = () => {
   }, [rive]);
 
   const navItems = [
-    { name: 'Augentik In Action', url: '#action', icon: <Home /> },
+    { name: 'Home', url: '#top', icon: <Home /> },
+    { name: 'Augentik In Action', url: '#action', icon: <User /> },
     { name: 'Our Vision', url: '#vision', icon: <User /> },
     { name: 'Integrations', url: '#integrations', icon: <Layers /> },
     { name: 'Sign In', url: 'https://lightrag-production-6328.up.railway.app/webui/#/login', icon: <LogIn /> },
@@ -114,6 +115,9 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Top anchor for scrolling */}
+      <div id="top" className="absolute top-0 left-0 w-0 h-0"></div>
+      
       {/* Tubelight Navbar */}
       <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
