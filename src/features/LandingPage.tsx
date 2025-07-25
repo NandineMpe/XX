@@ -2,13 +2,11 @@
  * Augentik Landing Page with Spline Hero, 'Augentik In Action', 'Our Vision', and 'Integrations' sections
  */
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Spline from '@splinetool/react-spline';
-import { useRive, Layout, Fit, Alignment } from '@rive-app/react-canvas';
-import styles from './LandingNavButtons.module.css';
-import { TubelightNavBar } from "@/components/ui/tubelight-navbar"
-import { Home, User, Layers, LogIn } from "lucide-react"
-import SectionWithMockup from "@/components/ui/section-with-mockup"
+import { useRive } from '@rive-app/react-canvas';
+import { TubelightNavBar } from '@/components/ui/tubelight-navbar';
+import { Home, User, Layers, LogIn } from 'lucide-react';
+import SectionWithMockup from '@/components/ui/section-with-mockup';
 
 const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
 const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png';
@@ -29,7 +27,7 @@ const TABS = [
     label: 'Supporting Documents',
     heading: 'Intelligent Supporting Document Retrieval',
     subheading: 'Automates the response to auditor document requests.',
-    description: `When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.`,
+    description: 'When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.',
     steps: [
       {
         title: 'Automated Document Requests',
@@ -50,7 +48,7 @@ const TABS = [
     label: 'Walkthroughs',
     heading: 'Process Walkthrough Library',
     subheading: 'Centralizes frequently requested process overviews into visual, easy-to-understand formats.',
-    description: `This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.`,
+    description: 'This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.',
     steps: [
       {
         title: 'Walkthrough Templates',
@@ -71,7 +69,7 @@ const TABS = [
     label: 'Audit Queries',
     heading: 'Audit Query Assistant',
     subheading: 'Addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time.',
-    description: `This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications. The system formulates tailored explanations using prior-year audit responses, group reporting policies, and mapped consolidation entries.`,
+    description: 'This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications. The system formulates tailored explanations using prior-year audit responses, group reporting policies, and mapped consolidation entries.',
     steps: [
       {
         title: 'Query Analysis',
@@ -90,7 +88,6 @@ const TABS = [
 ];
 
 const LandingPage = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('supporting');
   const tab = TABS.find(t => t.key === activeTab) || TABS[0];
 
@@ -102,7 +99,7 @@ const LandingPage = () => {
   });
 
   React.useEffect(() => {
-    if (rive && rive.ready) {
+    if (rive) {
       // Automatically play the state machine
       rive.play();
     }
@@ -195,8 +192,8 @@ const LandingPage = () => {
             <SectionWithMockup
               title={tab.heading}
               description={tab.description}
-              primaryImageSrc={""}
-              secondaryImageSrc={""}
+              primaryImageSrc={''}
+              secondaryImageSrc={''}
               reverseLayout={false}
             />
           )}
@@ -263,10 +260,10 @@ const LandingPage = () => {
                   className="w-16 h-16 mr-4 object-contain"
                 />
                 <div>
-                  <h3 className="text-white text-lg font-semibold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <h3 className='text-white text-lg font-semibold' style={{ fontFamily: "'Playfair Display', serif" }}>
                     Augentik
                   </h3>
-                  <p className="text-sm text-gray-500">Intelligent Audit Automation</p>
+                  <p className='text-sm text-gray-500'>Intelligent Audit Automation</p>
                 </div>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed mb-4">
