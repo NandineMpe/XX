@@ -8,6 +8,7 @@ import { TubelightNavBar } from '@/components/ui/tubelight-navbar';
 import { Home, User, Layers, LogIn } from 'lucide-react';
 import SectionWithMockup from '@/components/ui/section-with-mockup';
 import AuditTimeline from '@/components/ui/AuditTimeline';
+import { AugentikShowcaseDemo } from '@/components/ui/augentik-showcase-demo';
 
 const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
 const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png';
@@ -30,25 +31,25 @@ const INTEGRATION_LOGOS = [
 
 const TABS = [
   {
-    key: 'supporting',
-    label: 'Supporting Documents',
-    heading: 'Intelligent Supporting Document Retrieval',
-    subheading: 'Automates the response to auditor document requests.',
-    description: 'When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.',
+    key: 'consolidation',
+    label: 'Audit Queries',
+    heading: 'Audit Query Assistant',
+    subheading: 'Addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time.',
+    description: 'This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications. The system formulates tailored explanations using prior-year audit responses, group reporting policies, and mapped consolidation entries.',
     primaryImage: '',
     secondaryImage: '',
     steps: [
       {
-        title: 'Automated Document Requests',
-        desc: 'Our AI reads auditor emails and automatically categorizes document requests for efficient processing.'
+        title: 'Query Analysis',
+        desc: 'AI analyzes incoming consolidation queries to understand the specific information needed.'
       },
       {
-        title: 'Intelligent Document Retrieval',
-        desc: 'The system searches your files and emails to locate the exact documents needed for each request.'
+        title: 'Intelligent Response Generation',
+        desc: 'System generates responses based on your consolidation data, policies, and previous audit interactions.'
       },
       {
-        title: 'One-Click Approval & Delivery',
-        desc: 'Review suggested documents and approve with a single click, eliminating manual file handling.'
+        title: 'Smart Routing & Documentation',
+        desc: 'Complex queries are routed to the right team members with context, while all interactions are documented for future reference.'
       }
     ]
   },
@@ -76,32 +77,32 @@ const TABS = [
     ]
   },
   {
-    key: 'consolidation',
-    label: 'Audit Queries',
-    heading: 'Audit Query Assistant',
-    subheading: 'Addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time.',
-    description: 'This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications. The system formulates tailored explanations using prior-year audit responses, group reporting policies, and mapped consolidation entries.',
+    key: 'supporting',
+    label: 'Evidence Retrieval',
+    heading: 'Intelligent Supporting Document Retrieval',
+    subheading: 'Automates the response to auditor document requests.',
+    description: 'When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.',
     primaryImage: '',
     secondaryImage: '',
     steps: [
       {
-        title: 'Query Analysis',
-        desc: 'AI analyzes incoming consolidation queries to understand the specific information needed.'
+        title: 'Automated Document Requests',
+        desc: 'Our AI reads auditor emails and automatically categorizes document requests for efficient processing.'
       },
       {
-        title: 'Intelligent Response Generation',
-        desc: 'System generates responses based on your consolidation data, policies, and previous audit interactions.'
+        title: 'Intelligent Document Retrieval',
+        desc: 'The system searches your files and emails to locate the exact documents needed for each request.'
       },
       {
-        title: 'Smart Routing & Documentation',
-        desc: 'Complex queries are routed to the right team members with context, while all interactions are documented for future reference.'
+        title: 'One-Click Approval & Delivery',
+        desc: 'Review suggested documents and approve with a single click, eliminating manual file handling.'
       }
     ]
   }
 ];
 
 const LandingPage = () => {
-  const [activeTab, setActiveTab] = useState('supporting');
+  const [activeTab, setActiveTab] = useState('consolidation');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const tab = TABS.find(t => t.key === activeTab) || TABS[0];
 
@@ -210,17 +211,17 @@ const LandingPage = () => {
           <div className='w-full relative z-10'>
             {activeTab === 'walkthroughs' ? (
               <div className='w-full'>
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center'>
-                  {/* Left Column - Text Content */}
-                  <div className='space-y-4 md:space-y-6'>
-                    <h3 className='text-xl md:text-2xl font-bold text-white'>Process Walkthrough Library</h3>
-                    <p className='text-sm md:text-base text-gray-300 leading-relaxed'>
-                      This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.
-                    </p>
-                  </div>
-                  
-                  {/* Right Column - Rive Animation */}
-                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[300px] md:h-[500px] flex items-center justify-center'>
+                {/* Text Content at Top */}
+                <div className='text-center mb-8'>
+                  <h3 className='text-2xl md:text-3xl font-bold text-white mb-4'>Process Walkthrough Library</h3>
+                  <p className='text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto'>
+                    This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.
+                  </p>
+                </div>
+                
+                {/* Rive Animation in its own row with increased width */}
+                <div className='w-full max-w-6xl mx-auto'>
+                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center'>
                     {rive ? (
                       <WalkthroughRive
                         className='w-full h-full'
@@ -231,28 +232,30 @@ const LandingPage = () => {
                     )}
                   </div>
                 </div>
-                <div className='text-center mt-4'>
+                <div className='text-center mt-6'>
                   <p className='text-sm text-gray-400 italic'>Pick Sam up to begin walkthrough</p>
                 </div>
               </div>
             ) : activeTab === 'consolidation' ? (
               <div className='w-full'>
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-center'>
-                  {/* Left Column - Text Content */}
-                  <div className='space-y-4 md:space-y-6'>
-                    <h3 className='text-xl md:text-2xl font-bold text-white'>Audit Query Assistant</h3>
-                    <p className='text-sm md:text-base text-gray-300 leading-relaxed'>
-                      This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications.
-                    </p>
-                  </div>
-                  
-                  {/* Right Column - Video */}
-                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[300px] md:h-[500px] flex items-center justify-center'>
+                {/* Text Content at Top */}
+                <div className='text-center mb-8'>
+                  <h3 className='text-2xl md:text-3xl font-bold text-white mb-4'>Audit Query Assistant</h3>
+                  <p className='text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto'>
+                    This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications.
+                  </p>
+                </div>
+                
+                {/* Video in its own row with increased width */}
+                <div className='w-full max-w-6xl mx-auto'>
+                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center'>
                     <video
-                      className='w-full h-full object-cover'
+                      className='w-full h-full object-contain'
                       controls
                       preload='metadata'
-                      poster='https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/video-poster.jpg'
+                      autoPlay
+                      muted
+                      loop
                     >
                       <source 
                         src='https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/Revenue%20Query.mp4' 
@@ -262,7 +265,7 @@ const LandingPage = () => {
                     </video>
                   </div>
                 </div>
-                <div className='text-center mt-4'>
+                <div className='text-center mt-6'>
                   <p className='text-sm text-gray-400 italic'>Watch the Audit Query Assistant in action</p>
                 </div>
               </div>
@@ -289,6 +292,21 @@ const LandingPage = () => {
 
           {/* Timeline Section */}
           <AuditTimeline />
+        </div>
+      </section>
+
+      {/* Project Showcase Section */}
+      <section className="w-full bg-black text-white relative z-10">
+        <div className="max-w-7xl mx-auto px-4 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+              Experience Augentik
+            </h2>
+            <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+              Discover our comprehensive suite of AI-powered audit solutions designed to transform your audit process
+            </p>
+          </div>
+          <AugentikShowcaseDemo />
         </div>
       </section>
 
