@@ -106,7 +106,7 @@ const LandingPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const tab = TABS.find(t => t.key === activeTab) || TABS[0];
 
-  // Rive animation for walkthroughs
+  // Rive animation for walkthroughs - preload immediately
   const { RiveComponent: WalkthroughRive, rive } = useRive({
     src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm.riv',
     autoplay: true,
@@ -116,22 +116,46 @@ const LandingPage = () => {
     },
   });
 
+  // Rive animation for document retrieval - preload immediately
+  const { RiveComponent: DocumentRetrievalRive, rive: documentRive } = useRive({
+    src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ecg_workflow%20%281%29.riv',
+    autoplay: true,
+    stateMachines: 'State Machine 1',
+    onStateChange: (event) => {
+      console.log('Document retrieval Rive state changed:', event);
+    },
+  });
+
+  // Force both Rive animations to load and play immediately
   React.useEffect(() => {
-    if (rive) {
-      // Ensure the animation plays immediately when loaded
-      try {
-        rive.play();
-        // Force the state machine to start
-        const inputs = rive.stateMachineInputs('State Machine 1');
-        if (inputs && inputs.length > 0) {
-          // Trigger any initial inputs if needed
-          console.log('Rive animation loaded and playing');
+    const initializeRiveAnimations = () => {
+      if (rive) {
+        try {
+          rive.play();
+          console.log('Walkthrough Rive animation loaded and playing');
+        } catch (error) {
+          console.error('Error playing walkthrough Rive animation:', error);
         }
-      } catch (error) {
-        console.error('Error playing Rive animation:', error);
       }
-    }
-  }, [rive]);
+      
+      if (documentRive) {
+        try {
+          documentRive.play();
+          console.log('Document retrieval Rive animation loaded and playing');
+        } catch (error) {
+          console.error('Error playing document retrieval Rive animation:', error);
+        }
+      }
+    };
+
+    // Initialize immediately
+    initializeRiveAnimations();
+    
+    // Also try after a short delay to ensure DOM is ready
+    const timer = setTimeout(initializeRiveAnimations, 100);
+    
+    return () => clearTimeout(timer);
+  }, [rive, documentRive]);
 
   // Force page to start at top
   React.useEffect(() => {
@@ -235,14 +259,10 @@ const LandingPage = () => {
                 {/* Rive Animation in its own row with increased width */}
                 <div className='w-full max-w-6xl mx-auto'>
                   <div className='bg-gray-900 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center'>
-                    {rive ? (
-                      <WalkthroughRive
-                        className='w-full h-full'
-                        style={{ width: '100%', height: '100%' }}
-                      />
-                    ) : (
-                      <p className='text-gray-400'>Loading Rive animation...</p>
-                    )}
+                    <WalkthroughRive
+                      className='w-full h-full'
+                      style={{ width: '100%', height: '100%' }}
+                    />
                   </div>
                 </div>
                 <div className='text-center mt-6'>
@@ -290,6 +310,19 @@ const LandingPage = () => {
                   <p className='text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto'>
                     When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in &ldquo;Provided By Client&rdquo; (PBC) items while ensuring consistency across audit cycles.
                   </p>
+                </div>
+                
+                {/* Rive Animation for Document Retrieval */}
+                <div className='w-full max-w-6xl mx-auto'>
+                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center'>
+                    <DocumentRetrievalRive
+                      className='w-full h-full'
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  </div>
+                </div>
+                <div className='text-center mt-6'>
+                  <p className='text-sm text-gray-400 italic'>Watch the Document Retrieval workflow in action</p>
                 </div>
               </div>
             ) : (
