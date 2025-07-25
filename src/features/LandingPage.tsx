@@ -89,6 +89,7 @@ const TABS = [
 
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState('supporting');
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const tab = TABS.find(t => t.key === activeTab) || TABS[0];
 
   // Rive animation for walkthroughs
@@ -104,6 +105,28 @@ const LandingPage = () => {
       rive.play();
     }
   }, [rive]);
+
+  // Force page to start at top
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Handle scroll events
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   const navItems = [
     { name: 'Home', url: '#top', icon: <Home /> },
@@ -320,6 +343,19 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      
+      {/* Scroll to top button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 z-50 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          aria-label="Scroll to top"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
