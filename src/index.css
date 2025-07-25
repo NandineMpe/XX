@@ -294,6 +294,15 @@
   }
 }
 
+@keyframes pulse {
+  0%, 100% { 
+    transform: translateX(-50%) scale(1); 
+  }
+  50% { 
+    transform: translateX(-50%) scale(1.2); 
+  }
+}
+
 .timeline-glow {
   animation: timeline-glow 3s ease-in-out infinite;
 }
@@ -304,6 +313,46 @@
 
 .singularity-line-animate {
   animation: singularity-line 2s ease-out forwards;
+}
+
+/* Enhanced Timeline Styles */
+.timeline-milestone {
+  transition: all 0.3s ease;
+}
+
+.timeline-milestone:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.timeline-milestone:hover .milestone-content {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.milestone-content {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Status badge styles */
+.status-completed {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.status-in-progress {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-future {
+  background: rgba(107, 114, 128, 0.2);
+  color: #9ca3af;
+  border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
 /* Responsive timeline adjustments */
