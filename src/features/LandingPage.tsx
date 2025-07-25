@@ -194,54 +194,33 @@ const LandingPage = () => {
               </button>
             ))}
           </div>
-          {activeTab === 'walkthroughs' ? (
-            // Custom walkthroughs section with Rive animation
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-8 w-full items-center">
-              {/* Text Content */}
-              <div className="flex flex-col items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0">
-                <div className="space-y-2 md:space-y-1">
-                  <h2 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
-                    {tab.heading}
-                  </h2>
+          <div className='w-full relative z-10'>
+            {activeTab === 'walkthroughs' ? (
+              <div className='w-full'>
+                <div className='w-full h-[500px] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center'>
+                  {rive ? (
+                    <WalkthroughRive
+                      className='w-full h-full'
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                  ) : (
+                    <p className='text-gray-400'>Loading Rive animation...</p>
+                  )}
                 </div>
-                <p className="text-[#868f97] text-sm md:text-[15px] leading-6">
-                  {tab.description}
-                </p>
-              </div>
-
-              {/* Rive Animation */}
-              <div className="relative mt-10 md:mt-0 mx-auto w-full max-w-[471px]">
-                <div className="relative w-full h-[637px] bg-[#ffffff0a] rounded-[32px] backdrop-blur-[15px] backdrop-brightness-[100%] border-0 z-10 overflow-hidden">
-                  <div className="p-0 h-full">
-                    {WalkthroughRive ? (
-                      <WalkthroughRive className="w-full h-full" />
-                    ) : (
-                      <div className="h-full flex items-center justify-center">
-                        <div className="text-gray-400 text-center">
-                          <div className="text-6xl mb-4">📋</div>
-                          <div className="text-xl mb-2 font-semibold">Process Walkthrough Library</div>
-                          <div className="text-sm text-gray-500 max-w-xs">
-                            Interactive process documentation and audit-friendly walkthroughs
-                          </div>
-                          <div className="mt-4 text-xs text-gray-600">
-                            Loading Rive animation...
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                <div className='text-center mt-4'>
+                  <p className='text-sm text-gray-400 italic'>Pick Sam Up To Begin Business Model Walkthrough</p>
                 </div>
               </div>
-            </div>
-          ) : (
-            <SectionWithMockup
-              title={tab.heading}
-              description={tab.description}
-              primaryImageSrc={''}
-              secondaryImageSrc={''}
-              reverseLayout={false}
-            />
-          )}
+            ) : (
+              <SectionWithMockup
+                title={tab.heading}
+                description={tab.description}
+                primaryImageSrc={tab.mockupImage}
+                secondaryImageSrc={tab.mockupImage2}
+                reverseLayout={false}
+              />
+            )}
+          </div>
         </div>
       </section>
 
