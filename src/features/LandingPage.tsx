@@ -8,7 +8,6 @@ import { TubelightNavBar } from '@/components/ui/tubelight-navbar';
 import { Home, User, Layers, LogIn } from 'lucide-react';
 import SectionWithMockup from '@/components/ui/section-with-mockup';
 import AuditTimeline from '@/components/ui/AuditTimeline';
-import { AugentikShowcaseDemo } from '@/components/ui/augentik-showcase-demo';
 
 const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
 const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png';
@@ -258,7 +257,7 @@ const LandingPage = () => {
                 
                 {/* Rive Animation in its own row with increased width */}
                 <div className='w-full max-w-6xl mx-auto'>
-                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center'>
+                  <div className='bg-black/80 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center shadow-lg'>
                     <WalkthroughRive
                       className='w-full h-full'
                       style={{ width: '100%', height: '100%' }}
@@ -314,7 +313,7 @@ const LandingPage = () => {
                 
                 {/* Rive Animation for Document Retrieval */}
                 <div className='w-full max-w-6xl mx-auto'>
-                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center'>
+                  <div className='bg-black/80 backdrop-blur-md border border-white/20 rounded-lg overflow-hidden h-[400px] md:h-[600px] flex items-center justify-center shadow-lg'>
                     <DocumentRetrievalRive
                       className='w-full h-full'
                       style={{ width: '100%', height: '100%' }}
@@ -351,20 +350,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Project Showcase Section */}
-      <section className="w-full bg-black text-white relative z-10">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-              Experience Augentik
-            </h2>
-            <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-              Discover our comprehensive suite of AI-powered audit solutions designed to transform your audit process
-            </p>
-          </div>
-          <AugentikShowcaseDemo />
-        </div>
-      </section>
+
 
       {/* Integrations Section */}
       <section id="integrations" className="w-full flex flex-col items-center justify-center py-12 md:py-20 px-4 bg-black text-white relative z-10">
