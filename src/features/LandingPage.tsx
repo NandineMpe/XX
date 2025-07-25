@@ -20,6 +20,12 @@ const INTEGRATION_LOGOS = [
   { src: 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/svg%20logos/microsoft.svg', alt: 'Microsoft' },
   { src: 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/svg%20logos/outlook.svg', alt: 'Outlook' },
   { src: 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/svg%20logos/slack-wordmark.svg', alt: 'Slack' },
+  { src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/sap-svgrepo-com.svg', alt: 'SAP' },
+  { src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/xero-svgrepo-com.svg', alt: 'Xero' },
+  { src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/oracle-2-logo-svgrepo-com.svg', alt: 'Oracle' },
+  { src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ms-sharepoint-svgrepo-com.svg', alt: 'SharePoint' },
+  { src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/brand-quickbooks-svgrepo-com.svg', alt: 'QuickBooks' },
+  { src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/alfresco-svgrepo-com.svg', alt: 'Alfresco' },
 ];
 
 const TABS = [
