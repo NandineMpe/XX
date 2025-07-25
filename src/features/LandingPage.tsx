@@ -108,7 +108,30 @@ const LandingPage = () => {
 
   // Force page to start at top
   React.useEffect(() => {
-    window.scrollTo(0, 0);
+    // Try multiple approaches to ensure page starts at top
+    const forceScrollToTop = () => {
+      console.log('Attempting to scroll to top...');
+      console.log('Current scroll position:', window.scrollY);
+      
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      
+      // Force scroll restoration
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      
+      console.log('After scroll attempt:', window.scrollY);
+    };
+    
+    // Immediate attempt
+    forceScrollToTop();
+    
+    // Try again after a short delay to ensure DOM is ready
+    setTimeout(forceScrollToTop, 100);
+    setTimeout(forceScrollToTop, 500);
+    setTimeout(forceScrollToTop, 1000);
   }, []);
 
   // Handle scroll events
@@ -145,7 +168,7 @@ const LandingPage = () => {
       <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
       {/* Hero Section with Spline filling the area, below navbar */}
-      <section className="w-full flex flex-col items-center justify-center pt-32 pb-20 px-0 bg-black relative">
+      <section className="w-full flex flex-col items-center justify-center pt-32 pb-20 px-0 bg-black relative min-h-screen">
         <div className="absolute inset-0 w-full h-full">
           <Spline scene={splineUrl} style={{ width: '100%', height: '100%' }} />
         </div>
@@ -356,6 +379,17 @@ const LandingPage = () => {
           </svg>
         </button>
       )}
+      
+      {/* Manual scroll to top button (always visible for testing) */}
+      <button
+        onClick={scrollToTop}
+        className="fixed top-8 right-8 z-50 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        aria-label="Manual scroll to top"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+      </button>
     </div>
   );
 };

@@ -145,6 +145,7 @@
     overflow-x: hidden;
     overflow-y: auto; /* Ensure vertical scrolling is enabled */
     min-height: 100vh;
+    position: relative; /* Ensure proper positioning */
   }
   
   html {
@@ -152,6 +153,14 @@
     -ms-overflow-style: none; /* Internet Explorer 10+ */
     overflow-x: hidden;
     overflow-y: auto; /* Ensure vertical scrolling is enabled */
+    scroll-behavior: smooth;
+    height: 100%;
+  }
+  
+  /* Ensure the page can scroll to the very top */
+  #root {
+    min-height: 100vh;
+    position: relative;
   }
   
   html::-webkit-scrollbar {
