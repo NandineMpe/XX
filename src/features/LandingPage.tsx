@@ -111,13 +111,24 @@ const LandingPage = () => {
     src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm.riv',
     autoplay: true,
     stateMachines: 'State Machine 1',
+    onStateChange: (event) => {
+      console.log('Rive state changed:', event);
+    },
   });
 
   React.useEffect(() => {
     if (rive) {
       // Automatically play the state machine
       console.log('Rive loaded, playing animation');
-      rive.play();
+      try {
+        rive.play();
+        // Also try to start the state machine explicitly
+        if (rive.stateMachineNames && rive.stateMachineNames.length > 0) {
+          console.log('Available state machines:', rive.stateMachineNames);
+        }
+      } catch (error) {
+        console.error('Error playing Rive animation:', error);
+      }
     }
   }, [rive]);
 
@@ -268,6 +279,35 @@ const LandingPage = () => {
                 </div>
                 <div className='text-center mt-6'>
                   <p className='text-sm text-gray-400 italic'>Watch the Audit Query Assistant in action</p>
+                </div>
+              </div>
+            ) : activeTab === 'supporting' ? (
+              <div className='w-full'>
+                {/* Text Content at Top */}
+                <div className='text-center mb-8'>
+                  <h3 className='text-2xl md:text-3xl font-bold text-white mb-4'>Document Retrieval</h3>
+                  <p className='text-base md:text-lg text-gray-300 leading-relaxed max-w-4xl mx-auto'>
+                    When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.
+                  </p>
+                </div>
+                
+                {/* Feature highlights in a grid layout */}
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mt-8'>
+                  <div className='bg-white/5 backdrop-blur-md border border-white/10 rounded-lg p-6'>
+                    <div className='text-2xl mb-3'>📧</div>
+                    <h4 className='text-lg font-semibold mb-2'>Automated Document Requests</h4>
+                    <p className='text-sm text-gray-300'>Our AI reads auditor emails and automatically categorizes document requests for efficient processing.</p>
+                  </div>
+                  <div className='bg-white/5 backdrop-blur-md border border-white/10 rounded-lg p-6'>
+                    <div className='text-2xl mb-3'>🔍</div>
+                    <h4 className='text-lg font-semibold mb-2'>Intelligent Document Retrieval</h4>
+                    <p className='text-sm text-gray-300'>The system searches your files and emails to locate the exact documents needed for each request.</p>
+                  </div>
+                  <div className='bg-white/5 backdrop-blur-md border border-white/10 rounded-lg p-6'>
+                    <div className='text-2xl mb-3'>✅</div>
+                    <h4 className='text-lg font-semibold mb-2'>One-Click Approval & Delivery</h4>
+                    <p className='text-sm text-gray-300'>Review suggested documents and approve with a single click, eliminating manual file handling.</p>
+                  </div>
                 </div>
               </div>
             ) : (
