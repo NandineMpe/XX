@@ -207,6 +207,42 @@
   padding-top: 6rem; /* Adjust to match navbar height */
 }
 
+/* Hero section scroll fixes */
+.hero-section {
+  position: relative;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.hero-section canvas {
+  pointer-events: none; /* Allow scroll events to pass through the canvas */
+}
+
+.hero-section .spline-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Prevent canvas from blocking scroll */
+}
+
+/* Additional Spline-specific fixes */
+.hero-section .spline-container canvas {
+  pointer-events: none !important;
+}
+
+.hero-section .spline-container iframe {
+  pointer-events: none !important;
+}
+
+/* Ensure smooth scrolling through the entire page */
+.page-container {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  height: 100vh;
+}
+
 /* Scrolling banner animation */
 @keyframes scroll-banner {
   0% {
@@ -274,11 +310,26 @@
 @media (max-width: 768px) {
   .timeline-mobile {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    gap: 3rem;
   }
   
   .timeline-mobile .milestone {
-    margin-bottom: 2rem;
     width: 100%;
+    max-width: 320px;
+  }
+  
+  .timeline-mobile .milestone h4 {
+    font-size: 1.125rem;
+  }
+  
+  .timeline-mobile .milestone p {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-mobile .milestone {
+    max-width: 280px;
   }
 }

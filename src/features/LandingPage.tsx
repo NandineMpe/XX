@@ -110,12 +110,24 @@ const LandingPage = () => {
     src: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Augentik%20Assets/ornua_bm%20%281%29.riv',
     autoplay: true,
     stateMachines: 'State Machine 1',
+    onStateChange: (event) => {
+      console.log('Rive state changed:', event);
+    },
   });
 
   React.useEffect(() => {
     if (rive) {
-      // Automatically play the state machine
+      // Ensure the animation starts immediately
       rive.play();
+      // Force the state machine to start
+      try {
+        const inputs = rive.stateMachineInputs('State Machine 1');
+        if (inputs && inputs.length > 0) {
+          inputs[0].value = true;
+        }
+      } catch {
+        console.log('Rive state machine already running');
+      }
     }
   }, [rive]);
 
@@ -168,7 +180,7 @@ const LandingPage = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white page-container">
       {/* Top anchor for scrolling */}
       <div id="top" className="absolute top-0 left-0 w-0 h-0"></div>
       
@@ -176,8 +188,8 @@ const LandingPage = () => {
       <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
       {/* Hero Section with Spline filling the area, below navbar */}
-      <section className="w-full flex flex-col items-center justify-center pt-32 pb-20 px-0 bg-black relative min-h-screen">
-        <div className="absolute inset-0 w-full h-full">
+      <section className="w-full flex flex-col items-center justify-center pt-32 pb-20 px-0 bg-black relative min-h-screen hero-section">
+        <div className="absolute inset-0 w-full h-full spline-container">
           <Spline scene={splineUrl} style={{ width: '100%', height: '100%' }} />
         </div>
         
@@ -210,15 +222,26 @@ const LandingPage = () => {
           <div className='w-full relative z-10'>
             {activeTab === 'walkthroughs' ? (
               <div className='w-full'>
-                <div className='w-full h-[500px] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center'>
-                  {rive ? (
-                    <WalkthroughRive
-                      className='w-full h-full'
-                      style={{ width: '100%', height: '100%' }}
-                    />
-                  ) : (
-                    <p className='text-gray-400'>Loading Rive animation...</p>
-                  )}
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
+                  {/* Left Column - Text Content */}
+                  <div className='space-y-6'>
+                    <h3 className='text-2xl font-bold text-white'>Process Walkthrough Library</h3>
+                    <p className='text-gray-300 leading-relaxed'>
+                      This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.
+                    </p>
+                  </div>
+                  
+                  {/* Right Column - Rive Animation */}
+                  <div className='bg-gray-900 rounded-lg overflow-hidden h-[500px] flex items-center justify-center'>
+                    {rive ? (
+                      <WalkthroughRive
+                        className='w-full h-full'
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      <p className='text-gray-400'>Loading Rive animation...</p>
+                    )}
+                  </div>
                 </div>
                 <div className='text-center mt-4'>
                   <p className='text-sm text-gray-400 italic'>Interactive Business Model Walkthrough - Click to Explore</p>
@@ -240,13 +263,12 @@ const LandingPage = () => {
       {/* Our Vision Section */}
       <section id="vision" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
         <div className="max-w-4xl w-full mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="text-4xl font-bold mb-6 tracking-tight">Our Vision</h2>
-            <p className="text-xl mb-8 text-gray-300">Reimagining audit from burden to advantage—where continuous intelligence meets human expertise</p>
           </div>
           
-          <div className="mb-16">
-            <p className="text-lg leading-relaxed text-gray-300 mb-8">
+          <div className="mb-12 text-center">
+            <p className="text-lg leading-relaxed text-gray-300 mb-6">
               The traditional audit model is broken. Finance teams spend months preparing for annual audits, drowning in document requests, explaining the same processes year after year, and waiting an entire year to discover irregularities and misstatements that could have been caught in real-time. At Augentik, we envision a fundamentally different future.
             </p>
             <p className="text-lg leading-relaxed text-gray-300">

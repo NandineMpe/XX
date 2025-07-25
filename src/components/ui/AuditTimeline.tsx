@@ -6,41 +6,36 @@ interface Milestone {
   description: string;
   status: 'achieved' | 'in-progress' | 'future';
   icon: string;
-  year?: string;
 }
 
 const MILESTONES: Milestone[] = [
   {
     id: 'foundation',
     title: 'Automated Knowledge & Evidence',
-    description: 'We started by solving the most repetitive audit tasks. Our AI-powered platform automates document retrieval and centralizes process knowledge, eliminating the endless back-and-forth that bogs down finance teams.',
+    description: 'AI-powered document retrieval and process knowledge centralization, eliminating repetitive audit tasks.',
     status: 'achieved',
-    icon: '📄',
-    year: '2023'
+    icon: '📋'
   },
   {
     id: 'accelerator',
     title: 'Real-time Compliance Assessment',
-    description: 'We then accelerated the compliance process from weeks to minutes. Our system performs comprehensive IFRS compliance checks in under 10 minutes, providing instant insights and actionable recommendations.',
+    description: 'Comprehensive IFRS compliance checks in under 10 minutes with instant insights and recommendations.',
     status: 'achieved',
-    icon: '⚡',
-    year: '2024'
+    icon: '⚡'
   },
   {
     id: 'integration',
     title: 'Continuous Transaction Monitoring',
-    description: 'This is where we are now. We are building the infrastructure for real-time transaction monitoring, where financial data is continuously analyzed for anomalies and compliance deviations as they happen.',
+    description: 'Real-time financial data analysis for anomalies and compliance deviations as they occur.',
     status: 'in-progress',
-    icon: '🔄',
-    year: '2025'
+    icon: '🔍'
   },
   {
     id: 'singularity',
     title: 'The Continuous Audit',
-    description: 'On day 1000 of our journey, we see a revolutionary audit ecosystem: continuous, round-the-clock audit intelligence that provides a comprehensive audit trail ready for auditor review and sign-off. One auditor, one machine, one audit, completed continuously, audited in a fraction of the time, with no more waiting an entire year to spot irregularities.',
+    description: 'Revolutionary audit ecosystem with round-the-clock intelligence, ready for immediate auditor review and sign-off.',
     status: 'future',
-    icon: '∞',
-    year: '2026+'
+    icon: '✅'
   }
 ];
 
@@ -119,95 +114,106 @@ const AuditTimeline: React.FC = () => {
   };
 
   return (
-    <div ref={timelineRef} className="w-full py-16">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Timeline Header */}
-        <div className="text-center mb-16">
-          <h3 className="text-3xl font-bold mb-4">The Road to Audit Singularity</h3>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+    <div ref={timelineRef} className="w-full py-20 relative overflow-hidden">
+      {/* Background gradient for visual storytelling */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-transparent to-blue-900/10 pointer-events-none"></div>
+      
+      <div className="max-w-6xl mx-auto px-4 relative z-10">
+        {/* Timeline Header with increased spacing */}
+        <div className="text-center mb-20">
+          <h3 className="text-4xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            The Road to Audit Singularity
+          </h3>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             From fragmented processes to unified intelligence—witness the evolution of audit
           </p>
         </div>
 
-        {/* Timeline Container */}
-        <div className="relative">
-          {/* Background Line */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 transform -translate-y-1/2 z-0" />
+        {/* Timeline Container with enhanced spacing */}
+        <div className="relative mb-16">
+          {/* Background Line with gradient */}
+          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-gray-800 via-gray-600 to-gray-800 transform -translate-y-1/2 z-0 rounded-full" />
           
-          {/* Singularity Line (animated) */}
+          {/* Singularity Line (animated) with enhanced glow */}
           <div 
-            className={`absolute top-1/2 left-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transform -translate-y-1/2 z-10 transition-all duration-2000 ease-out ${
+            className={`absolute top-1/2 left-0 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 transform -translate-y-1/2 z-10 transition-all duration-3000 ease-out rounded-full ${
               isVisible ? 'w-full' : 'w-0'
             }`}
             style={{
-              boxShadow: '0 0 20px rgba(147, 51, 234, 0.5)',
-              filter: 'blur(0.5px)'
+              boxShadow: '0 0 30px rgba(147, 51, 234, 0.6)',
+              filter: 'blur(1px)'
             }}
           />
 
-          {/* Milestones */}
-          <div className="relative z-20 flex justify-between items-center timeline-mobile">
+          {/* Milestones with increased spacing */}
+          <div className="relative z-20 flex justify-between items-start timeline-mobile gap-8">
             {MILESTONES.map((milestone, index) => (
               <div
                 key={milestone.id}
-                className="flex flex-col items-center group cursor-pointer milestone"
+                className="flex flex-col items-center group cursor-pointer milestone flex-1"
                 onClick={() => setActiveMilestone(activeMilestone === milestone.id ? null : milestone.id)}
               >
-                {/* Milestone Node */}
-                <div className="relative mb-6">
-                  {/* Outer Ring */}
+                {/* Enhanced Milestone Node */}
+                <div className="relative mb-8">
+                  {/* Outer Ring with gradient border */}
                   <div 
-                    className={`w-16 h-16 rounded-full border-2 border-gray-600 flex items-center justify-center transition-all duration-500 ${
+                    className={`w-20 h-20 rounded-full border-3 border-gradient-to-r from-gray-600 to-gray-500 flex items-center justify-center transition-all duration-700 ${
                       isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                     }`}
                     style={{
-                      animationDelay: `${index * 200}ms`
+                      animationDelay: `${index * 300}ms`,
+                      background: 'linear-gradient(145deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.8))',
+                      border: '2px solid transparent',
+                      backgroundClip: 'padding-box'
                     }}
                   >
-                    {/* Inner Circle */}
+                    {/* Inner Circle with enhanced styling */}
                     <div 
-                      className={`w-12 h-12 rounded-full ${getStatusColor(milestone.status)} flex items-center justify-center text-white text-xl font-bold transition-all duration-300 ${
-                        activeMilestone === milestone.id ? 'scale-110' : 'scale-100'
+                      className={`w-16 h-16 rounded-full ${getStatusColor(milestone.status)} flex items-center justify-center text-white text-2xl font-bold transition-all duration-500 shadow-lg ${
+                        activeMilestone === milestone.id ? 'scale-110 shadow-2xl' : 'scale-100'
                       } ${
-                        milestone.status === 'in-progress' ? 'animate-pulse' : ''
+                        milestone.status === 'in-progress' ? 'animate-pulse shadow-purple-500/50' : ''
                       }`}
+                      style={{
+                        background: milestone.status === 'achieved' 
+                          ? 'linear-gradient(145deg, #10b981, #059669)' 
+                          : milestone.status === 'in-progress'
+                          ? 'linear-gradient(145deg, #f59e0b, #d97706)'
+                          : 'linear-gradient(145deg, #8b5cf6, #7c3aed)'
+                      }}
                     >
                       {milestone.icon}
                     </div>
                   </div>
 
-                  {/* Glow Effect */}
+                  {/* Enhanced Glow Effect */}
                   <div 
-                    className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                      activeMilestone === milestone.id ? 'scale-150 opacity-30' : 'scale-100 opacity-0'
+                    className={`absolute inset-0 rounded-full transition-all duration-500 ${
+                      activeMilestone === milestone.id ? 'scale-200 opacity-40' : 'scale-100 opacity-0'
                     }`}
                     style={{
                       background: `radial-gradient(circle, ${getStatusColor(milestone.status).replace('bg-', '')} 0%, transparent 70%)`,
-                      filter: 'blur(8px)'
+                      filter: 'blur(12px)'
                     }}
                   />
                 </div>
 
-                {/* Milestone Content */}
-                <div className={`text-center max-w-xs transition-all duration-300 ${
+                {/* Enhanced Milestone Content */}
+                <div className={`text-center max-w-sm transition-all duration-500 ${
                   activeMilestone === milestone.id ? 'scale-105' : 'scale-100'
                 }`}>
-                  <div className="flex items-center justify-center mb-2">
-                    <h4 className="text-lg font-semibold text-white mr-2">{milestone.title}</h4>
-                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusBgColor(milestone.status)} ${getStatusTextColor(milestone.status)}`}>
+                  <div className="flex flex-col items-center mb-4">
+                    <h4 className="text-xl font-bold text-white mb-3 leading-tight">{milestone.title}</h4>
+                    <span className={`px-4 py-2 text-sm rounded-full font-semibold ${getStatusBgColor(milestone.status)} ${getStatusTextColor(milestone.status)} border border-current/20`}>
                       {getStatusText(milestone.status)}
                     </span>
                   </div>
-                  
-                  {milestone.year && (
-                    <p className="text-sm text-gray-400 mb-3">{milestone.year}</p>
-                  )}
 
-                  {/* Description (shown on hover/click) */}
-                  <div className={`transition-all duration-300 overflow-hidden ${
-                    activeMilestone === milestone.id ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
+                  {/* Enhanced Description */}
+                  <div className={`transition-all duration-500 overflow-hidden ${
+                    activeMilestone === milestone.id ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
                   }`}>
-                    <p className="text-sm text-gray-300 leading-relaxed">
+                    <p className="text-base text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded-lg border border-gray-800">
                       {milestone.description}
                     </p>
                   </div>
@@ -217,26 +223,40 @@ const AuditTimeline: React.FC = () => {
           </div>
         </div>
 
-        {/* Progress Indicator */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center space-x-2 bg-gray-900/50 rounded-full px-6 py-3 border border-gray-800">
-            <div className="flex space-x-1">
+        {/* Enhanced Progress Indicator */}
+        <div className="text-center">
+          <div className="inline-flex flex-col items-center space-y-4 bg-gray-900/70 rounded-2xl px-8 py-6 border border-gray-800 backdrop-blur-sm">
+            {/* Visual Progress Bar */}
+            <div className="w-full max-w-md">
+              <div className="flex justify-between text-sm text-gray-400 mb-2">
+                <span>Progress</span>
+                <span>{MILESTONES.filter(m => m.status === 'achieved').length} of {MILESTONES.length}</span>
+              </div>
+              <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full transition-all duration-1000 ease-out"
+                  style={{
+                    width: `${(MILESTONES.filter(m => m.status === 'achieved').length / MILESTONES.length) * 100}%`
+                  }}
+                />
+              </div>
+            </div>
+            
+            {/* Milestone Dots */}
+            <div className="flex space-x-3">
               {MILESTONES.map((milestone, index) => (
                 <div
                   key={milestone.id}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index < MILESTONES.filter(m => m.status === 'achieved').length 
-                      ? 'bg-green-500' 
-                      : index === MILESTONES.filter(m => m.status === 'achieved').length 
-                        ? 'bg-yellow-500 animate-pulse' 
-                        : 'bg-gray-600'
+                  className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                    milestone.status === 'achieved'
+                      ? 'bg-green-500 shadow-lg shadow-green-500/50'
+                      : milestone.status === 'in-progress'
+                      ? 'bg-yellow-500 shadow-lg shadow-yellow-500/50 animate-pulse'
+                      : 'bg-gray-600'
                   }`}
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-400 ml-2">
-              {MILESTONES.filter(m => m.status === 'achieved').length} of {MILESTONES.length} phases completed
-            </span>
           </div>
         </div>
       </div>
