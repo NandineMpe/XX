@@ -382,3 +382,16 @@
     max-width: 280px;
   }
 }
+
+/* Timeline popup fixes */
+.timeline-container {
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
+
+@media (max-width: 768px) {
+  .timeline-container {
+    padding-top: 80px;
+    padding-bottom: 150px;
+  }
+}

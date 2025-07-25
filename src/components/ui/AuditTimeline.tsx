@@ -33,7 +33,7 @@ const MILESTONES: Milestone[] = [
   {
     id: 'singularity',
     title: 'The Continuous Audit',
-    description: 'Our ultimate goal: a single, continuous audit trail. One auditor, one machine, one audit—done continuously. No more waiting, no more surprises.',
+    description: 'Our ultimate goal: a single, continuous audit trail. One auditor, one machine, one audit, done continuously. No more waiting, no more surprises.',
     status: 'future',
     icon: 'star'
   }
@@ -113,33 +113,33 @@ const AuditTimeline: React.FC = () => {
   };
 
   return (
-    <div ref={timelineRef} className="w-full py-12 relative overflow-hidden">
+    <div ref={timelineRef} className="w-full py-12 relative">
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         {/* Timeline Header */}
         <div className="text-center mb-12 md:mb-20">
           <p className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8">
-            Reimagining audit from burden to advantage—where continuous intelligence meets human expertise
+            Reimagining audit from burden to advantage, where continuous intelligence meets human expertise
           </p>
           <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
             <p className="text-base md:text-lg text-gray-300 leading-relaxed">
               The traditional audit model is broken. Finance teams spend months preparing for annual audits, drowning in document requests, explaining the same processes year after year, and waiting an entire year to discover irregularities that could have been caught in real-time.
             </p>
             <p className="text-base md:text-lg text-gray-300 leading-relaxed">
-              Our vision is to eliminate the burden of being audited while saving finance teams both time and money. On day 1000 of our journey, we see a revolutionary audit ecosystem: continuous, round-the-clock audit intelligence. One auditor, one machine, one audit—completed continuously, audited in a fraction of the time.
+              Our vision is to eliminate the burden of being audited while saving finance teams both time and money. On day 1000 of our journey, we see a revolutionary audit ecosystem: continuous, round-the-clock audit intelligence. One auditor, one machine, one audit, completed continuously, audited in a fraction of the time.
             </p>
           </div>
         </div>
 
-        {/* Timeline Container */}
-        <div className="w-full max-w-6xl mx-auto relative">
-          <div className="relative h-32 md:h-48 my-6 md:my-10">
+                  {/* Timeline Container */}
+          <div className="w-full max-w-6xl mx-auto relative overflow-visible timeline-container">
+            <div className="relative h-32 md:h-48 my-6 md:my-10 overflow-visible">
             {/* Background Timeline Line */}
             <div className="absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-500 transform -translate-y-1/2 rounded-full" />
             
             {/* Progress Line */}
             <div 
               className={`absolute top-1/2 left-[10%] h-1 bg-gradient-to-r from-purple-600 via-purple-500 to-purple-400 transform -translate-y-1/2 rounded-full transition-all duration-3000 ease-in-out ${
-                isVisible ? 'w-[60%]' : 'w-0'
+                isVisible ? 'w-[42%]' : 'w-0'
               }`}
               style={{
                 boxShadow: '0 0 20px rgba(168, 85, 247, 0.5)'
@@ -175,7 +175,7 @@ const AuditTimeline: React.FC = () => {
                 </div>
 
                 {/* Milestone Content with Enhanced Glassmorphism */}
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full w-72 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 opacity-0 invisible transition-all duration-300 -mt-4 shadow-lg group-hover:opacity-100 group-hover:visible group-hover:-mt-6">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-72 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 opacity-0 invisible transition-all duration-300 mb-4 shadow-lg group-hover:opacity-100 group-hover:visible group-hover:mb-6 z-50">
                   <h4 className="text-lg font-semibold mb-3 text-white">
                     {milestone.title}
                   </h4>

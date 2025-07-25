@@ -253,10 +253,6 @@ const LandingPage = () => {
         <div className="max-w-4xl w-full mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-4xl font-bold mb-6 tracking-tight">Our Vision</h2>
-          </div>
-          
-          <div className="mb-12 text-center">
-            <h3 className="text-2xl font-semibold text-gray-300 mb-2">Our Vision</h3>
             <p className="text-lg text-gray-400">The Road to Audit Singularity</p>
           </div>
 
