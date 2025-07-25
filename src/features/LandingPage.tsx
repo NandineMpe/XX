@@ -118,7 +118,7 @@ const LandingPage = () => {
       <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
       {/* Hero Section with Spline filling the area, below navbar */}
-      <section className="w-full flex flex-col items-center justify-center pt-32 pb-0 px-0 bg-black relative" style={{ minHeight: '100vh' }}>
+      <section className="w-full flex flex-col items-center justify-center pt-32 pb-20 px-0 bg-black relative">
         <div className="absolute inset-0 w-full h-full">
           <Spline scene={splineUrl} style={{ width: '100%', height: '100%' }} />
         </div>
