@@ -143,12 +143,15 @@
     @apply bg-background text-foreground;
     scroll-behavior: smooth;
     overflow-x: hidden;
+    overflow-y: auto; /* Ensure vertical scrolling is enabled */
+    min-height: 100vh;
   }
   
-  /* Hide scrollbar by default */
   html {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* Internet Explorer 10+ */
+    overflow-x: hidden;
+    overflow-y: auto; /* Ensure vertical scrolling is enabled */
   }
   
   html::-webkit-scrollbar {

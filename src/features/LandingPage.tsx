@@ -113,7 +113,7 @@ const LandingPage = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start">
+    <div className="min-h-screen bg-black text-white">
       {/* Tubelight Navbar */}
       <TubelightNavBar items={navItems} logoUrl={logoUrl} />
 
