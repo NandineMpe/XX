@@ -1,0 +1,116 @@
+## IFRS 1 - First-time Adoption of International Financial Reporting Standards
+## Requirement: An entity shall prepare and present an opening IFRS statement of financial position at the date of transition to IFRSs.
+
+## IFRS 2 - Share-based Payment
+## Requirement: An entity shall recognize share-based payment transactions in its financial statements, including transactions with employees or other parties to be settled in cash, other assets, or equity instruments of the entity.
+
+## IFRS 3 - Business Combinations
+## Requirement: An acquirer shall recognize the identifiable assets acquired, the liabilities assumed and any non-controlling interest in the acquiree at the acquisition date.
+
+## IFRS 5 - Non-current Assets Held for Sale and Discontinued Operations
+## Requirement: An entity shall classify a non-current asset (or disposal group) as held for sale if its carrying amount will be recovered principally through a sale transaction rather than through continuing use.
+
+## IFRS 7 - Financial Instruments: Disclosures
+## Requirement: An entity shall disclose information that enables users of its financial statements to evaluate the significance of financial instruments for its financial position and performance.
+
+## IFRS 8 - Operating Segments
+## Requirement: An entity shall disclose information to enable users of its financial statements to evaluate the nature and financial effects of the business activities in which it engages and the economic environments in which it operates.
+
+## IFRS 9 - Financial Instruments
+## Requirement: An entity shall classify financial assets as subsequently measured at amortized cost, fair value through other comprehensive income, or fair value through profit or loss on the basis of both the entity's business model for managing the financial assets and the contractual cash flow characteristics of the financial asset.
+
+## IFRS 10 - Consolidated Financial Statements
+## Requirement: An investor controls an investee when the investor is exposed, or has rights, to variable returns from its involvement with the investee and has the ability to affect those returns through its power over the investee.
+
+## IFRS 11 - Joint Arrangements
+## Requirement: A joint arrangement is an arrangement of which two or more parties have joint control. Joint control is the contractually agreed sharing of control of an arrangement, which exists only when decisions about the relevant activities require the unanimous consent of the parties sharing control.
+
+## IFRS 12 - Disclosure of Interests in Other Entities
+## Requirement: An entity shall disclose information that enables users of its financial statements to evaluate the nature of, and risks associated with, its interests in other entities and the effects of those interests on its financial position, financial performance and cash flows.
+
+## IFRS 13 - Fair Value Measurement
+## Requirement: An entity shall disclose information that helps users of its financial statements assess both the valuation techniques and inputs used to develop fair value measurements and, for fair value measurements using significant unobservable inputs (Level 3), the effect of the measurements on profit or loss or other comprehensive income for the period.
+
+## IFRS 15 - Revenue from Contracts with Customers
+## Requirement: An entity shall recognize revenue to depict the transfer of promised goods or services to customers in an amount that reflects the consideration to which the entity expects to be entitled in exchange for those goods or services.
+
+## IFRS 16 - Leases
+## Requirement: A lessee shall recognize a right-of-use asset and a lease liability at the lease commencement date.
+
+## IFRS 17 - Insurance Contracts
+## Requirement: An entity shall recognize groups of insurance contracts it issues and groups of reinsurance contracts it holds from the earliest of the beginning of the coverage period of the contracts in the group and the date when the first payment from a contract in the group becomes due.
+
+## IAS 1 - Presentation of Financial Statements
+## Requirement: A complete set of financial statements comprises a statement of financial position as at the end of the period, a statement of profit or loss and other comprehensive income for the period, a statement of changes in equity for the period, a statement of cash flows for the period, and notes, comprising significant accounting policies and other explanatory information.
+
+## IAS 2 - Inventories
+## Requirement: Inventories shall be measured at the lower of cost and net realizable value.
+
+## IAS 7 - Statement of Cash Flows
+## Requirement: An entity shall present a statement of cash flows as an integral part of its financial statements for each period for which financial statements are presented.
+
+## IAS 8 - Accounting Policies, Changes in Accounting Estimates and Errors
+## Requirement: An entity shall select and apply its accounting policies consistently for similar transactions, other events and conditions, unless an IFRS specifically requires or permits categorization of items for which different policies may be appropriate.
+
+## IAS 10 - Events after the Reporting Period
+## Requirement: An entity shall adjust the amounts recognized in its financial statements to reflect adjusting events after the reporting period.
+
+## IAS 12 - Income Taxes
+## Requirement: An entity shall recognize a deferred tax liability for all taxable temporary differences, except to the extent that the deferred tax liability arises from the initial recognition of goodwill or of an asset or liability in a transaction that is not a business combination and, at the time of the transaction, affects neither accounting profit nor taxable profit (tax loss).
+
+## IAS 16 - Property, Plant and Equipment
+## Requirement: An entity shall recognize an item of property, plant and equipment as an asset if, and only if, it is probable that future economic benefits associated with the item will flow to the entity and the cost of the item can be measured reliably.
+
+## IAS 19 - Employee Benefits
+## Requirement: An entity shall recognize a liability and an expense for employee benefits.
+
+## IAS 20 - Accounting for Government Grants and Disclosure of Government Assistance
+## Requirement: Government grants shall not be recognized until there is reasonable assurance that the entity will comply with the conditions attaching to them and that the grants will be received.
+
+## IAS 21 - The Effects of Changes in Foreign Exchange Rates
+## Requirement: An entity shall record a foreign currency transaction in its functional currency by applying to the foreign currency amount the spot exchange rate between the functional currency and the foreign currency at the date of the transaction.
+
+## IAS 23 - Borrowing Costs
+## Requirement: An entity shall capitalize borrowing costs that are directly attributable to the acquisition, construction or production of a qualifying asset as part of the cost of that asset.
+
+## IAS 24 - Related Party Disclosures
+## Requirement: An entity shall disclose related party relationships and transactions between the entity and its related parties.
+
+## IAS 26 - Accounting and Reporting by Retirement Benefit Plans
+## Requirement: The financial statements of a defined benefit plan shall include either a statement that shows the net assets available for benefits and the actuarial present value of promised retirement benefits, distinguishing between vested benefits and non-vested benefits, or a statement of net assets available for benefits.
+
+## IAS 27 - Separate Financial Statements
+## Requirement: When an entity prepares separate financial statements, it shall account for investments in subsidiaries, joint ventures and associates either at cost or in accordance with IFRS 9.
+
+## IAS 28 - Investments in Associates and Joint Ventures
+## Requirement: An investor shall account for its investment in an associate or a joint venture using the equity method except when that investment is classified as held for sale in accordance with IFRS 5.
+
+## IAS 29 - Financial Reporting in Hyperinflationary Economies
+## Requirement: The financial statements of an entity whose functional currency is the currency of a hyperinflationary economy shall be stated in terms of the measuring unit current at the end of the reporting period.
+
+## IAS 32 - Financial Instruments: Presentation
+## Requirement: An entity shall classify a financial instrument, or its component parts, as a financial liability, a financial asset or an equity instrument in accordance with the substance of the contractual arrangement and the definitions of a financial liability, a financial asset and an equity instrument.
+
+## IAS 33 - Earnings per Share
+## Requirement: An entity shall calculate and present earnings per share in accordance with this Standard.
+
+## IAS 34 - Interim Financial Reporting
+## Requirement: An entity shall apply the same accounting policies in its interim financial statements as are applied in its annual financial statements.
+
+## IAS 36 - Impairment of Assets
+## Requirement: An entity shall assess at the end of each reporting period whether there is any indication that an asset may be impaired.
+
+## IAS 37 - Provisions, Contingent Liabilities and Contingent Assets
+## Requirement: An entity shall recognize a provision if, and only if, a present obligation has arisen as a result of a past event, the settlement of which is expected to result in an outflow from the entity of resources embodying economic benefits, and a reliable estimate can be made of the amount of the obligation.
+
+## IAS 38 - Intangible Assets
+## Requirement: An entity shall recognize an intangible asset if, and only if, it is probable that the expected future economic benefits that are attributable to the asset will flow to the entity and the cost of the asset can be measured reliably.
+
+## IAS 39 - Financial Instruments: Recognition and Measurement
+## Requirement: An entity shall recognize a financial asset or a financial liability in its statement of financial position when, and only when, the entity becomes a party to the contractual provisions of the instrument.
+
+## IAS 40 - Investment Property
+## Requirement: An entity shall recognize investment property as an asset when, and only when, it is probable that the future economic benefits that are associated with the investment property will flow to the entity and the cost of the investment property can be measured reliably.
+
+## IAS 41 - Agriculture
+## Requirement: An entity shall recognize a biological asset or agricultural produce when, and only when, the entity controls the asset as a result of past events, it is probable that future economic benefits associated with the asset will flow to the entity, and the fair value or cost of the asset can be measured reliably. 

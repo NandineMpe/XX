@@ -1,0 +1,13 @@
+{
+  "llm_name": "gpt-4",
+  "llm_config": {
+    "api_key": "sk-your-actual-openai-api-key-here",
+    "temperature": 0.1,
+    "max_tokens": 4000
+  },
+  "kv_storage": "json",
+  "vector_storage": "faiss",
+  "graph_storage": "networkx",
+  "working_dir": "./ifrs_assessment_workspace",
+  "log_level": "INFO"
+} 
