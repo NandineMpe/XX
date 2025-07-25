@@ -117,18 +117,9 @@ const LandingPage = () => {
   });
 
   React.useEffect(() => {
-    if (rive) {
+    if (rive && rive.ready) {
       // Automatically play the state machine
-      console.log('Rive loaded, playing animation');
-      try {
-        rive.play();
-        // Also try to start the state machine explicitly
-        if (rive.stateMachineNames && rive.stateMachineNames.length > 0) {
-          console.log('Available state machines:', rive.stateMachineNames);
-        }
-      } catch (error) {
-        console.error('Error playing Rive animation:', error);
-      }
+      rive.play();
     }
   }, [rive]);
 

@@ -78,6 +78,11 @@ export const SignInPage: React.FC<SignInPageProps> = ({
               className="mx-auto mb-2 w-32 h-32 object-contain"
             />
             <p className="animate-element animate-delay-200 text-muted-foreground text-center">{description}</p>
+            
+            {/* Disclaimer */}
+            <p className="animate-element animate-delay-200 text-xs text-muted-foreground/70 text-center italic">
+              Sign In limited to onboarded users
+            </p>
 
             <form className="space-y-5" onSubmit={onSignIn}>
               <div className="animate-element animate-delay-300">
