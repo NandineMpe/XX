@@ -143,7 +143,7 @@ const LandingPage = () => {
                 key={tabOption.key}
                 onClick={() => setActiveTab(tabOption.key)}
                 className={`px-6 py-2 rounded-full font-semibold text-lg transition-colors focus:outline-none ${activeTab === tabOption.key ? 'bg-purple-900/40 text-white' : 'bg-black/40 text-gray-300 hover:bg-purple-900/20'}`}
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                style={{ fontFamily: 'Playfair Display, serif' }}
               >
                 {tabOption.label}
               </button>
@@ -260,7 +260,7 @@ const LandingPage = () => {
                   className="w-16 h-16 mr-4 object-contain"
                 />
                 <div>
-                  <h3 className='text-white text-lg font-semibold' style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <h3 className='text-white text-lg font-semibold' style={{ fontFamily: 'Playfair Display, serif' }}>
                     Augentik
                   </h3>
                   <p className='text-sm text-gray-500'>Intelligent Audit Automation</p>
