@@ -225,3 +225,60 @@
 .animate-scroll-banner:hover {
   animation-play-state: paused;
 }
+
+/* Timeline Animations */
+@keyframes timeline-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(147, 51, 234, 0.6);
+  }
+}
+
+@keyframes milestone-appear {
+  0% {
+    transform: scale(0) rotate(180deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes singularity-line {
+  0% {
+    width: 0%;
+    opacity: 0;
+  }
+  100% {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+.timeline-glow {
+  animation: timeline-glow 3s ease-in-out infinite;
+}
+
+.milestone-appear {
+  animation: milestone-appear 0.8s ease-out forwards;
+}
+
+.singularity-line-animate {
+  animation: singularity-line 2s ease-out forwards;
+}
+
+/* Responsive timeline adjustments */
+@media (max-width: 768px) {
+  .timeline-mobile {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .timeline-mobile .milestone {
+    margin-bottom: 2rem;
+    width: 100%;
+  }
+}

@@ -7,6 +7,7 @@ import { useRive } from '@rive-app/react-canvas';
 import { TubelightNavBar } from '@/components/ui/tubelight-navbar';
 import { Home, User, Layers, LogIn } from 'lucide-react';
 import SectionWithMockup from '@/components/ui/section-with-mockup';
+import AuditTimeline from '@/components/ui/AuditTimeline';
 
 const splineUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/Augentik%20Spline.spline';
 const logoUrl = 'https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/agentic%20logo.png';
@@ -28,6 +29,8 @@ const TABS = [
     heading: 'Intelligent Supporting Document Retrieval',
     subheading: 'Automates the response to auditor document requests.',
     description: 'When external auditors send requests, the system automatically reads and classifies these requests, locates appropriate documents from internal repositories, and routes results for one-click approval before transmission. This eliminates hours of manual searching and reduces delays in "Provided By Client" (PBC) items while ensuring consistency across audit cycles.',
+    primaryImage: '',
+    secondaryImage: '',
     steps: [
       {
         title: 'Automated Document Requests',
@@ -49,6 +52,8 @@ const TABS = [
     heading: 'Process Walkthrough Library',
     subheading: 'Centralizes frequently requested process overviews into visual, easy-to-understand formats.',
     description: 'This module centralizes frequently requested process overviews into visual, easy-to-understand formats that auditors can access independently. This module eliminates the client-side burden of re-explaining business processes year after year. From revenue recognition methodologies to inventory control procedures, these standardized explanations include granular audit-friendly content such as key controls, timing of recognition, system dependencies, and associated documentation.',
+    primaryImage: '',
+    secondaryImage: '',
     steps: [
       {
         title: 'Walkthrough Templates',
@@ -70,6 +75,8 @@ const TABS = [
     heading: 'Audit Query Assistant',
     subheading: 'Addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time.',
     description: 'This module addresses the reality that in large, listed entities, consolidation-related questions account for 60-70% of audit time. This module allows audit teams to independently query accounting treatments, eliminations, and group-level balances, receiving structured, client-approved explanations without requiring repetitive back-and-forth communications. The system formulates tailored explanations using prior-year audit responses, group reporting policies, and mapped consolidation entries.',
+    primaryImage: '',
+    secondaryImage: '',
     steps: [
       {
         title: 'Query Analysis',
@@ -215,8 +222,8 @@ const LandingPage = () => {
               <SectionWithMockup
                 title={tab.heading}
                 description={tab.description}
-                primaryImageSrc={tab.mockupImage}
-                secondaryImageSrc={tab.mockupImage2}
+                primaryImageSrc={tab.primaryImage || ''}
+                secondaryImageSrc={tab.secondaryImage || ''}
                 reverseLayout={false}
               />
             )}
@@ -226,9 +233,23 @@ const LandingPage = () => {
 
       {/* Our Vision Section */}
       <section id="vision" className="w-full flex flex-col items-center justify-center py-20 px-4 bg-black text-white relative z-10">
-        <div className="max-w-3xl w-full mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-4 tracking-tight">Our Vision</h2>
-          <p className="text-lg mb-8">Augentik performs the audit before your auditor comes in to ask questions. We believe in proactive, intelligent audit automation—so you can focus on your business, not your inbox.</p>
+        <div className="max-w-4xl w-full mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6 tracking-tight">Our Vision</h2>
+            <p className="text-xl mb-8 text-gray-300">Reimagining audit from burden to advantage—where continuous intelligence meets human expertise</p>
+          </div>
+          
+          <div className="mb-16">
+            <p className="text-lg leading-relaxed text-gray-300 mb-8">
+              The traditional audit model is broken. Finance teams spend months preparing for annual audits, drowning in document requests, explaining the same processes year after year, and waiting an entire year to discover irregularities and misstatements that could have been caught in real-time. At Augentik, we envision a fundamentally different future.
+            </p>
+            <p className="text-lg leading-relaxed text-gray-300">
+              We envision a world where audit intelligence is embedded into the fabric of business operations, where compliance is continuously monitored, and where the audit process adds value rather than consuming it.
+            </p>
+          </div>
+
+          {/* Timeline Section */}
+          <AuditTimeline />
         </div>
       </section>
 
