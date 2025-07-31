@@ -28,8 +28,8 @@ router = APIRouter(
     tags=["document-requests"],
 )
 
-# Create combined auth dependency
-combined_auth = get_combined_auth_dependency(global_args.api_key)
+# Create combined auth dependency - will be set in create_document_request_routes function
+combined_auth = None
 
 
 class DocumentRequestWebhookRequest(BaseModel):
@@ -473,8 +473,10 @@ async def handle_form_initial_request(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def create_document_request_routes():
+def create_document_request_routes(api_key: Optional[str] = None):
     """Create document request routes"""
+    global combined_auth
+    combined_auth = get_combined_auth_dependency(api_key)
     
     @router.post(
         "/426951f9-1936-44c3-83ae-8f52f0508acf",
