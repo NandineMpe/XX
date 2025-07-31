@@ -342,7 +342,7 @@ export default function ProcessWalkthroughLibrary() {
 
     // Send webhook POST request
     try {
-      const response = await fetch('https://primary-production-1d298.up.railway.app/webhook-test/document-request', {
+      const response = await fetch('https://primary-production-1d298.up.railway.app/webhook/c0a66c51-ad89-490c-b729-b27fc45b410f', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
