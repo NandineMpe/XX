@@ -319,9 +319,11 @@ export default function ProcessWalkthroughLibrary() {
   const addRequest = useDocumentRequestStore((s) => s.addRequest);
 
   // Helper to handle document request
-  const handleRequestDoc = (doc: any, process: any, step: any) => {
+  const handleRequestDoc = async (doc: any, process: any, step: any) => {
     const now = new Date();
-    addRequest({
+    
+    // Create the request data
+    const requestData = {
       id: uuidv4(),
       auditor: 'Sam Salt',
       document: doc.name,
@@ -332,8 +334,39 @@ export default function ProcessWalkthroughLibrary() {
       lastUpdate: now.toISOString(),
       auditTrail: [{ status: 'Requested', at: now.toISOString() }],
       attachments: [],
-    });
+    };
+
+    // Add to local state (existing functionality)
+    addRequest(requestData);
     setToast(`Requested: ${doc.name}`);
+
+    // Send webhook POST request
+    try {
+      const response = await fetch('https://primary-production-1d298.up.railway.app/webhook-test/document-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          document: doc.name,
+          description: doc.description,
+          process: process.name,
+          step: step.title,
+          entity: selectedEntity.name,
+          auditor: 'Sam Salt',
+          timestamp: now.toISOString(),
+          requestId: requestData.id
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Webhook request failed:', response.status, response.statusText);
+      } else {
+        console.log('Webhook request sent successfully');
+      }
+    } catch (error) {
+      console.error('Error sending webhook request:', error);
+    }
   };
 
   const step = selectedProcess.steps[currentStep];
