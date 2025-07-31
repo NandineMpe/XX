@@ -14,6 +14,7 @@ const STATUS = {
   WAITING_EMAIL: 'Waiting for Client Email Approval',
   CLIENT_APPROVED: 'Client Approved via Email',
   SENT: 'Sent to Auditor',
+  READY: 'Ready',
   FAILED: 'Failed / Needs Manual Intervention',
 };
 
@@ -23,6 +24,7 @@ const statusMeta = {
   [STATUS.WAITING_EMAIL]:{ icon: <Mail className="text-yellow-500" />, color: 'yellow', label: 'Waiting Email', badge: true },
   [STATUS.CLIENT_APPROVED]: { icon: <CheckCircle className="text-green-500" />, color: 'green', label: 'Client Approved' },
   [STATUS.SENT]:         { icon: <Send className="text-blue-600" />, color: 'blue', label: 'Sent' },
+  [STATUS.READY]:        { icon: <Download className='text-green-500' />, color: 'green', label: 'Ready' },
   [STATUS.FAILED]:       { icon: <AlertTriangle className="text-red-500" />, color: 'red', label: 'Failed', error: true },
 };
 
@@ -49,8 +51,8 @@ const handleDownload = (request: DocumentRequest) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  } else if (request.status === STATUS.SENT) {
-    // For documents retrieved via n8n webhook that are marked as SENT
+  } else if (request.status === STATUS.SENT || request.status === STATUS.READY) {
+    // For documents retrieved via n8n webhook that are marked as SENT or READY
     // This would typically have a download URL in the request data
     const downloadUrl = (request as any).downloadUrl || (request as any).fileUrl;
     
@@ -138,9 +140,9 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
     id: 'download',
     cell: ({ row }) => {
       const request = row.original;
-      // Show download button if document is available (status is SENT or has attachments)
+      // Show download button if document is available (status is SENT, READY, or has attachments)
       const hasAttachments = request.attachments && request.attachments.length > 0;
-      const isAvailable = request.status === STATUS.SENT || hasAttachments;
+      const isAvailable = request.status === STATUS.SENT || request.status === STATUS.READY || hasAttachments;
       
       if (!isAvailable) {
         return <span className="text-gray-400 text-xs">Not available</span>;
