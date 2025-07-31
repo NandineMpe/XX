@@ -152,6 +152,58 @@ class InsertTextsRequest(BaseModel):
         }
 
 
+class N8nWebhookRequest(BaseModel):
+    """Request model for n8n webhook integration
+
+    Attributes:
+        content: The main content to be inserted (can be text or JSON string)
+        source: Source identifier for the content (optional)
+        metadata: Additional metadata from n8n (optional)
+        content_type: Type of content (text, json, file) (optional)
+    """
+
+    content: str = Field(
+        min_length=1,
+        description="The content to insert (text, JSON string, or file content)",
+    )
+    source: Optional[str] = Field(
+        default="n8n_webhook", 
+        description="Source identifier for the content"
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional metadata from n8n workflow"
+    )
+    content_type: Optional[str] = Field(
+        default="text",
+        description="Type of content: 'text', 'json', or 'file'"
+    )
+
+    @field_validator("content", mode="after")
+    @classmethod
+    def strip_content_after(cls, content: str) -> str:
+        return content.strip()
+
+    @field_validator("source", mode="after")
+    @classmethod
+    def strip_source_after(cls, source: str) -> str:
+        return source.strip() if source else "n8n_webhook"
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "content": "This is sample content from n8n workflow",
+                "source": "email_processor",
+                "metadata": {
+                    "workflow_id": "12345",
+                    "trigger_type": "email",
+                    "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "content_type": "text"
+            }
+        }
+
+
 class InsertResponse(BaseModel):
     """Response model for document insertion operations
 
@@ -1005,6 +1057,87 @@ def create_document_routes(
             return InsertResponse(status=status, message=status_message)
         except Exception as e:
             logger.error(f"Error /documents/batch: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @router.post(
+        "/n8n_webhook",
+        response_model=InsertResponse,
+        dependencies=[Depends(combined_auth)],
+    )
+    async def n8n_webhook(
+        request: N8nWebhookRequest, background_tasks: BackgroundTasks
+    ):
+        """
+        Webhook endpoint for n8n integration.
+
+        This endpoint is specifically designed for n8n workflows to send content
+        to the LightRAG system. It accepts various content types and processes
+        them in the background.
+
+        Args:
+            request (N8nWebhookRequest): The request body containing:
+                - content: The main content to be inserted
+                - source: Source identifier (optional, defaults to "n8n_webhook")
+                - metadata: Additional metadata from n8n workflow (optional)
+                - content_type: Type of content ("text", "json", "file") (optional)
+            background_tasks: FastAPI BackgroundTasks for async processing
+
+        Returns:
+            InsertResponse: A response object containing the status of the operation.
+
+        Raises:
+            HTTPException: If an error occurs during processing (500).
+
+        Example n8n webhook payload:
+        {
+            "content": "This is content from n8n workflow",
+            "source": "email_processor",
+            "metadata": {
+                "workflow_id": "12345",
+                "trigger_type": "email",
+                "timestamp": "2024-01-01T00:00:00Z"
+            },
+            "content_type": "text"
+        }
+        """
+        try:
+            # Process content based on content_type
+            if request.content_type == "json":
+                # For JSON content, we might want to extract specific fields
+                # or convert to a more readable format
+                import json
+                try:
+                    json_data = json.loads(request.content)
+                    # Convert JSON to a readable string format
+                    processed_content = json.dumps(json_data, indent=2, ensure_ascii=False)
+                except json.JSONDecodeError:
+                    # If JSON parsing fails, treat as regular text
+                    processed_content = request.content
+            else:
+                # For text and file content types, use as-is
+                processed_content = request.content
+
+            # Create a source identifier that includes metadata if available
+            source_identifier = request.source
+            if request.metadata:
+                workflow_id = request.metadata.get("workflow_id", "unknown")
+                source_identifier = f"{request.source}_{workflow_id}"
+
+            # Add to background tasks for processing
+            background_tasks.add_task(
+                pipeline_index_texts,
+                rag,
+                [processed_content],
+                file_sources=[source_identifier],
+            )
+
+            return InsertResponse(
+                status="success",
+                message=f"Content from n8n webhook ({source_identifier}) successfully received. Processing will continue in background.",
+            )
+        except Exception as e:
+            logger.error(f"Error /documents/n8n_webhook: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
 
