@@ -345,6 +345,7 @@ export default function ProcessWalkthroughLibrary() {
       const response = await fetch('https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
         method: 'POST',
         headers: {
+          'X-API-Key': 'admin123',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
