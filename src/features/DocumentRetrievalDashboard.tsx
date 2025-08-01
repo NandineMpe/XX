@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import DataTable from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { ColumnDef } from '@tanstack/react-table';
-import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search, Download } from 'lucide-react';
+import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search, Download, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDocumentRequestStore, DocumentRequest } from '@/stores/documentRequests';
 
@@ -181,13 +181,45 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
 ];
 
 export default function DocumentRetrievalDashboard() {
-  const requests = useDocumentRequestStore((s) => s.requests);
+  const { 
+    requests, 
+    loading, 
+    error, 
+    fetchRequests, 
+    refreshRequests 
+  } = useDocumentRequestStore();
+  
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [selected, setSelected] = useState<DocumentRequest | null>(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterAuditor, setFilterAuditor] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  // Set up polling for real-time updates
+  useEffect(() => {
+    // Poll every 30 seconds for new document requests
+    pollingIntervalRef.current = setInterval(() => {
+      refreshRequests();
+    }, 30000); // 30 seconds
+    
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [refreshRequests]);
+
+  // Manual refresh handler
+  const handleRefresh = () => {
+    refreshRequests();
+  };
 
   // Unique status and auditor options for filters
   const statusOptions = Array.from(new Set(requests.map(r => r.status)));
@@ -207,10 +239,71 @@ export default function DocumentRetrievalDashboard() {
     );
   }, [requests, search, filterStatus, filterAuditor, filterDate]);
 
+  // Loading state
+  if (loading && requests.length === 0) {
+    return (
+      <div className="flex h-full w-full bg-black text-white pt-24">
+        <div className="w-full max-w-7xl mx-auto py-8 px-4">
+          <div className="flex items-center justify-center h-64">
+            <div className="flex items-center gap-2">
+              <Loader2 className="animate-spin text-blue-500" />
+              <span>Loading document requests...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && requests.length === 0) {
+    return (
+      <div className="flex h-full w-full bg-black text-white pt-24">
+        <div className="w-full max-w-7xl mx-auto py-8 px-4">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <p className="text-red-500 mb-4">Error: {error}</p>
+              <button 
+                onClick={handleRefresh}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full w-full bg-black text-white pt-24">
       <div className="w-full max-w-7xl mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Supporting Document Retrieval</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Supporting Document Retrieval</h1>
+          
+          {/* Refresh button */}
+          <button 
+            onClick={handleRefresh}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            disabled={loading}
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+            {loading && <span>Refreshing...</span>}
+          </button>
+        </div>
+
+        {/* Error banner */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="text-red-500" />
+              <span>Error: {error}</span>
+            </div>
+          </div>
+        )}
+
         {/* Search/Filter Bar with custom style */}
         <div className="mb-4 flex flex-wrap items-center gap-4">
           {/* Search input with icon and slash */}
