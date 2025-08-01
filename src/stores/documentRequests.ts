@@ -42,21 +42,34 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       console.log('🔄 Fetching document requests from API...');
       set({ loading: true, error: null });
       
-      const response = await fetch('https://lightrag-production-6328.up.railway.app/webhook/api/document-requests', {
+      const url = 'https://lightrag-production-6328.up.railway.app/webhook/api/document-requests';
+      console.log('🌐 Making request to:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
         headers: {
           'X-API-Key': 'admin123',
           'Content-Type': 'application/json',
         },
+        mode: 'cors', // Explicitly set CORS mode
       });
       
       console.log('📡 API Response status:', response.status);
+      console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ API Error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
       
       const data = await response.json();
       console.log('📊 API Response data:', data);
+      
+      if (!data.requests || !Array.isArray(data.requests)) {
+        console.error('❌ Invalid data structure:', data);
+        throw new Error('Invalid data structure received from API');
+      }
       
       // Transform backend data to match frontend format
       const transformedRequests = data.requests.map((request: any) => ({
@@ -87,6 +100,11 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       
     } catch (error) {
       console.error('❌ Error fetching requests:', error);
+      console.error('❌ Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       set({ 
         loading: false, 
         error: error instanceof Error ? error.message : 'Failed to fetch requests' 
