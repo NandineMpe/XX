@@ -199,18 +199,22 @@ export default function DocumentRetrievalDashboard() {
 
   // Initial data fetch
   useEffect(() => {
+    console.log('🚀 DocumentRetrievalDashboard mounted, fetching requests...');
     fetchRequests();
   }, [fetchRequests]);
 
   // Set up polling for real-time updates
   useEffect(() => {
+    console.log('⏰ Setting up polling every 30 seconds...');
     // Poll every 30 seconds for new document requests
     pollingIntervalRef.current = setInterval(() => {
+      console.log('⏰ Polling interval triggered, refreshing requests...');
       refreshRequests();
     }, 30000); // 30 seconds
     
     return () => {
       if (pollingIntervalRef.current) {
+        console.log('🧹 Cleaning up polling interval');
         clearInterval(pollingIntervalRef.current);
       }
     };
@@ -218,8 +222,16 @@ export default function DocumentRetrievalDashboard() {
 
   // Manual refresh handler
   const handleRefresh = () => {
+    console.log('🔄 Manual refresh button clicked');
     refreshRequests();
   };
+
+  // Debug logging for requests data
+  useEffect(() => {
+    console.log('📊 Current requests in dashboard:', requests);
+    console.log('📊 Loading state:', loading);
+    console.log('📊 Error state:', error);
+  }, [requests, loading, error]);
 
   // Unique status and auditor options for filters
   const statusOptions = Array.from(new Set(requests.map(r => r.status)));

@@ -39,6 +39,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
     })),
   fetchRequests: async () => {
     try {
+      console.log('🔄 Fetching document requests from API...');
       set({ loading: true, error: null });
       
       const response = await fetch('https://lightrag-production-6328.up.railway.app/webhook/api/document-requests', {
@@ -48,11 +49,14 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         },
       });
       
+      console.log('📡 API Response status:', response.status);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log('📊 API Response data:', data);
       
       // Transform backend data to match frontend format
       const transformedRequests = data.requests.map((request: any) => ({
@@ -71,13 +75,18 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         fileSize: request.fileSize,
       }));
       
+      console.log('🔄 Transformed requests:', transformedRequests);
+      
       set({ 
         requests: transformedRequests,
         loading: false,
         error: null 
       });
       
+      console.log('✅ Successfully updated store with', transformedRequests.length, 'requests');
+      
     } catch (error) {
+      console.error('❌ Error fetching requests:', error);
       set({ 
         loading: false, 
         error: error instanceof Error ? error.message : 'Failed to fetch requests' 
@@ -85,6 +94,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
     }
   },
   refreshRequests: async () => {
+    console.log('🔄 Manual refresh triggered');
     await get().fetchRequests();
   },
 })); 
