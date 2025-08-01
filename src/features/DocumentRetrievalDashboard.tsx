@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import DataTable from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
@@ -197,11 +197,11 @@ export default function DocumentRetrievalDashboard() {
   const [filterDate, setFilterDate] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
-  // Initial data fetch
+  // Initial data fetch - ensure it runs immediately on mount
   useEffect(() => {
     console.log('🚀 DocumentRetrievalDashboard mounted, fetching requests...');
     fetchRequests();
-  }, [fetchRequests]);
+  }, []); // Empty dependency array ensures it only runs once on mount
 
   // Set up polling for real-time updates
   useEffect(() => {
@@ -218,13 +218,13 @@ export default function DocumentRetrievalDashboard() {
         clearInterval(pollingIntervalRef.current);
       }
     };
-  }, [refreshRequests]);
+  }, []); // Empty dependency array ensures it only runs once on mount
 
   // Manual refresh handler
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     console.log('🔄 Manual refresh button clicked');
     refreshRequests();
-  };
+  }, [refreshRequests]);
 
   // Debug logging for requests data
   useEffect(() => {
