@@ -349,12 +349,15 @@ export default function ProcessWalkthroughLibrary() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          document: doc.name,
+          documentType: doc.name,
           description: doc.description,
-          process: process.name,
-          step: step.title,
-          entity: selectedEntity.name,
-          auditor: 'Sam Salt',
+          parameters: {
+            auditor: 'Sam Salt',
+            entity: selectedEntity.name,
+            process: process.name,
+            step: step.title,
+            source_trigger: 'Walkthrough'
+          },
           timestamp: now.toISOString(),
           requestId: requestData.id
         }),

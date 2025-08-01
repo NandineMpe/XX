@@ -72,21 +72,26 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       }
       
       // Transform backend data to match frontend format
-      const transformedRequests = data.requests.map((request: any) => ({
-        id: request.requestId,
-        auditor: request.parameters?.auditor || 'Unknown',
-        document: request.documentType || 'Unknown',
-        date: new Date(request.createdAt).toLocaleDateString(),
-        source: request.parameters?.source_trigger || 'Walkthrough',
-        method: 'Manual',
-        status: request.status,
-        lastUpdate: new Date(request.updatedAt).toLocaleString(),
-        auditTrail: [{ status: request.status, at: request.updatedAt }],
-        attachments: request.downloadUrl ? [{ name: request.fileName || 'Document', url: request.downloadUrl }] : [],
-        downloadUrl: request.downloadUrl,
-        fileName: request.fileName,
-        fileSize: request.fileSize,
-      }));
+      const transformedRequests = data.requests.map((request: any) => {
+        // Extract parameters if they exist, otherwise use defaults
+        const parameters = request.parameters || {};
+        
+        return {
+          id: request.requestId,
+          auditor: parameters.auditor || 'Sam Salt', // Default to Sam Salt if not provided
+          document: request.documentType || 'Document Request', // Use documentType or default
+          date: new Date(request.createdAt).toLocaleDateString(),
+          source: parameters.source_trigger || 'Walkthrough',
+          method: 'Manual',
+          status: request.status,
+          lastUpdate: new Date(request.updatedAt).toLocaleString(),
+          auditTrail: [{ status: request.status, at: request.updatedAt }],
+          attachments: request.downloadUrl ? [{ name: request.fileName || 'Document', url: request.downloadUrl }] : [],
+          downloadUrl: request.downloadUrl,
+          fileName: request.fileName,
+          fileSize: request.fileSize,
+        };
+      });
       
       console.log('🔄 Transformed requests:', transformedRequests);
       
