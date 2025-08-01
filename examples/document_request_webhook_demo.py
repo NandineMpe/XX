@@ -15,7 +15,7 @@ import uuid
 from typing import Dict, Any
 
 # Configuration
-LIGHTRAG_BASE_URL = "http://localhost:8000"  # Adjust to your production URL
+LIGHTRAG_BASE_URL = "https://lightrag-production-6328.up.railway.app"  # Production URL
 API_KEY = None  # Set this if you have API key authentication enabled
 
 # Headers for requests
@@ -255,9 +255,44 @@ def demo_get_specific_request(request_id: str):
         print(f"❌ Failed to get document request {request_id}")
 
 
+def demo_download_file(request_id: str):
+    """Demo downloading a file"""
+    print(f"\n=== Demo 7: Download File ===")
+    
+    # First check if the request exists and is ready
+    result = get_document_request(request_id)
+    if not result:
+        print(f"❌ Request {request_id} not found")
+        return
+    
+    if result['status'] != 'Ready':
+        print(f"❌ Request {request_id} is not ready for download (status: {result['status']})")
+        return
+    
+    # Download the file
+    response = requests.get(
+        f"{LIGHTRAG_BASE_URL}/webhook/api/document-requests/{request_id}/download",
+        headers={"Authorization": f"Bearer {API_KEY}"}
+    )
+    
+    if response.status_code == 200:
+        # Save the file locally
+        filename = f"downloaded_file_{request_id}.bin"
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+        
+        print(f"✅ File downloaded successfully: {filename}")
+        print(f"File size: {len(response.content)} bytes")
+        print(f"Content-Type: {response.headers.get('content-type', 'unknown')}")
+        print(f"Content-Disposition: {response.headers.get('content-disposition', 'unknown')}")
+    else:
+        print(f"❌ Download failed: {response.status_code}")
+        print(f"Error: {response.text}")
+
+
 def demo_error_handling():
     """Demo error handling scenarios"""
-    print("\n=== Demo 7: Error Handling ===")
+    print("\n=== Demo 8: Error Handling ===")
     
     # Test 1: Try to update non-existent request
     print("\n1. Testing update of non-existent request...")
@@ -341,6 +376,10 @@ def main():
     
     if request_id_1:
         demo_get_specific_request(request_id_1)
+        time.sleep(1)
+        
+        # Test download functionality if the request is ready
+        demo_download_file(request_id_1)
         time.sleep(1)
     
     demo_error_handling()

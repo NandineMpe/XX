@@ -12,8 +12,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Literal
 from pathlib import Path
+from io import BytesIO
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, File, UploadFile
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 
 from lightrag.utils import logger
@@ -182,6 +184,10 @@ class DocumentRequestStatus(BaseModel):
     )
     updatedAt: str = Field(
         description="Last update timestamp (ISO format)"
+    )
+    file_content: Optional[bytes] = Field(
+        default=None,
+        description="Binary content of the file if stored directly"
     )
     
     class Config:
@@ -610,6 +616,75 @@ def create_document_request_routes(api_key: Optional[str] = None):
             raise
         except Exception as e:
             logger.error(f"Error getting document request {request_id}: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @router.get(
+        "/api/document-requests/{request_id}/download",
+        dependencies=[Depends(combined_auth)],
+    )
+    async def download_document_file(request_id: str):
+        """
+        Download the binary file content for a specific document request.
+        
+        Args:
+            request_id: The unique request identifier
+        
+        Returns:
+            StreamingResponse: The binary file content with appropriate headers
+        """
+        try:
+            if request_id not in document_requests_db:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Document request with ID {request_id} not found"
+                )
+            
+            request_data = document_requests_db[request_id]
+            
+            # Check if file content exists
+            if "file_content" not in request_data or request_data["file_content"] is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No file content available for request {request_id}"
+                )
+            
+            # Check if status is Ready
+            if request_data["status"] != "Ready":
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Document is not ready for download. Current status: {request_data['status']}"
+                )
+            
+            file_content = request_data["file_content"]
+            file_name = request_data.get("fileName", f"document_{request_id}")
+            
+            # Determine content type based on file extension
+            content_type = "application/octet-stream"
+            if file_name.lower().endswith(('.pdf',)):
+                content_type = "application/pdf"
+            elif file_name.lower().endswith(('.doc', '.docx')):
+                content_type = "application/msword"
+            elif file_name.lower().endswith(('.xls', '.xlsx')):
+                content_type = "application/vnd.ms-excel"
+            elif file_name.lower().endswith(('.txt',)):
+                content_type = "text/plain"
+            elif file_name.lower().endswith(('.csv',)):
+                content_type = "text/csv"
+            
+            return StreamingResponse(
+                BytesIO(file_content),
+                media_type=content_type,
+                headers={
+                    "Content-Disposition": f"attachment; filename={file_name}",
+                    "Content-Length": str(len(file_content))
+                }
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error downloading file for request {request_id}: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
     
