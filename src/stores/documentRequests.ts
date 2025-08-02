@@ -99,7 +99,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       console.log('🔄 Fetching document requests from API...');
       set({ loading: true, error: null });
       
-      const url = 'https://primary-production-1d298.up.railway.app/webhook/api/document-requests';
+      const url = 'https://lightrag-production-6328.up.railway.app/webhook/api/document-requests';
       console.log('🌐 Making request to:', url);
       
       const response = await fetch(url, {
