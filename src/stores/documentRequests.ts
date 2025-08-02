@@ -140,6 +140,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       
       const data = await response.json();
       console.log('📊 API Response data:', data);
+      console.log('📊 Raw request data:', data.requests?.[0]);
       
       if (!data.requests || !Array.isArray(data.requests)) {
         console.error('❌ Invalid data structure:', data);
@@ -166,6 +167,15 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
                              request.fileName || 
                              mappedStatus === 'Ready' || 
                              mappedStatus === 'Sent to Auditor';
+          
+          console.log('🔍 Processing request:', {
+            requestId: request.requestId,
+            status: request.status,
+            mappedStatus,
+            downloadUrl: request.downloadUrl,
+            fileName: request.fileName,
+            isProcessed
+          });
           
           // Create audit trail
           const auditTrail = [];
