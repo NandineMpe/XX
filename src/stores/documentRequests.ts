@@ -274,8 +274,8 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         req.status === 'Waiting for Client Email Approval'
       );
       
-      // Always poll if there are active requests, or if we have no requests (might be first request)
-      if (hasActiveRequests || requests.length === 0) {
+      // Only poll if there are active requests that need updates
+      if (hasActiveRequests) {
         console.log('🔄 Polling for updates...');
         await get().fetchRequests();
       }

@@ -189,7 +189,6 @@ export default function DocumentRetrievalDashboard() {
     refreshRequests 
   } = useDocumentRequestStore();
   
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [selected, setSelected] = useState<DocumentRequest | null>(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -202,34 +201,6 @@ export default function DocumentRetrievalDashboard() {
     console.log('🚀 DocumentRetrievalDashboard mounted, fetching requests...');
     fetchRequests();
   }, []); // Empty dependency array ensures it only runs once on mount
-
-  // Set up polling for real-time updates
-  useEffect(() => {
-    console.log('⏰ Setting up polling every 30 seconds...');
-    // Poll every 30 seconds for new document requests
-    pollingIntervalRef.current = setInterval(() => {
-      // Only poll if there are active requests
-      const hasActiveRequests = requests.some(req => 
-        req.status === 'Requested' || 
-        req.status === 'Auto-Retrieval in Progress' ||
-        req.status === 'Waiting for Client Email Approval'
-      );
-      
-      if (hasActiveRequests) {
-        console.log('⏰ Polling interval triggered, refreshing requests...');
-        refreshRequests();
-      } else {
-        console.log('⏰ No active requests, skipping poll...');
-      }
-    }, 30000); // 30 seconds
-    
-    return () => {
-      if (pollingIntervalRef.current) {
-        console.log('🧹 Cleaning up polling interval');
-        clearInterval(pollingIntervalRef.current);
-      }
-    };
-  }, [requests]); // Add requests as dependency to check active requests
 
   // Manual refresh handler
   const handleRefresh = useCallback(() => {
