@@ -17,7 +17,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   },
-  base: '/',
+  base: process.env.BUILD_TARGET === 'railway' ? '/webui/' : '/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
