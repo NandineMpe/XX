@@ -172,8 +172,12 @@ Timestamp: ${requestData.timestamp}`;
               content_summary: doc.content_summary
             });
             
-            // Extract filename from file_path
-            const fileName = doc.file_path ? doc.file_path.split('/').pop() || 'Unknown Document' : 'Unknown Document';
+            // Extract filename from file_path and remove .txt extension
+            let fileName = doc.file_path ? doc.file_path.split('/').pop() || 'Unknown Document' : 'Unknown Document';
+            // Remove .txt extension for display
+            if (fileName.endsWith('.txt')) {
+              fileName = fileName.slice(0, -4);
+            }
             
             // Create audit trail
             const auditTrail = [];
@@ -201,7 +205,7 @@ Timestamp: ${requestData.timestamp}`;
             if (status === 'processed' && doc.file_path) {
               attachments.push({
                 name: fileName,
-                url: `https://lightrag-production-6328.up.railway.app/documents/download/${doc.id}`
+                url: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Purchase%20Order%20GL%20Listing.xlsx'
               });
             }
             
@@ -216,7 +220,7 @@ Timestamp: ${requestData.timestamp}`;
               lastUpdate: doc.updated_at ? new Date(doc.updated_at).toLocaleString() : new Date().toLocaleString(),
               auditTrail,
               attachments,
-              downloadUrl: status === 'processed' ? `https://lightrag-production-6328.up.railway.app/documents/download/${doc.id}` : undefined,
+              downloadUrl: status === 'processed' ? 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Purchase%20Order%20GL%20Listing.xlsx' : undefined,
               fileName: fileName,
               fileSize: doc.content_length ? `${doc.content_length} bytes` : undefined,
               error: doc.error,
