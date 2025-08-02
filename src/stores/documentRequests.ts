@@ -67,27 +67,9 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
 
   sendWebhookRequest: async (requestData) => {
     try {
-      console.log('🚀 Sending webhook request:', requestData);
+      console.log('🚀 Sending webhook request to n8n:', requestData);
       
-      // First, store the request in the backend immediately
-      const backendResponse = await fetch('https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
-        method: 'POST',
-        headers: {
-          'X-API-Key': 'admin123',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!backendResponse.ok) {
-        const errorText = await backendResponse.text();
-        console.error('❌ Backend request failed:', backendResponse.status, errorText);
-        throw new Error(`Backend failed: ${backendResponse.status} - ${errorText}`);
-      }
-
-      console.log('✅ Request stored in backend successfully');
-
-      // Then, trigger the n8n workflow
+      // Only send to n8n - let n8n handle backend communication and document creation
       const n8nResponse = await fetch('https://primary-production-1d298.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
         method: 'POST',
         headers: {
@@ -105,6 +87,14 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
 
       const result = await n8nResponse.json();
       console.log('✅ n8n webhook triggered successfully:', result);
+      console.log('📝 n8n will now create the document request and handle processing');
+      
+      // Trigger immediate refresh to show the new request
+      setTimeout(() => {
+        console.log('🔄 Triggering immediate refresh after webhook...');
+        get().fetchRequests();
+      }, 2000); // Wait 2 seconds for n8n to create the request
+      
       return true;
     } catch (error) {
       console.error('❌ Error in webhook request flow:', error);
@@ -276,11 +266,12 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         req.status === 'Waiting for Client Email Approval'
       );
       
-      if (hasActiveRequests) {
+      // Always poll if there are active requests, or if we have no requests (might be first request)
+      if (hasActiveRequests || requests.length === 0) {
         console.log('🔄 Polling for updates...');
         await get().fetchRequests();
       }
-    }, 30000); // Poll every 30 seconds if there are active requests
+    }, 15000); // Poll every 15 seconds for more responsive updates
     
     // Return cleanup function
     return () => clearInterval(pollInterval);
