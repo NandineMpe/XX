@@ -1132,6 +1132,40 @@ def create_document_routes(
                 file_sources=[source_identifier],
             )
 
+            # Create document request entry for frontend display
+            try:
+                from lightrag.api.routers.document_request_routes import document_requests_db, get_current_timestamp
+                import uuid
+                
+                request_id = str(uuid.uuid4())
+                document_requests_db[request_id] = {
+                    "requestId": request_id,
+                    "status": "Processing",
+                    "documentType": request.metadata.get("document_type", "n8n_upload") if request.metadata else "n8n_upload",
+                    "parameters": request.metadata,
+                    "downloadUrl": None,
+                    "fileName": f"{source_identifier}.{request.content_type}",
+                    "fileSize": len(request.content),
+                    "errorMessage": None,
+                    "createdAt": get_current_timestamp(),
+                    "updatedAt": get_current_timestamp()
+                }
+                
+                # Add background task to update status to Ready when processing completes
+                async def update_document_status():
+                    import asyncio
+                    await asyncio.sleep(5)  # Wait for processing to complete
+                    if request_id in document_requests_db:
+                        document_requests_db[request_id].update({
+                            "status": "Ready",
+                            "updatedAt": get_current_timestamp()
+                        })
+                
+                background_tasks.add_task(update_document_status)
+                
+            except Exception as e:
+                logger.warning(f"Failed to create document request entry: {str(e)}")
+
             return InsertResponse(
                 status="success",
                 message=f"Content from n8n webhook ({source_identifier}) successfully received. Processing will continue in background.",
