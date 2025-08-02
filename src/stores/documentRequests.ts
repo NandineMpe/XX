@@ -69,7 +69,8 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
     try {
       console.log('🚀 Sending webhook request:', requestData);
       
-      const response = await fetch('https://primary-production-1d298.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
+      // First, store the request in the backend immediately
+      const backendResponse = await fetch('https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
         method: 'POST',
         headers: {
           'X-API-Key': 'admin123',
@@ -78,17 +79,35 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         body: JSON.stringify(requestData),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Webhook request failed:', response.status, errorText);
-        throw new Error(`Webhook failed: ${response.status} - ${errorText}`);
+      if (!backendResponse.ok) {
+        const errorText = await backendResponse.text();
+        console.error('❌ Backend request failed:', backendResponse.status, errorText);
+        throw new Error(`Backend failed: ${backendResponse.status} - ${errorText}`);
       }
 
-      const result = await response.json();
-      console.log('✅ Webhook request successful:', result);
+      console.log('✅ Request stored in backend successfully');
+
+      // Then, trigger the n8n workflow
+      const n8nResponse = await fetch('https://primary-production-1d298.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
+        method: 'POST',
+        headers: {
+          'X-API-Key': 'admin123',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!n8nResponse.ok) {
+        const errorText = await n8nResponse.text();
+        console.error('❌ n8n webhook failed:', n8nResponse.status, errorText);
+        throw new Error(`n8n webhook failed: ${n8nResponse.status} - ${errorText}`);
+      }
+
+      const result = await n8nResponse.json();
+      console.log('✅ n8n webhook triggered successfully:', result);
       return true;
     } catch (error) {
-      console.error('❌ Error sending webhook request:', error);
+      console.error('❌ Error in webhook request flow:', error);
       set({ error: error instanceof Error ? error.message : 'Failed to send webhook request' });
       return false;
     }
