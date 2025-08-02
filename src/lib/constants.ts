@@ -9,7 +9,7 @@ export const ifrsMicroserviceUrl = 'https://web-production-89b97.up.railway.app'
 // Debug logging
 console.log('Final backendBaseUrl:', backendBaseUrl);
 
-export const webuiPrefix = '/webui/'
+export const webuiPrefix = '/'
 
 export const controlButtonVariant: ButtonVariantType = 'ghost'
 

@@ -5,7 +5,6 @@ import { useDocumentRequestStore } from '@/stores/documentRequests';
 import { v4 as uuidv4 } from 'uuid';
 import { Sidebar } from '@/components/ui/modern-side-bar';
 import N8nTestPanel from '@/components/ui/n8n-test-panel';
-import WebhookTest from '@/components/ui/webhook-test';
 // Mock config/data
 const entities = [
   {
@@ -480,9 +479,6 @@ export default function ProcessWalkthroughLibrary() {
       
       {/* n8n Test Panel - only show in development */}
       {process.env.NODE_ENV === 'development' && <N8nTestPanel />}
-      
-      {/* Webhook Test - always show for debugging */}
-      <WebhookTest />
     </div>
   );
 } 
