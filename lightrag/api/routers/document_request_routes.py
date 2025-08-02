@@ -530,6 +530,12 @@ def create_document_request_routes(api_key: Optional[str] = None):
             DocumentRequestResponse: Response with status and request ID
         """
         try:
+            # Handle form data with action (completion notification) - CHECK THIS FIRST
+            if action is not None:
+                return await handle_form_completion_notification(
+                    requestId, action, downloadUrl, fileName, fileSize, errorMessage
+                )
+            
             # Handle multipart/form-data (binary file upload)
             if file is not None:
                 return await handle_binary_file_upload(
@@ -540,13 +546,7 @@ def create_document_request_routes(api_key: Optional[str] = None):
             if request is not None:
                 return await handle_json_request(request)
             
-            # Handle form data without file (completion notification)
-            if action is not None:
-                return await handle_form_completion_notification(
-                    requestId, action, downloadUrl, fileName, fileSize, errorMessage
-                )
-            
-                        # Handle form data without action (initial request)
+            # Handle form data without action (initial request)
             return await handle_form_initial_request(requestId, documentType, parameters)
                 
         except HTTPException:
