@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import { useDocumentRequestStore } from '@/stores/documentRequests';
 import { v4 as uuidv4 } from 'uuid';
 import { Sidebar } from '@/components/ui/modern-side-bar';
+import N8nTestPanel from '@/components/ui/n8n-test-panel';
 // Mock config/data
 const entities = [
   {
@@ -293,7 +294,7 @@ function OrnuaBusinessModel() {
   });
 
   React.useEffect(() => {
-    if (rive && rive.ready) {
+    if (rive) {
       // Automatically play the state machine
       rive.play();
     }
@@ -316,15 +317,16 @@ export default function ProcessWalkthroughLibrary() {
   const [currentStep, setCurrentStep] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
 
-  const addRequest = useDocumentRequestStore((s) => s.addRequest);
+  const { addRequest, sendWebhookRequest, clearError } = useDocumentRequestStore();
 
   // Helper to handle document request
   const handleRequestDoc = async (doc: any, process: any, step: any) => {
     const now = new Date();
+    const requestId = uuidv4();
     
-    // Create the request data
+    // Create the request data for local state
     const requestData = {
-      id: uuidv4(),
+      id: requestId,
       auditor: 'Sam Salt',
       document: doc.name,
       date: now.toISOString().slice(0, 10),
@@ -336,40 +338,33 @@ export default function ProcessWalkthroughLibrary() {
       attachments: [],
     };
 
-    // Add to local state (existing functionality)
+    // Add to local state immediately for optimistic UI update
     addRequest(requestData);
     setToast(`Requested: ${doc.name}`);
 
-    // Send webhook POST request
-    try {
-      const response = await fetch('https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
-        method: 'POST',
-        headers: {
-          'X-API-Key': 'admin123',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          documentType: doc.name,
-          description: doc.description,
-          parameters: {
-            auditor: 'Sam Salt',
-            entity: selectedEntity.name,
-            process: process.name,
-            step: step.title,
-            source_trigger: 'Walkthrough'
-          },
-          timestamp: now.toISOString(),
-          requestId: requestData.id
-        }),
-      });
+    // Clear any previous errors
+    clearError();
 
-      if (!response.ok) {
-        console.error('Webhook request failed:', response.status, response.statusText);
-      } else {
-        console.log('Webhook request sent successfully');
-      }
-    } catch (error) {
-      console.error('Error sending webhook request:', error);
+    // Send webhook request using the improved store method
+    const webhookData = {
+      documentType: doc.name,
+      description: doc.description,
+      parameters: {
+        auditor: 'Sam Salt',
+        entity: selectedEntity.name,
+        process: process.name,
+        step: step.title,
+        source_trigger: 'Walkthrough'
+      },
+      timestamp: now.toISOString(),
+      requestId: requestId
+    };
+
+    const success = await sendWebhookRequest(webhookData);
+    
+    if (!success) {
+      // If webhook failed, show error toast
+      setToast(`Failed to request: ${doc.name}. Please try again.`);
     }
   };
 
@@ -399,7 +394,7 @@ export default function ProcessWalkthroughLibrary() {
         {/* Glassmorphic Progress Bar for Stages */}
         <div className="w-full max-w-4xl mx-auto mb-8">
           <div className="flex items-center justify-between gap-2 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg border border-white/20" style={{ position: 'relative' }}>
-              {selectedProcess.steps.map((s, i) => (
+            {selectedProcess.steps.map((s, i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
                 <button
                   className={`w-8 h-8 flex items-center justify-center rounded-full border-2 transition-all duration-200 font-bold text-lg ${i === currentStep ? 'bg-white/80 text-black border-white shadow-lg scale-110' : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:text-white'}`}
@@ -424,7 +419,7 @@ export default function ProcessWalkthroughLibrary() {
               }}
             />
           </div>
-            </div>
+        </div>
 
         {/* Rive player for Business Model process */}
         {selectedProcess.id === 'business-model' && (
@@ -481,6 +476,9 @@ export default function ProcessWalkthroughLibrary() {
           </div>
         )}
       </main>
+      
+      {/* n8n Test Panel - only show in development */}
+      {process.env.NODE_ENV === 'development' && <N8nTestPanel />}
     </div>
   );
 } 
