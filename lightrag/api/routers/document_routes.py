@@ -1124,14 +1124,6 @@ def create_document_routes(
                 workflow_id = request.metadata.get("workflow_id", "unknown")
                 source_identifier = f"{request.source}_{workflow_id}"
 
-            # Add to background tasks for processing
-            background_tasks.add_task(
-                pipeline_index_texts,
-                rag,
-                [processed_content],
-                file_sources=[source_identifier],
-            )
-
             # Create document request entry for frontend display
             try:
                 from lightrag.api.routers.document_request_routes import document_requests_db, get_current_timestamp
@@ -1148,23 +1140,76 @@ def create_document_routes(
                     "fileSize": len(request.content),
                     "errorMessage": None,
                     "createdAt": get_current_timestamp(),
-                    "updatedAt": get_current_timestamp()
+                    "updatedAt": get_current_timestamp(),
+                    "file_content": request.content.encode('utf-8'),  # Store actual content for download
+                    "lightrag_source_id": source_identifier  # Link to LightRAG document
                 }
                 
-                # Add background task to update status to Ready when processing completes
-                async def update_document_status():
+                # Add background task to monitor LightRAG processing
+                async def monitor_lightrag_processing():
                     import asyncio
-                    await asyncio.sleep(5)  # Wait for processing to complete
+                    max_attempts = 60  # 5 minutes max (60 * 5 seconds)
+                    attempts = 0
+                    
+                    while attempts < max_attempts:
+                        try:
+                            # Check if document exists in LightRAG and get its status
+                            docs_by_status = await rag.get_docs_by_status("processed")
+                            
+                            # Look for our document by source identifier
+                            for doc_id, doc_status in docs_by_status.items():
+                                if doc_status.file_path == source_identifier:
+                                    # Document is processed successfully
+                                    if request_id in document_requests_db:
+                                        document_requests_db[request_id].update({
+                                            "status": "Ready",
+                                            "updatedAt": get_current_timestamp(),
+                                            "downloadUrl": f"/webhook/api/document-requests/{request_id}/download"
+                                        })
+                                    return
+                            
+                            # Check for failed documents
+                            failed_docs = await rag.get_docs_by_status("failed")
+                            for doc_id, doc_status in failed_docs.items():
+                                if doc_status.file_path == source_identifier:
+                                    # Document processing failed
+                                    if request_id in document_requests_db:
+                                        document_requests_db[request_id].update({
+                                            "status": "Failed",
+                                            "errorMessage": doc_status.error or "Processing failed",
+                                            "updatedAt": get_current_timestamp()
+                                        })
+                                    return
+                            
+                            # Still processing, wait and try again
+                            await asyncio.sleep(5)
+                            attempts += 1
+                            
+                        except Exception as e:
+                            logger.warning(f"Error monitoring LightRAG processing for {request_id}: {str(e)}")
+                            await asyncio.sleep(5)
+                            attempts += 1
+                    
+                    # Timeout - mark as failed
                     if request_id in document_requests_db:
                         document_requests_db[request_id].update({
-                            "status": "Ready",
+                            "status": "Failed",
+                            "errorMessage": "Processing timeout after 5 minutes",
                             "updatedAt": get_current_timestamp()
                         })
                 
-                background_tasks.add_task(update_document_status)
+                background_tasks.add_task(monitor_lightrag_processing)
                 
             except Exception as e:
                 logger.warning(f"Failed to create document request entry: {str(e)}")
+
+            # Add to background tasks for processing
+            background_tasks.add_task(
+                pipeline_index_texts,
+                rag,
+                [processed_content],
+                file_sources=[source_identifier],
+            )
 
             return InsertResponse(
                 status="success",
