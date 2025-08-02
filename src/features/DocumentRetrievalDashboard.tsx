@@ -208,8 +208,19 @@ export default function DocumentRetrievalDashboard() {
     console.log('⏰ Setting up polling every 30 seconds...');
     // Poll every 30 seconds for new document requests
     pollingIntervalRef.current = setInterval(() => {
-      console.log('⏰ Polling interval triggered, refreshing requests...');
-      refreshRequests();
+      // Only poll if there are active requests
+      const hasActiveRequests = requests.some(req => 
+        req.status === 'Requested' || 
+        req.status === 'Auto-Retrieval in Progress' ||
+        req.status === 'Waiting for Client Email Approval'
+      );
+      
+      if (hasActiveRequests) {
+        console.log('⏰ Polling interval triggered, refreshing requests...');
+        refreshRequests();
+      } else {
+        console.log('⏰ No active requests, skipping poll...');
+      }
     }, 30000); // 30 seconds
     
     return () => {
@@ -218,7 +229,7 @@ export default function DocumentRetrievalDashboard() {
         clearInterval(pollingIntervalRef.current);
       }
     };
-  }, []); // Empty dependency array ensures it only runs once on mount
+  }, [requests]); // Add requests as dependency to check active requests
 
   // Manual refresh handler
   const handleRefresh = useCallback(() => {

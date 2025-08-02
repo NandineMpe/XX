@@ -251,7 +251,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         console.log('🔄 Polling for updates...');
         await get().fetchRequests();
       }
-    }, 10000); // Poll every 10 seconds if there are active requests
+    }, 30000); // Poll every 30 seconds if there are active requests
     
     // Return cleanup function
     return () => clearInterval(pollInterval);
