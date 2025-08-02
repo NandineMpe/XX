@@ -68,6 +68,11 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
   sendWebhookRequest: async (requestData) => {
     try {
       console.log('🚀 Sending webhook request to n8n:', requestData);
+      console.log('📄 Document details being sent:', {
+        documentType: requestData.documentType,
+        description: requestData.description,
+        parameters: requestData.parameters
+      });
       
       // Only send to n8n - let n8n handle backend communication and document creation
       const n8nResponse = await fetch('https://primary-production-1d298.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
@@ -164,7 +169,10 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
             mappedStatus,
             downloadUrl: request.downloadUrl,
             fileName: request.fileName,
-            isProcessed
+            isProcessed,
+            documentType: request.documentType,
+            parameters: request.parameters,
+            finalDocumentName: documentName
           });
           
           // Create audit trail
