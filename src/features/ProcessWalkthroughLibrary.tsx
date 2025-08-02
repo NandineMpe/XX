@@ -316,6 +316,9 @@ export default function ProcessWalkthroughLibrary() {
   const [selectedProcess, setSelectedProcess] = useState(selectedEntity.processes[0]);
   const [currentStep, setCurrentStep] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string>('');
+  const [pdfTitle, setPdfTitle] = useState<string>('');
 
   const { addRequest, sendWebhookRequest, clearError } = useDocumentRequestStore();
 
@@ -365,6 +368,25 @@ export default function ProcessWalkthroughLibrary() {
     if (!success) {
       // If webhook failed, show error toast
       setToast(`Failed to request: ${doc.name}. Please try again.`);
+    }
+  };
+
+  // Helper to handle document viewing
+  const handleViewDoc = (doc: any) => {
+    // Map document names to their PDF URLs
+    const documentUrls: Record<string, string> = {
+      'Member Co-operative Framework Agreement': 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Procurement%20and%20Quality%20Policy.pdf',
+      'Procurement & Quality Policy': 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Procurement%20and%20Quality%20Policy.pdf',
+      // Add more document mappings as needed
+    };
+
+    const url = documentUrls[doc.name];
+    if (url) {
+      setPdfUrl(url);
+      setPdfTitle(doc.name);
+      setShowPdfModal(true);
+    } else {
+      setToast(`PDF not available for: ${doc.name}`);
     }
   };
 
@@ -455,7 +477,7 @@ export default function ProcessWalkthroughLibrary() {
                       {doc.type === 'view' ? (
                         <button
                           className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors duration-200"
-                          onClick={() => {/* TODO: Implement view logic if available */}}
+                          onClick={() => handleViewDoc(doc)}
                         >
                           View Document
                         </button>
@@ -479,6 +501,38 @@ export default function ProcessWalkthroughLibrary() {
       
       {/* n8n Test Panel - only show in development */}
       {process.env.NODE_ENV === 'development' && <N8nTestPanel />}
+
+      {/* PDF Viewer Modal */}
+      {showPdfModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full h-full max-w-6xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 bg-gray-100 border-b">
+              <h3 className="text-lg font-semibold text-gray-900 truncate pr-4">
+                {pdfTitle}
+              </h3>
+              <button
+                onClick={() => setShowPdfModal(false)}
+                className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                aria-label="Close PDF viewer"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* PDF Viewer */}
+            <div className="flex-1 w-full h-full">
+              <iframe
+                src={`${pdfUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                className="w-full h-full border-0"
+                title={pdfTitle}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
