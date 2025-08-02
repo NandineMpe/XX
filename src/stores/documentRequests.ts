@@ -76,14 +76,20 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         // Extract parameters if they exist, otherwise use defaults
         const parameters = request.parameters || {};
         
+        // Generate a more descriptive document name if documentType is null
+        const documentName = request.documentType || `Document Request ${request.requestId.slice(0, 8)}`;
+        
+        // Determine if this request has been processed (has downloadUrl or different status)
+        const isProcessed = request.downloadUrl || request.status !== 'Requested';
+        
         return {
           id: request.requestId,
           auditor: parameters.auditor || 'Sam Salt', // Default to Sam Salt if not provided
-          document: request.documentType || 'Document Request', // Use documentType or default
+          document: documentName,
           date: new Date(request.createdAt).toLocaleDateString(),
           source: parameters.source_trigger || 'Walkthrough',
           method: 'Manual',
-          status: request.status,
+          status: isProcessed ? 'Ready' : request.status, // Show as Ready if processed
           lastUpdate: new Date(request.updatedAt).toLocaleString(),
           auditTrail: [{ status: request.status, at: request.updatedAt }],
           attachments: request.downloadUrl ? [{ name: request.fileName || 'Document', url: request.downloadUrl }] : [],
