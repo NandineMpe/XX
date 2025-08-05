@@ -165,7 +165,7 @@ export default function DocumentManager() {
   const health = useBackendState.use.health()
   const pipelineBusy = useBackendState.use.pipelineBusy()
   const [docs, setDocs] = useState<DocsStatusesResponse | null>(null)
-  const currentTab = useSettingsStore.use.currentTab()
+
   const showFileName = useSettingsStore.use.showFileName()
   const setShowFileName = useSettingsStore.use.setShowFileName()
 
@@ -400,12 +400,10 @@ export default function DocumentManager() {
     }
   }, [setDocs, t])
 
-  // Fetch documents when the tab becomes visible
+  // Fetch documents when component mounts (removed currentTab dependency for Settings context)
   useEffect(() => {
-    if (currentTab === 'documents') {
-      fetchDocuments()
-    }
-  }, [currentTab, fetchDocuments])
+    fetchDocuments()
+  }, [fetchDocuments])
 
   const scanDocuments = useCallback(async () => {
     try {
@@ -426,9 +424,9 @@ export default function DocumentManager() {
     }
   }, [t])
 
-  // Set up polling when the documents tab is active and health is good
+  // Set up polling when health is good (removed currentTab dependency for Settings context)
   useEffect(() => {
-    if (currentTab !== 'documents' || !health) {
+    if (!health) {
       return
     }
 
@@ -449,7 +447,7 @@ export default function DocumentManager() {
     return () => {
       clearInterval(interval)
     }
-  }, [health, fetchDocuments, t, currentTab])
+  }, [health, fetchDocuments, t])
 
   // Monitor docs changes to check status counts and trigger health check if needed
   useEffect(() => {
