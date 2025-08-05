@@ -35,19 +35,24 @@ interface SignInPageProps {
 // --- SUB-COMPONENTS ---
 
 const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-2xl border border-border bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-violet-400/70 focus-within:bg-violet-500/10">
-    {children}
+  <div className="relative">
+    <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-purple-500/20 rounded-2xl blur-sm"></div>
+    <div className="relative bg-background/80 backdrop-blur-sm border border-border/50 rounded-2xl">
+      {children}
+    </div>
   </div>
 );
 
 const TestimonialCard = ({ testimonial, delay }: { testimonial: Testimonial, delay: string }) => (
-  <div className={`animate-testimonial ${delay} flex items-start gap-3 rounded-3xl bg-card/40 dark:bg-zinc-800/40 backdrop-blur-xl border border-white/10 p-5 w-64`}>
-    <img src={testimonial.avatarSrc} className="h-10 w-10 object-cover rounded-2xl" alt="avatar" />
-    <div className="text-sm leading-snug">
-      <p className="flex items-center gap-1 font-medium">{testimonial.name}</p>
-      <p className="text-muted-foreground">{testimonial.handle}</p>
-      <p className="mt-1 text-foreground/80">{testimonial.text}</p>
+  <div className={`${delay} bg-background/80 backdrop-blur-sm border border-border/50 rounded-2xl p-4 max-w-xs`}>
+    <div className="flex items-center gap-3 mb-3">
+      <img src={testimonial.avatarSrc} alt={testimonial.name} className="w-10 h-10 rounded-full" />
+      <div>
+        <p className="font-medium text-sm">{testimonial.name}</p>
+        <p className="text-xs text-muted-foreground">{testimonial.handle}</p>
+      </div>
     </div>
+    <p className="text-sm text-muted-foreground">{testimonial.text}</p>
   </div>
 );
 
@@ -64,6 +69,15 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   onCreateAccount,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showKlaviyoForm, setShowKlaviyoForm] = useState(false);
+
+  const handleRequestExclusiveAccess = () => {
+    setShowKlaviyoForm(true);
+  };
+
+  const handleCloseKlaviyoForm = () => {
+    setShowKlaviyoForm(false);
+  };
 
   return (
     <div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw]">
@@ -119,17 +133,33 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
             <div className="animate-element animate-delay-700 relative flex items-center justify-center">
               <span className="w-full border-t border-border"></span>
-              <span className="px-4 text-sm text-muted-foreground bg-background absolute">Or continue with</span>
+              <span className="px-4 text-sm text-muted-foreground bg-background absolute">Don't have access?</span>
             </div>
 
-            <button onClick={onGoogleSignIn} className="animate-element animate-delay-800 w-full flex items-center justify-center gap-3 border border-border rounded-2xl py-4 hover:bg-secondary transition-colors">
-                <GoogleIcon />
-                Continue with Google
-            </button>
+            <div className="animate-element animate-delay-800 text-center space-y-4">
+              <h3 className="text-lg font-semibold text-foreground">Request Exclusive Access</h3>
+              <p className="text-sm text-muted-foreground">
+                Join the exclusive community of early adopters and get priority access to our advanced AI-powered document management platform.
+              </p>
+              <button 
+                onClick={handleRequestExclusiveAccess} 
+                className="w-full flex items-center justify-center gap-3 border border-violet-400 rounded-2xl py-4 hover:bg-violet-500/10 transition-colors text-violet-400 hover:text-violet-300"
+              >
+                Request Exclusive Access
+              </button>
+            </div>
 
-            <p className="animate-element animate-delay-900 text-center text-sm text-muted-foreground">
-              New to our platform? <a href="#" onClick={(e) => { e.preventDefault(); onCreateAccount?.(); }} className="text-violet-400 hover:underline transition-colors">Create Account</a>
-            </p>
+            <div className="animate-element animate-delay-900 text-center space-y-2">
+              <p className="text-xs text-muted-foreground/70">
+                ✨ Early access benefits include:
+              </p>
+              <ul className="text-xs text-muted-foreground/60 space-y-1">
+                <li>• Priority support and onboarding</li>
+                <li>• Exclusive feature previews</li>
+                <li>• Direct feedback channels</li>
+                <li>• Special pricing for early adopters</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -146,6 +176,25 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             </div>
           )}
         </section>
+      )}
+
+      {/* Klaviyo Form Modal */}
+      {showKlaviyoForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-2xl p-6 max-w-md w-full relative">
+            <button
+              onClick={handleCloseKlaviyoForm}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ✕
+            </button>
+            <h3 className="text-lg font-semibold mb-4">Request Exclusive Access</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Join our exclusive community and be among the first to experience the future of AI-powered document management.
+            </p>
+            <div className="klaviyo-form-TwzEQD"></div>
+          </div>
+        </div>
       )}
     </div>
   );
