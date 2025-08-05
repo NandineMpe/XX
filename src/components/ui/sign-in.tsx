@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 // --- HELPER COMPONENTS (ICONS) ---
@@ -78,38 +78,6 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   const handleCloseKlaviyoForm = () => {
     setShowKlaviyoForm(false);
   };
-
-  // Load Klaviyo form when modal opens
-  useEffect(() => {
-    if (showKlaviyoForm) {
-      // Wait for the modal to render, then try to load the Klaviyo form
-      const timer = setTimeout(() => {
-        console.log('Attempting to load Klaviyo form...');
-        
-        // Try multiple approaches to load the Klaviyo form
-        const klaviyo = (window as any)._klOnsite;
-        if (klaviyo && klaviyo.push) {
-          console.log('Klaviyo API found, attempting to open form...');
-          klaviyo.push(['openForm', 'TwzEQD']);
-        } else {
-          console.log('Klaviyo API not found, trying alternative approach...');
-          // Try to manually trigger the form by creating a script
-          const script = document.createElement('script');
-          script.src = 'https://static.klaviyo.com/onsite/js/klaviyo.js';
-          script.onload = () => {
-            console.log('Klaviyo script loaded, attempting to open form...');
-            const klaviyoLoaded = (window as any)._klOnsite;
-            if (klaviyoLoaded && klaviyoLoaded.push) {
-              klaviyoLoaded.push(['openForm', 'TwzEQD']);
-            }
-          };
-          document.head.appendChild(script);
-        }
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [showKlaviyoForm]);
 
   return (
     <div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw]">
@@ -212,7 +180,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             <p className="text-sm text-muted-foreground mb-4">
               Join our exclusive community and be among the first to experience the future of AI-powered document management.
             </p>
-            <div className="klaviyo-form-TwzEQD" style={{ minHeight: '200px' }}></div>
+            <div className="klaviyo-form-TwzEQD"></div>
           </div>
         </div>
       )}
