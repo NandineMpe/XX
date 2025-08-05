@@ -67,69 +67,53 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
 
   sendWebhookRequest: async (requestData) => {
     try {
-      console.log('🚀 Sending document to LightRAG:', requestData);
-      console.log('📄 Document details being sent:', {
+      console.log('🚀 Sending document request to n8n webhook:', requestData);
+      console.log('📄 Document request details being sent:', {
         documentType: requestData.documentType,
         description: requestData.description,
         parameters: requestData.parameters
       });
       
-      // Upload directly to LightRAG documents endpoint
-      const formData = new FormData();
-      
-      // Create a simple text file with the document request details
-      const documentContent = `Document Request: ${requestData.documentType}
-Description: ${requestData.description}
-Auditor: ${requestData.parameters.auditor}
-Entity: ${requestData.parameters.entity}
-Process: ${requestData.parameters.process}
-Step: ${requestData.parameters.step}
-Request ID: ${requestData.requestId}
-Timestamp: ${requestData.timestamp}`;
-      
-      const blob = new Blob([documentContent], { type: 'text/plain' });
-      const file = new File([blob], `${requestData.documentType.replace(/[^a-zA-Z0-9]/g, '_')}.txt`, { type: 'text/plain' });
-      
-      formData.append('file', file);
-      
-      const lightragResponse = await fetch('https://lightrag-production-6328.up.railway.app/documents/upload', {
+      // Send request to n8n webhook endpoint
+      const webhookResponse = await fetch('https://primary-production-1d298.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
         method: 'POST',
         headers: {
           'X-API-Key': 'admin123',
+          'Content-Type': 'application/json',
         },
-        body: formData,
+        body: JSON.stringify(requestData),
       });
 
-      if (!lightragResponse.ok) {
-        const errorText = await lightragResponse.text();
-        console.error('❌ LightRAG upload failed:', lightragResponse.status, errorText);
-        throw new Error(`LightRAG upload failed: ${lightragResponse.status} - ${errorText}`);
+      if (!webhookResponse.ok) {
+        const errorText = await webhookResponse.text();
+        console.error('❌ n8n webhook request failed:', webhookResponse.status, errorText);
+        throw new Error(`n8n webhook request failed: ${webhookResponse.status} - ${errorText}`);
       }
 
-      const result = await lightragResponse.json();
-      console.log('✅ Document uploaded to LightRAG successfully:', result);
-      console.log('📝 Document will now be processed by LightRAG pipeline');
+      const result = await webhookResponse.json();
+      console.log('✅ Document request sent to n8n webhook successfully:', result);
+      console.log('📝 Document request will now be processed by n8n workflow');
       
-      // Trigger immediate refresh to show the new document
+      // Trigger immediate refresh to show the new document request
       setTimeout(() => {
-        console.log('🔄 Triggering immediate refresh after LightRAG upload...');
+        console.log('🔄 Triggering immediate refresh after n8n webhook request...');
         get().fetchRequests();
-      }, 2000); // Wait 2 seconds for LightRAG to process the upload
+      }, 2000); // Wait 2 seconds for n8n to process the request
       
       return true;
     } catch (error) {
-      console.error('❌ Error in LightRAG upload flow:', error);
-      set({ error: error instanceof Error ? error.message : 'Failed to upload document to LightRAG' });
+      console.error('❌ Error in n8n webhook request flow:', error);
+      set({ error: error instanceof Error ? error.message : 'Failed to send document request to n8n webhook' });
       return false;
     }
   },
 
   fetchRequests: async () => {
     try {
-      console.log('🔄 Fetching documents from LightRAG API...');
+      console.log('🔄 Fetching document requests from n8n API...');
       set({ loading: true, error: null });
       
-      const url = 'https://lightrag-production-6328.up.railway.app/documents';
+      const url = 'https://primary-production-1d298.up.railway.app/webhook/api/document-requests';
       console.log('🌐 Making request to:', url);
       
       const response = await fetch(url, {
@@ -150,93 +134,47 @@ Timestamp: ${requestData.timestamp}`;
       }
       
       const data = await response.json();
-      console.log('📊 LightRAG API Response data:', data);
+      console.log('📊 n8n API Response data:', data);
       
-      if (!data.statuses || typeof data.statuses !== 'object') {
-        console.error('❌ Invalid data structure:', data);
-        throw new Error('Invalid data structure received from LightRAG API');
-      }
-      
-      // Transform LightRAG documents into document request format
+      // Transform n8n document requests into document request format
       const transformedRequests: DocumentRequest[] = [];
       
-      // Process documents from all statuses
-      Object.entries(data.statuses).forEach(([status, documents]) => {
-        const docsArray = documents as any[];
-        docsArray.forEach((doc) => {
+      if (Array.isArray(data)) {
+        data.forEach((request) => {
           try {
-            console.log('🔍 Processing LightRAG document:', {
-              id: doc.id,
-              status: status,
-              file_path: doc.file_path,
-              content_summary: doc.content_summary
+            console.log('🔍 Processing n8n document request:', {
+              id: request.id,
+              documentType: request.documentType,
+              status: request.status
             });
-            
-            // Extract filename from file_path and remove .txt extension
-            let fileName = doc.file_path ? doc.file_path.split('/').pop() || 'Unknown Document' : 'Unknown Document';
-            // Remove .txt extension for display
-            if (fileName.endsWith('.txt')) {
-              fileName = fileName.slice(0, -4);
-            }
-            
-            // Create audit trail
-            const auditTrail = [];
-            if (doc.created_at) {
-              auditTrail.push({ 
-                status: 'Requested', 
-                at: new Date(doc.created_at).toISOString() 
-              });
-            }
-            if (doc.updated_at && doc.updated_at !== doc.created_at) {
-              auditTrail.push({ 
-                status: status === 'processed' ? 'Ready' : status === 'processing' ? 'Auto-Retrieval in Progress' : status,
-                at: new Date(doc.updated_at).toISOString() 
-              });
-            }
-            
-            // Map LightRAG status to document request status
-            let mappedStatus = 'Requested';
-            if (status === 'processed') mappedStatus = 'Ready';
-            else if (status === 'processing') mappedStatus = 'Auto-Retrieval in Progress';
-            else if (status === 'failed') mappedStatus = 'Failed / Needs Manual Intervention';
-            
-            // Handle attachments for processed documents
-            const attachments = [];
-            if (status === 'processed' && doc.file_path) {
-              attachments.push({
-                name: fileName,
-                url: 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Purchase%20Order%20GL%20Listing.xlsx'
-              });
-            }
             
             transformedRequests.push({
-              id: doc.id,
-              auditor: 'Sam Salt', // Default since LightRAG doesn't store this
-              document: fileName,
-              date: doc.created_at ? new Date(doc.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
-              source: 'LightRAG Upload',
+              id: request.id || request.requestId,
+              auditor: request.parameters?.auditor || 'Unknown',
+              document: request.documentType || 'Unknown Document',
+              date: request.timestamp ? new Date(request.timestamp).toLocaleDateString() : new Date().toLocaleDateString(),
+              source: request.parameters?.source_trigger || 'Walkthrough',
               method: 'Automatic',
-              status: mappedStatus,
-              lastUpdate: doc.updated_at ? new Date(doc.updated_at).toLocaleString() : new Date().toLocaleString(),
-              auditTrail,
-              attachments,
-              downloadUrl: status === 'processed' ? 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Purchase%20Order%20GL%20Listing.xlsx' : undefined,
-              fileName: fileName,
-              fileSize: doc.content_length ? `${doc.content_length} bytes` : undefined,
-              error: doc.error,
-              // Store original LightRAG data for debugging
-              requestId: doc.id,
-              documentType: fileName,
-              parameters: { source: 'LightRAG Upload' },
-              errorMessage: doc.error,
+              status: request.status || 'Requested',
+              lastUpdate: request.timestamp ? new Date(request.timestamp).toLocaleString() : new Date().toLocaleString(),
+              auditTrail: request.auditTrail || [],
+              attachments: request.attachments || [],
+              downloadUrl: request.downloadUrl,
+              fileName: request.documentType,
+              fileSize: request.fileSize,
+              error: request.error,
+              requestId: request.requestId,
+              documentType: request.documentType,
+              parameters: request.parameters,
+              errorMessage: request.error,
             });
           } catch (transformError) {
-            console.error('❌ Error transforming LightRAG document:', doc, transformError);
+            console.error('❌ Error transforming n8n document request:', request, transformError);
           }
         });
-      });
+      }
       
-      console.log('🔄 Transformed LightRAG documents:', transformedRequests);
+      console.log('🔄 Transformed n8n document requests:', transformedRequests);
       
       set({ 
         requests: transformedRequests,
@@ -244,13 +182,13 @@ Timestamp: ${requestData.timestamp}`;
         error: null 
       });
       
-      console.log('✅ Successfully updated store with', transformedRequests.length, 'documents from LightRAG');
+      console.log('✅ Successfully updated store with', transformedRequests.length, 'document requests from n8n');
       
     } catch (error) {
-      console.error('❌ Error fetching documents from LightRAG:', error);
+      console.error('❌ Error fetching document requests from n8n:', error);
       set({ 
         loading: false, 
-        error: error instanceof Error ? error.message : 'Failed to fetch documents from LightRAG' 
+        error: error instanceof Error ? error.message : 'Failed to fetch document requests from n8n' 
       });
     }
   },
