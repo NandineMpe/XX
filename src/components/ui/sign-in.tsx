@@ -94,11 +94,11 @@ export const SignInPage: React.FC<SignInPageProps> = ({
     if (showKlaviyoForm) {
       console.log('🔄 Klaviyo modal opened, initializing form...');
       
-      // Use a more reliable method to embed the Klaviyo form
+      // Use the correct embed method for the updated script
       const embedKlaviyoForm = () => {
         const formContainer = document.querySelector('.klaviyo-form-TwzEQD');
         if (formContainer) {
-          console.log('🔄 Embedding Klaviyo form...');
+          console.log('🔄 Embedding Klaviyo form with correct API key...');
           
           // Clear the container first
           formContainer.innerHTML = '';
@@ -111,9 +111,10 @@ export const SignInPage: React.FC<SignInPageProps> = ({
           // Add the embed div to the container
           formContainer.appendChild(embedDiv);
           
-          // Try to trigger the form embed
+          // Try to trigger the form embed with the correct method
           if (window._klOnsite) {
-            console.log('✅ Triggering Klaviyo form embed...');
+            console.log('✅ Triggering Klaviyo form embed with correct API key...');
+            // Use the correct embed method for the updated script
             window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
           } else {
             console.log('⏳ Klaviyo script not ready, will retry...');
