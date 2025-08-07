@@ -172,13 +172,46 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               fileName = fileName.slice(0, -4);
             }
             
-            // Filter: Only include documents that are actual document requests
-            // Document requests can be identified by:
-            // 1. Content patterns (for legacy documents)
-            // 2. File naming patterns (for n8n workflow documents)
-            // 3. Processing status (for documents being processed)
-            // 4. n8n webhook specific indicators
-            // 5. Documents that have been uploaded and chunked (processed documents)
+            // Filter: Include ALL documents from LightRAG-3 storage system
+            // According to LightRAG-3, all documents are permanently stored and retrievable
+            // We should include documents that are:
+            // 1. Document requests (n8n webhook documents)
+            // 2. Uploaded documents that have been processed
+            // 3. Documents with any processing status
+            // 4. Documents with content_summary (indicating they've been processed)
+            
+            // Only exclude documents that are clearly invalid or corrupted
+            const isInvalidDocument = 
+              // Exclude documents with no ID
+              !doc.id ||
+              // Exclude documents with no file_path and no content_summary
+              (!doc.file_path && (!doc.content_summary || doc.content_summary.length === 0)) ||
+              // Exclude documents with empty or invalid file_path
+              (doc.file_path && (doc.file_path.trim() === '' || doc.file_path === 'null' || doc.file_path === 'undefined'));
+            
+            // Skip only if this is an invalid document
+            if (isInvalidDocument) {
+              console.log('⏭️ Skipping invalid document:', fileName);
+              console.log('📄 Document ID:', doc.id);
+              console.log('📄 Document file_path:', doc.file_path);
+              console.log('📄 Document content_summary length:', doc.content_summary?.length || 0);
+              return; // Skip invalid documents
+            }
+            
+            console.log('✅ Including document in requests:', fileName);
+            console.log('📄 Document details:', {
+              id: doc.id,
+              status: status,
+              source: doc.source,
+              file_path: doc.file_path,
+              content_summary_length: doc.content_summary?.length || 0
+            });
+            
+            // Parse document request content to extract information
+            const contentLines = doc.content_summary ? doc.content_summary.split('\n') : [];
+            const requestInfo: any = {};
+            
+            // Determine if this is a document request or uploaded document
             const isDocumentRequest = (
               // Check content patterns (legacy documents)
               (doc.content_summary && (
@@ -202,63 +235,12 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               )) ||
               // Check if it has a requestId field
               doc.requestId ||
-              // Check if it's in a processing status (likely a document request)
-              status === 'processing' || status === 'processed' ||
               // Check if it came from n8n webhook (by source or file path)
               (doc.source && doc.source.toLowerCase().includes('n8n')) ||
               (doc.file_path && doc.file_path.toLowerCase().includes('n8n')) ||
               // Check if it's an n8n upload document
-              (doc.documentType && doc.documentType === 'n8n_upload') ||
-              // Include documents that have been processed (chunked and ready)
-              status === 'processed' ||
-              // Include documents with content_summary (indicating they've been processed)
-              (doc.content_summary && doc.content_summary.length > 0)
+              (doc.documentType && doc.documentType === 'n8n_upload')
             );
-            
-            // Additional check: Exclude files that are clearly NOT document requests
-            // These patterns indicate uploaded files that haven't been processed yet
-            const isUploadedFile = 
-              // Only exclude if it's a raw uploaded file with no processing
-              (!doc.content_summary || doc.content_summary.length === 0) &&
-              (fileName.toLowerCase().includes('.pdf') ||
-              fileName.toLowerCase().includes('.doc') ||
-              fileName.toLowerCase().includes('.docx') ||
-              fileName.toLowerCase().includes('.xls') ||
-              fileName.toLowerCase().includes('.xlsx') ||
-              fileName.toLowerCase().includes('.txt')) &&
-              // AND it doesn't have any of the document request indicators
-              !doc.requestId &&
-              !doc.source &&
-              !doc.documentType &&
-              status !== 'processing' &&
-              status !== 'processed';
-            
-            // Skip if this is not a document request (i.e., it's an uploaded file)
-            if (!isDocumentRequest || isUploadedFile) {
-              console.log('⏭️ Skipping document:', fileName);
-              console.log('📄 Document content summary:', doc.content_summary);
-              console.log('🔍 Is document request:', isDocumentRequest);
-              console.log('🔍 Is uploaded file:', isUploadedFile);
-              console.log('🔍 Document source:', doc.source);
-              console.log('🔍 Document file_path:', doc.file_path);
-              console.log('🔍 Document documentType:', doc.documentType);
-              console.log('🔍 Document status:', status);
-              console.log('🔍 Document requestId:', doc.requestId);
-              return; // Actually skip this document
-            }
-            
-            console.log('✅ Including document in requests:', fileName);
-            console.log('📄 Document details:', {
-              id: doc.id,
-              status: status,
-              source: doc.source,
-              file_path: doc.file_path,
-              content_summary_length: doc.content_summary?.length || 0
-            });
-            
-            // Parse document request content to extract information
-            const contentLines = doc.content_summary ? doc.content_summary.split('\n') : [];
-            const requestInfo: any = {};
             
             // First try to parse from content_summary (legacy documents)
             contentLines.forEach((line: string) => {
@@ -310,8 +292,8 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
             }
             
             // For uploaded documents that have been processed, set appropriate source
-            const documentSource = requestInfo['Source Trigger'] || requestInfo['Process'] 
-              ? 'Walkthrough' 
+            const documentSource = isDocumentRequest 
+              ? (requestInfo['Source Trigger'] || requestInfo['Process'] ? 'Walkthrough' : 'LightRAG Upload')
               : (doc.source && doc.source.toLowerCase().includes('n8n')) 
                 ? 'Walkthrough' 
                 : 'Document Upload';

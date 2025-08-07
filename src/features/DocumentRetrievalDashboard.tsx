@@ -134,8 +134,8 @@ export default function DocumentRetrievalDashboard() {
     {
       header: 'Source/Trigger',
       id: 'source',
-      accessorFn: () => 'Walkthrough',
-      cell: () => 'Walkthrough',
+      accessorFn: (row) => row.source ?? 'Walkthrough',
+      cell: ({ row }) => row.original.source || 'Walkthrough',
     },
     {
       header: 'Current Status',
@@ -246,10 +246,12 @@ export default function DocumentRetrievalDashboard() {
   const statusOptions = Array.from(new Set(requests.map(r => r.status)));
   const auditorOptions = Array.from(new Set(requests.map(r => r.auditor)));
 
-  // Enhanced filter logic
+  // Enhanced filter logic - only show document requests, not all uploaded documents
   const filtered = useMemo(() => {
     if (!Array.isArray(requests)) return [];
-    return requests.filter((r) =>
+    
+    // First filter by search and other criteria
+    const searchFiltered = requests.filter((r) =>
       (r.document?.toLowerCase().includes(search.toLowerCase()) ||
         r.auditor?.toLowerCase().includes(search.toLowerCase()) ||
         r.status?.toLowerCase().includes(search.toLowerCase()) ||
@@ -258,6 +260,23 @@ export default function DocumentRetrievalDashboard() {
       (filterAuditor ? r.auditor === filterAuditor : true) &&
       (filterDate ? r.date === filterDate : true)
     );
+    
+    // Then filter to only show document requests (not uploaded documents)
+    return searchFiltered.filter((r) => {
+      // Show documents that are document requests
+      const isDocumentRequest = 
+        r.source === 'Walkthrough' ||
+        (r.documentType && r.documentType !== 'uploaded') ||
+        (r.parameters && r.parameters.source_trigger === 'Walkthrough') ||
+        (r.document && (
+          r.document.toLowerCase().includes('procurement') ||
+          r.document.toLowerCase().includes('general ledger') ||
+          r.document.toLowerCase().includes('purchase journal') ||
+          r.document.toLowerCase().includes('qb retrieval')
+        ));
+      
+      return isDocumentRequest;
+    });
   }, [requests, search, filterStatus, filterAuditor, filterDate]);
 
   // Loading state
@@ -421,7 +440,7 @@ export default function DocumentRetrievalDashboard() {
                       ))}
                     </ul>
                   ) : (
-                    <div className='text-gray-400 text-xs'>Pending</div>
+                    <div className="text-gray-400 text-xs">Pending</div>
                   )}
                   {/* Status-specific info */}
                   {selected.status === STATUS.WAITING_EMAIL && (
