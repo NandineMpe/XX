@@ -71,124 +71,6 @@ const handleDownload = (request: DocumentRequest) => {
   }
 };
 
-const columns: ColumnDef<DocumentRequest, any>[] = [
-  {
-    header: '',
-    id: 'status',
-    accessorFn: (row) => row.status ?? '',
-    cell: ({ row }) => {
-      const meta = statusMeta[row.original.status] || statusMeta[STATUS.REQUESTED];
-      return (
-        <span className="flex items-center gap-1">
-          {meta.icon}
-          {meta.badge && <Badge variant="secondary" className="ml-1">Email</Badge>}
-        </span>
-      );
-    },
-    size: 40,
-  },
-  {
-    header: 'Auditor',
-    id: 'auditor',
-    accessorFn: (row) => row.auditor ?? '',
-  },
-  {
-    header: 'Document Requested',
-    id: 'document',
-    accessorFn: (row) => row.document ?? '',
-  },
-  {
-    header: 'Date',
-    id: 'date',
-    accessorFn: (row) => row.date ?? '',
-    cell: ({ getValue }) => {
-      const value = getValue();
-      return value ? format(new Date(value), 'yyyy-MM-dd') : '';
-    },
-  },
-  {
-    header: 'Source/Trigger',
-    id: 'source',
-    accessorFn: () => 'Walkthrough',
-    cell: () => 'Walkthrough',
-  },
-  {
-    header: 'Current Status',
-    id: 'currentStatus',
-    accessorFn: (row) => row.status ?? '',
-    cell: ({ getValue }) => {
-      const meta = statusMeta[getValue()] || statusMeta[STATUS.REQUESTED];
-      return (
-        <span className={`flex items-center gap-2 font-medium text-${meta.color}-700`}>
-          {meta.icon}
-          {meta.label}
-        </span>
-      );
-    },
-  },
-  {
-    header: 'Last Update',
-    id: 'lastUpdate',
-    accessorFn: (row) => row.lastUpdate ?? '',
-    cell: ({ getValue }) => {
-      const value = getValue();
-      return value ? format(new Date(value), 'yyyy-MM-dd HH:mm') : '';
-    },
-  },
-  {
-    header: 'Download',
-    id: 'download',
-    cell: ({ row }) => {
-      const request = row.original;
-      // Show download button if document is available (status is SENT, READY, or has attachments)
-      const hasAttachments = request.attachments && request.attachments.length > 0;
-      const isAvailable = request.status === STATUS.SENT || request.status === STATUS.READY || hasAttachments;
-      
-      if (!isAvailable) {
-        return <span className="text-gray-400 text-xs">Not available</span>;
-      }
-      
-      return (
-        <button 
-          className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-          onClick={() => handleDownload(request)}
-          title="Download document"
-        >
-          <Download size={12} />
-          Download
-        </button>
-      );
-    },
-    size: 100,
-  },
-  {
-    header: '',
-    id: 'actions',
-    cell: ({ row }) => {
-      const request = row.original;
-      const actions = statusActions[request.status] || [];
-      return (
-        <div className="flex gap-2">
-          {actions.map((action) => (
-            <button key={action} className="text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">
-              {action}
-            </button>
-          ))}
-          <button 
-            className="text-xs px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white transition-colors"
-            onClick={() => setDeleteConfirm(request)}
-            title="Delete request"
-          >
-            <Trash2 size={12} />
-            Delete
-          </button>
-        </div>
-      );
-    },
-    size: 80,
-  },
-];
-
 export default function DocumentRetrievalDashboard() {
   const { 
     requests, 
@@ -207,6 +89,130 @@ export default function DocumentRetrievalDashboard() {
   const [filterAuditor, setFilterAuditor] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+
+  // Handle delete button click
+  const handleDeleteClick = useCallback((request: DocumentRequest) => {
+    setDeleteConfirm(request);
+  }, []);
+
+  // Define columns inside the component so setDeleteConfirm is in scope
+  const columns: ColumnDef<DocumentRequest, any>[] = [
+    {
+      header: '',
+      id: 'status',
+      accessorFn: (row) => row.status ?? '',
+      cell: ({ row }) => {
+        const meta = statusMeta[row.original.status] || statusMeta[STATUS.REQUESTED];
+        return (
+          <span className="flex items-center gap-1">
+            {meta.icon}
+            {meta.badge && <Badge variant="secondary" className="ml-1">Email</Badge>}
+          </span>
+        );
+      },
+      size: 40,
+    },
+    {
+      header: 'Auditor',
+      id: 'auditor',
+      accessorFn: (row) => row.auditor ?? '',
+    },
+    {
+      header: 'Document Requested',
+      id: 'document',
+      accessorFn: (row) => row.document ?? '',
+    },
+    {
+      header: 'Date',
+      id: 'date',
+      accessorFn: (row) => row.date ?? '',
+      cell: ({ getValue }) => {
+        const value = getValue();
+        return value ? format(new Date(value), 'yyyy-MM-dd') : '';
+      },
+    },
+    {
+      header: 'Source/Trigger',
+      id: 'source',
+      accessorFn: () => 'Walkthrough',
+      cell: () => 'Walkthrough',
+    },
+    {
+      header: 'Current Status',
+      id: 'currentStatus',
+      accessorFn: (row) => row.status ?? '',
+      cell: ({ getValue }) => {
+        const meta = statusMeta[getValue()] || statusMeta[STATUS.REQUESTED];
+        return (
+          <span className={`flex items-center gap-2 font-medium text-${meta.color}-700`}>
+            {meta.icon}
+            {meta.label}
+          </span>
+        );
+      },
+    },
+    {
+      header: 'Last Update',
+      id: 'lastUpdate',
+      accessorFn: (row) => row.lastUpdate ?? '',
+      cell: ({ getValue }) => {
+        const value = getValue();
+        return value ? format(new Date(value), 'yyyy-MM-dd HH:mm') : '';
+      },
+    },
+    {
+      header: 'Download',
+      id: 'download',
+      cell: ({ row }) => {
+        const request = row.original;
+        // Show download button if document is available (status is SENT, READY, or has attachments)
+        const hasAttachments = request.attachments && request.attachments.length > 0;
+        const isAvailable = request.status === STATUS.SENT || request.status === STATUS.READY || hasAttachments;
+        
+        if (!isAvailable) {
+          return <span className="text-gray-400 text-xs">Not available</span>;
+        }
+        
+        return (
+          <button 
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            onClick={() => handleDownload(request)}
+            title="Download document"
+          >
+            <Download size={12} />
+            Download
+          </button>
+        );
+      },
+      size: 100,
+    },
+    {
+      header: '',
+      id: 'actions',
+      cell: ({ row }) => {
+        const request = row.original;
+        const actions = statusActions[request.status] || [];
+        return (
+          <div className="flex gap-2">
+            {actions.map((action) => (
+              <button key={action} className="text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">
+                {action}
+              </button>
+            ))}
+            <button 
+              className="text-xs px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white transition-colors"
+              onClick={() => handleDeleteClick(request)}
+              title="Delete request"
+            >
+              <Trash2 size={12} />
+              Delete
+            </button>
+          </div>
+        );
+      },
+      size: 80,
+    },
+  ];
 
   // Initial data fetch - ensure it runs immediately on mount
   useEffect(() => {
