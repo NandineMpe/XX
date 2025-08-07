@@ -94,36 +94,40 @@ export const SignInPage: React.FC<SignInPageProps> = ({
     if (showKlaviyoForm) {
       console.log('🔄 Klaviyo modal opened, initializing form...');
       
-      // Wait for Klaviyo to be available and initialize the form
-      const initializeKlaviyoForm = () => {
-        if (window._klOnsite) {
-          console.log('✅ Klaviyo script detected, pushing form embed');
-          window._klOnsite.push(['openForm', 'TwzEQD']);
-        } else {
-          console.log('⏳ Klaviyo script not ready, retrying in 500ms...');
-          setTimeout(initializeKlaviyoForm, 500);
-        }
-      };
-
-      // Start initialization
-      initializeKlaviyoForm();
-
-      // Alternative: Try to embed the form directly if Klaviyo doesn't work
-      const embedFormDirectly = () => {
+      // Use a more reliable method to embed the Klaviyo form
+      const embedKlaviyoForm = () => {
         const formContainer = document.querySelector('.klaviyo-form-TwzEQD');
-        if (formContainer && !formContainer.innerHTML.trim()) {
-          console.log('🔄 Embedding Klaviyo form directly...');
-          formContainer.innerHTML = '<div class="klaviyo-form-TwzEQD"></div>';
+        if (formContainer) {
+          console.log('🔄 Embedding Klaviyo form...');
           
-          // Try to trigger Klaviyo form embed again
+          // Clear the container first
+          formContainer.innerHTML = '';
+          
+          // Create the proper embed structure
+          const embedDiv = document.createElement('div');
+          embedDiv.className = 'klaviyo-form-TwzEQD';
+          embedDiv.setAttribute('data-klaviyo-form-id', 'TwzEQD');
+          
+          // Add the embed div to the container
+          formContainer.appendChild(embedDiv);
+          
+          // Try to trigger the form embed
           if (window._klOnsite) {
-            window._klOnsite.push(['openForm', 'TwzEQD']);
+            console.log('✅ Triggering Klaviyo form embed...');
+            window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
+          } else {
+            console.log('⏳ Klaviyo script not ready, will retry...');
+            setTimeout(() => {
+              if (window._klOnsite) {
+                window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
+              }
+            }, 1000);
           }
         }
       };
 
-      // Try direct embedding after a delay
-      setTimeout(embedFormDirectly, 1000);
+      // Start the embedding process
+      embedKlaviyoForm();
 
       const handleKlaviyoSubmit = (event: any) => {
         console.log('📝 Klaviyo form submission event received:', event);
@@ -260,12 +264,28 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 <p className="text-sm text-muted-foreground mb-4">
                   Join our exclusive community and be among the first to experience the future of AI-powered document management.
                 </p>
-                <div className="klaviyo-form-TwzEQD" style={{ minHeight: '300px' }}></div>
+                
+                {/* Klaviyo Form Container */}
+                <div className="klaviyo-form-TwzEQD" style={{ minHeight: '300px', position: 'relative' }}>
+                  {/* The Klaviyo form will be embedded here */}
+                </div>
+                
                 {/* Fallback if Klaviyo form doesn't load */}
-                <div className="text-center py-4">
-                  <p className="text-sm text-muted-foreground">
-                    If the form doesn't appear, please refresh the page and try again.
+                <div className="text-center py-4 mt-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Having trouble with the form?
                   </p>
+                  <button
+                    onClick={() => {
+                      // Try to reload the form
+                      if (window._klOnsite) {
+                        window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
+                      }
+                    }}
+                    className="text-sm text-violet-400 hover:text-violet-300 underline"
+                  >
+                    Try again
+                  </button>
                 </div>
               </>
             ) : (
