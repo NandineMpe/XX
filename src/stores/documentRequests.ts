@@ -81,7 +81,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       });
       
       // Send request to n8n webhook endpoint
-      const webhookResponse = await fetch('https://primary-production-1d298.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
+      const webhookResponse = await fetch('https://lightrag-production-6328.up.railway.app/documents/n8n_webhook', {
         method: 'POST',
         headers: {
           'X-API-Key': 'admin123',
@@ -187,13 +187,24 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               // 5. Specific n8n filename patterns
               (fileName && (
                 fileName.toLowerCase().includes('qb retrieval n8n') ||
-                fileName.toLowerCase().includes('procurement general ledger n8n')
+                fileName.toLowerCase().includes('procurement general ledger n8n') ||
+                fileName.toLowerCase().includes('n8n')
               )) ||
               // 6. Content summary with document request patterns (legacy)
               (doc.content_summary && (
                 doc.content_summary.includes('Document Request:') ||
                 doc.content_summary.includes('Request ID:') ||
-                doc.content_summary.includes('source_trigger:')
+                doc.content_summary.includes('source_trigger:') ||
+                doc.content_summary.includes('n8n')
+              )) ||
+              // 7. Parameters field with n8n indicators
+              (doc.parameters && (
+                (typeof doc.parameters === 'string' && doc.parameters.includes('n8n')) ||
+                (typeof doc.parameters === 'object' && (
+                  doc.parameters.source_trigger === 'Walkthrough' ||
+                  doc.parameters.documentType ||
+                  doc.parameters.requestId
+                ))
               ))
             );
             
@@ -205,6 +216,9 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               console.log('📄 Document documentType:', doc.documentType);
               console.log('📄 Document requestId:', doc.requestId);
               console.log('📄 Document content_summary includes document request patterns:', doc.content_summary?.includes('Document Request:') || false);
+              console.log('📄 Document parameters:', doc.parameters);
+              console.log('📄 Document content_summary includes n8n:', doc.content_summary?.includes('n8n') || false);
+              console.log('📄 Document file_path includes n8n:', doc.file_path?.includes('n8n') || false);
               return; // Skip uploaded documents
             }
             
