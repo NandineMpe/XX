@@ -308,7 +308,19 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
                     .replace(/_/g, ' ') // Replace underscores with spaces
                     .replace(/\b\w/g, (l: string) => l.toUpperCase()); // Capitalize words
                   
-                  requestInfo['Document Request'] = cleanFileName || 'Document Request';
+                  // If the filename is just 'webhook' or similar, use the documentType from parameters
+                  if (cleanFileName.toLowerCase() === 'webhook' && doc.parameters) {
+                    try {
+                      const params = typeof doc.parameters === 'string' 
+                        ? JSON.parse(doc.parameters) 
+                        : doc.parameters;
+                      requestInfo['Document Request'] = params.documentType || params.document_type || 'Document Request';
+                    } catch {
+                      requestInfo['Document Request'] = 'Document Request';
+                    }
+                  } else {
+                    requestInfo['Document Request'] = cleanFileName || 'Document Request';
+                  }
                 } else {
                   // For uploaded documents, use the filename as the document name
                   requestInfo['Document Request'] = fileName;
@@ -358,6 +370,11 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               finalSource = 'Walkthrough';
             } else if (doc.source && doc.source !== 'Ornua') {
               finalSource = doc.source;
+            }
+            
+            // For n8n documents, ALWAYS use 'Walkthrough' as the source
+            if (isDocumentRequest) {
+              finalSource = 'Walkthrough';
             }
             
             // Create audit trail
