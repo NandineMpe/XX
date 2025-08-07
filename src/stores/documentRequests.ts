@@ -178,20 +178,38 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               doc.content_summary.includes('parameters:') ||
               doc.content_summary.includes('source_trigger:') ||
               // If it has a requestId field, it's likely a document request
-              doc.requestId ||
-              // If it's in a processing status, it's likely a document request
-              status === 'processing' || status === 'processed' || status === 'failed'
+              doc.requestId
             );
             
+            // Additional check: Exclude files that are clearly uploaded documents
+            // These patterns indicate uploaded files, not document requests
+            const isUploadedFile = fileName.toLowerCase().includes('.pdf') ||
+              fileName.toLowerCase().includes('.doc') ||
+              fileName.toLowerCase().includes('.docx') ||
+              fileName.toLowerCase().includes('.xls') ||
+              fileName.toLowerCase().includes('.xlsx') ||
+              fileName.toLowerCase().includes('.txt') ||
+              // Check if the content looks like a document request metadata
+              (doc.content_summary && (
+                doc.content_summary.includes('file_path:') ||
+                doc.content_summary.includes('content_length:') ||
+                doc.content_summary.includes('created_at:') ||
+                doc.content_summary.includes('updated_at:')
+              )) ||
+              // Check if the filename looks like a standard document (not a request)
+              fileName.toLowerCase().includes('ias-') ||
+              fileName.toLowerCase().includes('ifrs-') ||
+              fileName.toLowerCase().includes('policy') ||
+              fileName.toLowerCase().includes('agreement') ||
+              fileName.toLowerCase().includes('procedure');
+            
             // Skip if this is not a document request (i.e., it's an uploaded file)
-            if (!isDocumentRequest) {
+            if (!isDocumentRequest || isUploadedFile) {
               console.log('⏭️ Skipping uploaded file (not a document request):', fileName);
               console.log('📄 Document content summary:', doc.content_summary);
-              
-              // TEMPORARY: Include all documents for debugging
-              // Remove this block once the issue is resolved
-              console.log('🔍 TEMPORARY DEBUG: Including document anyway for debugging');
-              // Don't return - continue processing this document
+              console.log('🔍 Is document request:', isDocumentRequest);
+              console.log('🔍 Is uploaded file:', isUploadedFile);
+              return; // Actually skip this document
             }
             
             // Parse document request content to extract information
