@@ -150,7 +150,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       console.log('📊 Current local requests:', currentRequests);
       
       // Transform LightRAG documents into document request format
-      // Only include documents that are actual document requests (not uploaded files)
+      // Only include documents that are actual document requests (n8n webhook documents)
       const transformedRequests: DocumentRequest[] = [];
       
       // Process documents from all statuses
@@ -172,30 +172,40 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               fileName = fileName.slice(0, -4);
             }
             
-            // Filter: Include ALL documents from LightRAG-3 storage system
-            // According to LightRAG-3, all documents are permanently stored and retrievable
-            // We should include documents that are:
-            // 1. Document requests (n8n webhook documents)
-            // 2. Uploaded documents that have been processed
-            // 3. Documents with any processing status
-            // 4. Documents with content_summary (indicating they've been processed)
+            // Filter: ONLY include documents that are actual document requests from n8n webhook
+            // This should be very strict - only n8n webhook documents, not uploaded documents
+            const isDocumentRequest = (
+              // MUST have one of these n8n-specific indicators:
+              // 1. n8n in source field
+              (doc.source && doc.source.toLowerCase().includes('n8n')) ||
+              // 2. n8n in file_path
+              (doc.file_path && doc.file_path.toLowerCase().includes('n8n')) ||
+              // 3. n8n_upload documentType
+              (doc.documentType && doc.documentType === 'n8n_upload') ||
+              // 4. requestId field (indicates it's a document request)
+              doc.requestId ||
+              // 5. Specific n8n filename patterns
+              (fileName && (
+                fileName.toLowerCase().includes('qb retrieval n8n') ||
+                fileName.toLowerCase().includes('procurement general ledger n8n')
+              )) ||
+              // 6. Content summary with document request patterns (legacy)
+              (doc.content_summary && (
+                doc.content_summary.includes('Document Request:') ||
+                doc.content_summary.includes('Request ID:') ||
+                doc.content_summary.includes('source_trigger:')
+              ))
+            );
             
-            // Only exclude documents that are clearly invalid or corrupted
-            const isInvalidDocument = 
-              // Exclude documents with no ID
-              !doc.id ||
-              // Exclude documents with no file_path and no content_summary
-              (!doc.file_path && (!doc.content_summary || doc.content_summary.length === 0)) ||
-              // Exclude documents with empty or invalid file_path
-              (doc.file_path && (doc.file_path.trim() === '' || doc.file_path === 'null' || doc.file_path === 'undefined'));
-            
-            // Skip only if this is an invalid document
-            if (isInvalidDocument) {
-              console.log('⏭️ Skipping invalid document:', fileName);
-              console.log('📄 Document ID:', doc.id);
+            // Skip if this is not a document request (i.e., it's an uploaded file)
+            if (!isDocumentRequest) {
+              console.log('⏭️ Skipping uploaded document (not a document request):', fileName);
+              console.log('📄 Document source:', doc.source);
               console.log('📄 Document file_path:', doc.file_path);
-              console.log('📄 Document content_summary length:', doc.content_summary?.length || 0);
-              return; // Skip invalid documents
+              console.log('📄 Document documentType:', doc.documentType);
+              console.log('📄 Document requestId:', doc.requestId);
+              console.log('📄 Document content_summary includes document request patterns:', doc.content_summary?.includes('Document Request:') || false);
+              return; // Skip uploaded documents
             }
             
             console.log('✅ Including document in requests:', fileName);
@@ -212,35 +222,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
             const requestInfo: any = {};
             
             // Determine if this is a document request or uploaded document
-            const isDocumentRequest = (
-              // Check content patterns (legacy documents)
-              (doc.content_summary && (
-                doc.content_summary.includes('Document Request:') ||
-                doc.content_summary.includes('Auditor:') ||
-                doc.content_summary.includes('Entity:') ||
-                doc.content_summary.includes('Process:') ||
-                doc.content_summary.includes('Step:') ||
-                doc.content_summary.includes('Request ID:') ||
-                doc.content_summary.includes('documentType:') ||
-                doc.content_summary.includes('parameters:') ||
-                doc.content_summary.includes('source_trigger:')
-              )) ||
-              // Check for n8n webhook documents specifically
-              (fileName && (
-                fileName.toLowerCase().includes('qb retrieval') ||
-                fileName.toLowerCase().includes('n8n') ||
-                fileName.toLowerCase().includes('procurement') ||
-                fileName.toLowerCase().includes('general ledger') ||
-                fileName.toLowerCase().includes('purchase journal')
-              )) ||
-              // Check if it has a requestId field
-              doc.requestId ||
-              // Check if it came from n8n webhook (by source or file path)
-              (doc.source && doc.source.toLowerCase().includes('n8n')) ||
-              (doc.file_path && doc.file_path.toLowerCase().includes('n8n')) ||
-              // Check if it's an n8n upload document
-              (doc.documentType && doc.documentType === 'n8n_upload')
-            );
+            // This logic is now handled by the isDocumentRequest check above
             
             // First try to parse from content_summary (legacy documents)
             contentLines.forEach((line: string) => {

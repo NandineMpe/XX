@@ -262,16 +262,19 @@ export default function DocumentRetrievalDashboard() {
     );
     
     // Then filter to only show document requests (not uploaded documents)
+    // This should be very strict - only n8n webhook documents
     return searchFiltered.filter((r) => {
-      // Show documents that are document requests
+      // Show ONLY documents that are document requests from n8n webhook
       const isDocumentRequest = 
+        // Must have source = 'Walkthrough' (indicates n8n webhook)
         r.source === 'Walkthrough' ||
-        (r.documentType && r.documentType !== 'uploaded') ||
+        // Must have n8n_upload documentType
+        (r.documentType && r.documentType === 'n8n_upload') ||
+        // Must have source_trigger = 'Walkthrough' in parameters
         (r.parameters && r.parameters.source_trigger === 'Walkthrough') ||
+        // Must have specific n8n document patterns
         (r.document && (
-          r.document.toLowerCase().includes('procurement') ||
-          r.document.toLowerCase().includes('general ledger') ||
-          r.document.toLowerCase().includes('purchase journal') ||
+          r.document.toLowerCase().includes('procurement general ledger') ||
           r.document.toLowerCase().includes('qb retrieval')
         ));
       
@@ -439,9 +442,9 @@ export default function DocumentRetrievalDashboard() {
                         <li key={i}><a href={a.url} className="text-blue-600 underline">{a.name}</a></li>
                       ))}
                     </ul>
-                  ) : (
-                    <div className="text-gray-400 text-xs">Pending</div>
-                  )}
+                                     ) : (
+                     <div className='text-gray-400 text-xs'>Pending</div>
+                   )}
                   {/* Status-specific info */}
                   {selected.status === STATUS.WAITING_EMAIL && (
                     <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
