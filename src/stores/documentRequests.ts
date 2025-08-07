@@ -79,6 +79,8 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         description: requestData.description,
         parameters: requestData.parameters
       });
+      console.log('🌐 Webhook URL:', 'https://lightrag-production-6328.up.railway.app/documents/n8n_webhook');
+      console.log('📦 Request body:', JSON.stringify(requestData, null, 2));
       
       // Send request to n8n webhook endpoint
       const webhookResponse = await fetch('https://lightrag-production-6328.up.railway.app/documents/n8n_webhook', {
@@ -89,6 +91,9 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         },
         body: JSON.stringify(requestData),
       });
+
+      console.log('📡 Webhook response status:', webhookResponse.status);
+      console.log('📡 Webhook response headers:', Object.fromEntries(webhookResponse.headers.entries()));
 
       if (!webhookResponse.ok) {
         const errorText = await webhookResponse.text();
@@ -107,6 +112,10 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       return true;
     } catch (error) {
       console.error('❌ Error in n8n webhook request flow:', error);
+      console.error('❌ Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
       set({ error: error instanceof Error ? error.message : 'Failed to send document request to n8n webhook' });
       return false;
     }
@@ -139,6 +148,12 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       
       const data = await response.json();
       console.log('📊 LightRAG API Response data:', data);
+      console.log('📊 LightRAG API Response data structure:', {
+        hasStatuses: !!data.statuses,
+        statusesType: typeof data.statuses,
+        statusesKeys: data.statuses ? Object.keys(data.statuses) : 'none',
+        totalDocuments: data.statuses ? Object.values(data.statuses).flat().length : 0
+      });
       
       if (!data.statuses || typeof data.statuses !== 'object') {
         console.error('❌ Invalid data structure:', data);
@@ -150,19 +165,25 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       console.log('📊 Current local requests:', currentRequests);
       
       // Transform LightRAG documents into document request format
-      // Only include documents that are actual document requests (n8n webhook documents)
+      // TEMPORARILY: Include ALL documents for debugging
       const transformedRequests: DocumentRequest[] = [];
       
       // Process documents from all statuses
       Object.entries(data.statuses).forEach(([status, documents]) => {
         const docsArray = documents as any[];
+        console.log(`📄 Processing ${docsArray.length} documents with status: ${status}`);
+        
         docsArray.forEach((doc) => {
           try {
             console.log('🔍 Processing LightRAG document:', {
               id: doc.id,
               status: status,
               file_path: doc.file_path,
-              content_summary: doc.content_summary
+              content_summary: doc.content_summary,
+              source: doc.source,
+              documentType: doc.documentType,
+              requestId: doc.requestId,
+              parameters: doc.parameters
             });
             
             // Extract filename from file_path and remove .txt extension
@@ -172,41 +193,8 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               fileName = fileName.slice(0, -4);
             }
             
-            // Filter: ONLY include documents that are actual document requests from n8n webhook
-            // This should be very strict - only n8n webhook documents, not uploaded documents
-            const isDocumentRequest = (
-              // MUST have one of these n8n-specific indicators:
-              // 1. n8n in source field
-              (doc.source && doc.source.toLowerCase().includes('n8n')) ||
-              // 2. n8n in file_path
-              (doc.file_path && doc.file_path.toLowerCase().includes('n8n')) ||
-              // 3. n8n_upload documentType
-              (doc.documentType && doc.documentType === 'n8n_upload') ||
-              // 4. requestId field (indicates it's a document request)
-              doc.requestId ||
-              // 5. Specific n8n filename patterns
-              (fileName && (
-                fileName.toLowerCase().includes('qb retrieval n8n') ||
-                fileName.toLowerCase().includes('procurement general ledger n8n') ||
-                fileName.toLowerCase().includes('n8n')
-              )) ||
-              // 6. Content summary with document request patterns (legacy)
-              (doc.content_summary && (
-                doc.content_summary.includes('Document Request:') ||
-                doc.content_summary.includes('Request ID:') ||
-                doc.content_summary.includes('source_trigger:') ||
-                doc.content_summary.includes('n8n')
-              )) ||
-              // 7. Parameters field with n8n indicators
-              (doc.parameters && (
-                (typeof doc.parameters === 'string' && doc.parameters.includes('n8n')) ||
-                (typeof doc.parameters === 'object' && (
-                  doc.parameters.source_trigger === 'Walkthrough' ||
-                  doc.parameters.documentType ||
-                  doc.parameters.requestId
-                ))
-              ))
-            );
+            // TEMPORARILY: Include ALL documents for debugging
+            const isDocumentRequest = true; // Temporarily include all documents
             
             // Skip if this is not a document request (i.e., it's an uploaded file)
             if (!isDocumentRequest) {
