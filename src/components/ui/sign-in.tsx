@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+
+// TypeScript declaration for Klaviyo
+declare global {
+  interface Window {
+    _klOnsite?: any[];
+  }
+}
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -70,14 +77,94 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showKlaviyoForm, setShowKlaviyoForm] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const handleRequestExclusiveAccess = () => {
     setShowKlaviyoForm(true);
+    setFormSubmitted(false);
   };
 
   const handleCloseKlaviyoForm = () => {
     setShowKlaviyoForm(false);
+    setFormSubmitted(false);
   };
+
+  // Listen for Klaviyo form submission
+  useEffect(() => {
+    if (showKlaviyoForm) {
+      // Wait for the modal to be rendered in the DOM
+      const timer = setTimeout(() => {
+        const formContainer = document.querySelector('.klaviyo-form-TwzEQD');
+        if (formContainer) {
+          console.log('🎯 Klaviyo form container found, ensuring form renders...');
+          
+          // Check if Klaviyo script is loaded
+          if (window._klOnsite) {
+            console.log('✅ Klaviyo script is loaded');
+            // Try to trigger the form to render
+            try {
+              window._klOnsite.push(['openForm', 'TwzEQD']);
+            } catch (error) {
+              console.log('⚠️ Could not trigger Klaviyo form programmatically:', error);
+            }
+          } else {
+            console.log('❌ Klaviyo script not loaded yet, waiting...');
+            // Wait for Klaviyo script to load
+            const waitForKlaviyo = setInterval(() => {
+              if (window._klOnsite) {
+                console.log('✅ Klaviyo script loaded, now triggering form');
+                clearInterval(waitForKlaviyo);
+                try {
+                  window._klOnsite.push(['openForm', 'TwzEQD']);
+                } catch (error) {
+                  console.log('⚠️ Could not trigger Klaviyo form:', error);
+                }
+              }
+            }, 500);
+            
+            // Stop waiting after 10 seconds
+            setTimeout(() => {
+              clearInterval(waitForKlaviyo);
+              console.log('⏰ Timeout waiting for Klaviyo script');
+            }, 10000);
+          }
+        } else {
+          console.log('❌ Klaviyo form container not found');
+        }
+      }, 100);
+
+      const handleKlaviyoSubmit = (event: any) => {
+        console.log('📝 Klaviyo form submission event received:', event);
+        // Check if the event is from our Klaviyo form
+        if (event.detail && event.detail.formId === 'TwzEQD') {
+          setFormSubmitted(true);
+        }
+      };
+
+      // Listen for Klaviyo form submission events
+      document.addEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
+      
+      // Also listen for the specific form submission
+      const checkFormSubmission = setInterval(() => {
+        const formElement = document.querySelector('.klaviyo-form-TwzEQD');
+        if (formElement) {
+          // Check if the form has been submitted by looking for success indicators
+          const successElements = formElement.querySelectorAll('[data-success], .klaviyo-form-success');
+          if (successElements.length > 0) {
+            console.log('✅ Form submission detected via DOM check');
+            setFormSubmitted(true);
+            clearInterval(checkFormSubmission);
+          }
+        }
+      }, 1000);
+
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
+        clearInterval(checkFormSubmission);
+      };
+    }
+  }, [showKlaviyoForm]);
 
   return (
     <div className="h-[100dvh] flex flex-col md:flex-row font-geist w-[100dvw]">
@@ -176,11 +263,41 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             >
               ✕
             </button>
-            <h3 className="text-lg font-semibold mb-4">Request Exclusive Access</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Join our exclusive community and be among the first to experience the future of AI-powered document management.
-            </p>
-            <div className="klaviyo-form-TwzEQD"></div>
+            
+            {!formSubmitted ? (
+              <>
+                <h3 className="text-lg font-semibold mb-4">Request Exclusive Access</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Join our exclusive community and be among the first to experience the future of AI-powered document management.
+                </p>
+                <div className="klaviyo-form-TwzEQD min-h-[200px] flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <p>Loading form...</p>
+                    <p className="text-xs mt-2">If the form doesn't appear, please refresh the page and try again.</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">You're on the list!</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Thank you for joining our exclusive early access community. We'll be in touch soon - get ready to experience audits, reimagined.
+                  </p>
+                </div>
+                <button
+                  onClick={handleCloseKlaviyoForm}
+                  className="w-full bg-violet-600 text-white rounded-2xl py-3 font-medium hover:bg-violet-700 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
