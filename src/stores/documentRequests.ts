@@ -178,6 +178,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
             // 2. File naming patterns (for n8n workflow documents)
             // 3. Processing status (for documents being processed)
             // 4. n8n webhook specific indicators
+            // 5. Documents that have been uploaded and chunked (processed documents)
             const isDocumentRequest = (
               // Check content patterns (legacy documents)
               (doc.content_summary && (
@@ -207,45 +208,53 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               (doc.source && doc.source.toLowerCase().includes('n8n')) ||
               (doc.file_path && doc.file_path.toLowerCase().includes('n8n')) ||
               // Check if it's an n8n upload document
-              (doc.documentType && doc.documentType === 'n8n_upload')
+              (doc.documentType && doc.documentType === 'n8n_upload') ||
+              // Include documents that have been processed (chunked and ready)
+              status === 'processed' ||
+              // Include documents with content_summary (indicating they've been processed)
+              (doc.content_summary && doc.content_summary.length > 0)
             );
             
-            // Additional check: Exclude files that are clearly uploaded documents
-            // These patterns indicate uploaded files, not document requests
-            const isUploadedFile = fileName.toLowerCase().includes('.pdf') ||
+            // Additional check: Exclude files that are clearly NOT document requests
+            // These patterns indicate uploaded files that haven't been processed yet
+            const isUploadedFile = 
+              // Only exclude if it's a raw uploaded file with no processing
+              (!doc.content_summary || doc.content_summary.length === 0) &&
+              (fileName.toLowerCase().includes('.pdf') ||
               fileName.toLowerCase().includes('.doc') ||
               fileName.toLowerCase().includes('.docx') ||
               fileName.toLowerCase().includes('.xls') ||
               fileName.toLowerCase().includes('.xlsx') ||
-              fileName.toLowerCase().includes('.txt') ||
-              // Check if the content looks like a document request metadata
-              (doc.content_summary && (
-                doc.content_summary.includes('file_path:') ||
-                doc.content_summary.includes('content_length:') ||
-                doc.content_summary.includes('created_at:') ||
-                doc.content_summary.includes('updated_at:')
-              )) ||
-              // Check if the filename looks like a standard document (not a request)
-              // BUT exclude n8n webhook documents
-              ((fileName.toLowerCase().includes('ias-') ||
-              fileName.toLowerCase().includes('ifrs-') ||
-              fileName.toLowerCase().includes('policy') ||
-              fileName.toLowerCase().includes('agreement') ||
-              fileName.toLowerCase().includes('procedure')) &&
-              !fileName.toLowerCase().includes('n8n') &&
-              !fileName.toLowerCase().includes('qb retrieval'));
+              fileName.toLowerCase().includes('.txt')) &&
+              // AND it doesn't have any of the document request indicators
+              !doc.requestId &&
+              !doc.source &&
+              !doc.documentType &&
+              status !== 'processing' &&
+              status !== 'processed';
             
             // Skip if this is not a document request (i.e., it's an uploaded file)
             if (!isDocumentRequest || isUploadedFile) {
-              console.log('⏭️ Skipping uploaded file (not a document request):', fileName);
+              console.log('⏭️ Skipping document:', fileName);
               console.log('📄 Document content summary:', doc.content_summary);
               console.log('🔍 Is document request:', isDocumentRequest);
               console.log('🔍 Is uploaded file:', isUploadedFile);
               console.log('🔍 Document source:', doc.source);
               console.log('🔍 Document file_path:', doc.file_path);
               console.log('🔍 Document documentType:', doc.documentType);
+              console.log('🔍 Document status:', status);
+              console.log('🔍 Document requestId:', doc.requestId);
               return; // Actually skip this document
             }
+            
+            console.log('✅ Including document in requests:', fileName);
+            console.log('📄 Document details:', {
+              id: doc.id,
+              status: status,
+              source: doc.source,
+              file_path: doc.file_path,
+              content_summary_length: doc.content_summary?.length || 0
+            });
             
             // Parse document request content to extract information
             const contentLines = doc.content_summary ? doc.content_summary.split('\n') : [];
@@ -293,11 +302,19 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
                 } else if (fileName.toLowerCase().includes('qb retrieval')) {
                   requestInfo['Document Request'] = fileName.replace('QB Retrieval n8n_', '').replace('_', ' ');
                 } else {
+                  // For uploaded documents, use the filename as the document name
                   requestInfo['Document Request'] = fileName;
                 }
                 requestInfo['Auditor'] = 'Sam Salt'; // Default auditor
               }
             }
+            
+            // For uploaded documents that have been processed, set appropriate source
+            const documentSource = requestInfo['Source Trigger'] || requestInfo['Process'] 
+              ? 'Walkthrough' 
+              : (doc.source && doc.source.toLowerCase().includes('n8n')) 
+                ? 'Walkthrough' 
+                : 'Document Upload';
             
             // Create audit trail
             const auditTrail = [];
@@ -334,7 +351,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               auditor: requestInfo['Auditor'] || 'Sam Salt',
               document: requestInfo['Document Request'] || fileName,
               date: doc.created_at ? new Date(doc.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
-              source: requestInfo['Source Trigger'] || requestInfo['Process'] ? 'Walkthrough' : 'LightRAG Upload',
+              source: documentSource,
               method: 'Automatic',
               status: mappedStatus,
               lastUpdate: doc.updated_at ? new Date(doc.updated_at).toLocaleString() : new Date().toLocaleString(),
