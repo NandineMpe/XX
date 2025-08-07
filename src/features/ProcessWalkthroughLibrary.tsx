@@ -350,6 +350,7 @@ export default function ProcessWalkthroughLibrary() {
 
     // Send webhook request using the improved store method
     const webhookData = {
+      content: `<INSERT_YOUR_FILE_CONTENT_OR_A_REFERENCE_HERE>`, // Required field for n8n webhook
       documentType: doc.name,
       description: doc.description,
       parameters: {

@@ -165,7 +165,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       console.log('📊 Current local requests:', currentRequests);
       
       // Transform LightRAG documents into document request format
-      // TEMPORARILY: Include ALL documents for debugging
+      // Only include documents that are actual document requests (n8n webhook documents)
       const transformedRequests: DocumentRequest[] = [];
       
       // Process documents from all statuses
@@ -193,8 +193,41 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               fileName = fileName.slice(0, -4);
             }
             
-            // TEMPORARILY: Include ALL documents for debugging
-            const isDocumentRequest = true; // Temporarily include all documents
+            // Filter: ONLY include documents that are actual document requests from n8n webhook
+            // This should be very strict - only n8n webhook documents, not uploaded documents
+            const isDocumentRequest = (
+              // MUST have one of these n8n-specific indicators:
+              // 1. n8n in source field
+              (doc.source && doc.source.toLowerCase().includes('n8n')) ||
+              // 2. n8n in file_path
+              (doc.file_path && doc.file_path.toLowerCase().includes('n8n')) ||
+              // 3. n8n_upload documentType
+              (doc.documentType && doc.documentType === 'n8n_upload') ||
+              // 4. requestId field (indicates it's a document request)
+              doc.requestId ||
+              // 5. Specific n8n filename patterns
+              (fileName && (
+                fileName.toLowerCase().includes('qb retrieval n8n') ||
+                fileName.toLowerCase().includes('procurement general ledger n8n') ||
+                fileName.toLowerCase().includes('n8n')
+              )) ||
+              // 6. Content summary with document request patterns (legacy)
+              (doc.content_summary && (
+                doc.content_summary.includes('Document Request:') ||
+                doc.content_summary.includes('Request ID:') ||
+                doc.content_summary.includes('source_trigger:') ||
+                doc.content_summary.includes('n8n')
+              )) ||
+              // 7. Parameters field with n8n indicators
+              (doc.parameters && (
+                (typeof doc.parameters === 'string' && doc.parameters.includes('n8n')) ||
+                (typeof doc.parameters === 'object' && (
+                  doc.parameters.source_trigger === 'Walkthrough' ||
+                  doc.parameters.documentType ||
+                  doc.parameters.requestId
+                ))
+              ))
+            );
             
             // Skip if this is not a document request (i.e., it's an uploaded file)
             if (!isDocumentRequest) {
