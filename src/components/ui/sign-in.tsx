@@ -92,47 +92,6 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   // Listen for Klaviyo form submission
   useEffect(() => {
     if (showKlaviyoForm) {
-      // Wait for the modal to be rendered in the DOM
-      const timer = setTimeout(() => {
-        const formContainer = document.querySelector('.klaviyo-form-TwzEQD');
-        if (formContainer) {
-          console.log('🎯 Klaviyo form container found, ensuring form renders...');
-          
-          // Check if Klaviyo script is loaded
-          if (window._klOnsite) {
-            console.log('✅ Klaviyo script is loaded');
-            // Try to trigger the form to render
-            try {
-              window._klOnsite.push(['openForm', 'TwzEQD']);
-            } catch (error) {
-              console.log('⚠️ Could not trigger Klaviyo form programmatically:', error);
-            }
-          } else {
-            console.log('❌ Klaviyo script not loaded yet, waiting...');
-            // Wait for Klaviyo script to load
-            const waitForKlaviyo = setInterval(() => {
-              if (window._klOnsite) {
-                console.log('✅ Klaviyo script loaded, now triggering form');
-                clearInterval(waitForKlaviyo);
-                try {
-                  window._klOnsite.push(['openForm', 'TwzEQD']);
-                } catch (error) {
-                  console.log('⚠️ Could not trigger Klaviyo form:', error);
-                }
-              }
-            }, 500);
-            
-            // Stop waiting after 10 seconds
-            setTimeout(() => {
-              clearInterval(waitForKlaviyo);
-              console.log('⏰ Timeout waiting for Klaviyo script');
-            }, 10000);
-          }
-        } else {
-          console.log('❌ Klaviyo form container not found');
-        }
-      }, 100);
-
       const handleKlaviyoSubmit = (event: any) => {
         console.log('📝 Klaviyo form submission event received:', event);
         // Check if the event is from our Klaviyo form
@@ -144,14 +103,13 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       // Listen for Klaviyo form submission events
       document.addEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
       
-      // Also listen for the specific form submission
+      // Also check for form submission by monitoring the form element
       const checkFormSubmission = setInterval(() => {
         const formElement = document.querySelector('.klaviyo-form-TwzEQD');
         if (formElement) {
-          // Check if the form has been submitted by looking for success indicators
           const successElements = formElement.querySelectorAll('[data-success], .klaviyo-form-success');
           if (successElements.length > 0) {
-            console.log('✅ Form submission detected via DOM check');
+            console.log('✅ Klaviyo form submission detected via DOM monitoring');
             setFormSubmitted(true);
             clearInterval(checkFormSubmission);
           }
@@ -159,7 +117,6 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       }, 1000);
 
       return () => {
-        clearTimeout(timer);
         document.removeEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
         clearInterval(checkFormSubmission);
       };
@@ -270,12 +227,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 <p className="text-sm text-muted-foreground mb-4">
                   Join our exclusive community and be among the first to experience the future of AI-powered document management.
                 </p>
-                <div className="klaviyo-form-TwzEQD min-h-[200px] flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <p>Loading form...</p>
-                    <p className="text-xs mt-2">If the form doesn't appear, please refresh the page and try again.</p>
-                  </div>
-                </div>
+                <div className="klaviyo-form-TwzEQD"></div>
               </>
             ) : (
               <div className="text-center py-8">
