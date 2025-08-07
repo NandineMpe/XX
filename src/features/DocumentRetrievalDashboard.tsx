@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import DataTable from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { ColumnDef } from '@tanstack/react-table';
-import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search, Download, RefreshCw } from 'lucide-react';
+import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search, Download, RefreshCw, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDocumentRequestStore, DocumentRequest } from '@/stores/documentRequests';
 
@@ -165,7 +165,8 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
     header: '',
     id: 'actions',
     cell: ({ row }) => {
-      const actions = statusActions[row.original.status] || [];
+      const request = row.original;
+      const actions = statusActions[request.status] || [];
       return (
         <div className="flex gap-2">
           {actions.map((action) => (
@@ -173,6 +174,14 @@ const columns: ColumnDef<DocumentRequest, any>[] = [
               {action}
             </button>
           ))}
+          <button 
+            className="text-xs px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white transition-colors"
+            onClick={() => setDeleteConfirm(request)}
+            title="Delete request"
+          >
+            <Trash2 size={12} />
+            Delete
+          </button>
         </div>
       );
     },
@@ -187,10 +196,12 @@ export default function DocumentRetrievalDashboard() {
     error, 
     fetchRequests, 
     refreshRequests,
-    pollForUpdates
+    pollForUpdates,
+    deleteRequest
   } = useDocumentRequestStore();
   
   const [selected, setSelected] = useState<DocumentRequest | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<DocumentRequest | null>(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterAuditor, setFilterAuditor] = useState('');
@@ -315,13 +326,13 @@ export default function DocumentRetrievalDashboard() {
             style={{ minWidth: 220 }}
           >
             <input
-              className='outline-none w-full border-none bg-transparent text-gray-300 pr-8 text-sm placeholder-gray-400'
-              placeholder='Search by document, auditor, status, or date...'
+              className="outline-none w-full border-none bg-transparent text-gray-300 pr-8 text-sm placeholder-gray-400"
+              placeholder="Search by document, auditor, status, or date..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
-              type='text'
+              type="text"
             />
             {/* Slash icon for shortcut hint */}
             {!search && !searchFocused && (
@@ -400,7 +411,7 @@ export default function DocumentRetrievalDashboard() {
                   {selected.attachments.length ? (
                     <ul className="text-xs space-y-1">
                       {selected.attachments.map((a: any, i: number) => (
-                        <li key={i}><a href={a.url} className='text-blue-600 underline'>{a.name}</a></li>
+                        <li key={i}><a href={a.url} className="text-blue-600 underline">{a.name}</a></li>
                       ))}
                     </ul>
                   ) : (
@@ -431,6 +442,40 @@ export default function DocumentRetrievalDashboard() {
                       <button className="ml-2 text-xs px-2 py-1 rounded bg-muted hover:bg-accent border text-muted-foreground">View Log</button>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
+          <DialogContent>
+            {deleteConfirm && (
+              <div>
+                <DialogHeader>
+                  <DialogTitle>Delete Document Request</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete the document request for <b>{deleteConfirm.document}</b>?
+                    This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-4 flex gap-3 justify-end">
+                  <button 
+                    onClick={() => setDeleteConfirm(null)}
+                    className="px-4 py-2 text-sm bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => {
+                      deleteRequest(deleteConfirm.id);
+                      setDeleteConfirm(null);
+                    }}
+                    className="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             )}

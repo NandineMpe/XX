@@ -29,6 +29,7 @@ type DocumentRequestStore = {
   error: string | null;
   addRequest: (req: DocumentRequest) => void;
   updateRequest: (id: string, update: Partial<DocumentRequest>) => void;
+  deleteRequest: (id: string) => void;
   fetchRequests: () => Promise<void>;
   refreshRequests: () => Promise<void>;
   // New methods for better n8n integration
@@ -61,6 +62,11 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
   updateRequest: (id, update) =>
     set((state) => ({
       requests: state.requests.map((r) => (r.id === id ? { ...r, ...update } : r)),
+    })),
+  
+  deleteRequest: (id) =>
+    set((state) => ({
+      requests: state.requests.filter((r) => r.id !== id),
     })),
   
   clearError: () => set({ error: null }),
