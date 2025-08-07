@@ -94,11 +94,9 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       console.log('✅ Document request sent to n8n webhook successfully:', result);
       console.log('📝 Document request will now be processed by n8n workflow');
       
-      // Trigger immediate refresh to show the new document request
-      setTimeout(() => {
-        console.log('🔄 Triggering immediate refresh after n8n webhook request...');
-        get().fetchRequests();
-      }, 2000); // Wait 2 seconds for n8n to process the request
+      // Don't trigger immediate refresh - let the local request persist
+      // The polling mechanism will handle updates when LightRAG data becomes available
+      console.log('📝 Local request will persist until LightRAG data is available');
       
       return true;
     } catch (error) {
@@ -140,6 +138,10 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         console.error('❌ Invalid data structure:', data);
         throw new Error('Invalid data structure received from LightRAG API');
       }
+      
+      // Get current local requests to merge with LightRAG data
+      const currentRequests = get().requests;
+      console.log('📊 Current local requests:', currentRequests);
       
       // Transform LightRAG documents into document request format
       // Only include documents that are actual document requests (not uploaded files)
@@ -293,17 +295,39 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         });
       });
       
-      console.log('🔄 Transformed document requests:', transformedRequests);
+      console.log('🔄 Transformed document requests from LightRAG:', transformedRequests);
       console.log('📊 Total documents processed:', Object.values(data.statuses).flat().length);
       console.log('📊 Documents that passed filtering:', transformedRequests.length);
       
+      // Merge LightRAG data with local requests
+      // Keep local requests that don't have matching LightRAG data
+      const mergedRequests = [...currentRequests];
+      
+      // Update existing local requests with LightRAG data if they match
+      transformedRequests.forEach((lightragRequest) => {
+        const existingIndex = mergedRequests.findIndex(req => 
+          req.requestId === lightragRequest.requestId ||
+          req.document === lightragRequest.document
+        );
+        
+        if (existingIndex >= 0) {
+          console.log('🔄 Updating existing local request with LightRAG data:', lightragRequest.document);
+          mergedRequests[existingIndex] = { ...mergedRequests[existingIndex], ...lightragRequest };
+        } else {
+          console.log('➕ Adding new LightRAG request:', lightragRequest.document);
+          mergedRequests.push(lightragRequest);
+        }
+      });
+      
+      console.log('📊 Final merged requests:', mergedRequests);
+      
       set({ 
-        requests: transformedRequests,
+        requests: mergedRequests,
         loading: false,
         error: null 
       });
       
-      console.log('✅ Successfully updated store with', transformedRequests.length, 'document requests from LightRAG');
+      console.log('✅ Successfully updated store with', mergedRequests.length, 'document requests (local + LightRAG)');
       
     } catch (error) {
       console.error('❌ Error fetching document requests from LightRAG:', error);
@@ -329,12 +353,12 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         req.status === 'Waiting for Client Email Approval'
       );
       
-      // Only poll if there are active requests that need updates
-      if (hasActiveRequests) {
+      // Always poll if there are any requests (including new ones that might not have status yet)
+      if (requests.length > 0) {
         console.log('🔄 Polling for updates...');
         await get().fetchRequests();
       }
-    }, 15000); // Poll every 15 seconds for more responsive updates
+    }, 10000); // Poll every 10 seconds for more responsive updates
     
     // Return cleanup function
     return () => clearInterval(pollInterval);

@@ -186,7 +186,8 @@ export default function DocumentRetrievalDashboard() {
     loading, 
     error, 
     fetchRequests, 
-    refreshRequests 
+    refreshRequests,
+    pollForUpdates
   } = useDocumentRequestStore();
   
   const [selected, setSelected] = useState<DocumentRequest | null>(null);
@@ -201,6 +202,15 @@ export default function DocumentRetrievalDashboard() {
     console.log('🚀 DocumentRetrievalDashboard mounted, fetching requests...');
     fetchRequests();
   }, []); // Empty dependency array ensures it only runs once on mount
+
+  // Start polling for updates when component mounts
+  useEffect(() => {
+    console.log('🔄 Starting polling for document request updates...');
+    const cleanup = pollForUpdates();
+    
+    // Cleanup polling when component unmounts
+    return cleanup;
+  }, [pollForUpdates]);
 
   // Manual refresh handler
   const handleRefresh = useCallback(() => {
