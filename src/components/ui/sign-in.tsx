@@ -92,6 +92,39 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   // Listen for Klaviyo form submission
   useEffect(() => {
     if (showKlaviyoForm) {
+      console.log('🔄 Klaviyo modal opened, initializing form...');
+      
+      // Wait for Klaviyo to be available and initialize the form
+      const initializeKlaviyoForm = () => {
+        if (window._klOnsite) {
+          console.log('✅ Klaviyo script detected, pushing form embed');
+          window._klOnsite.push(['openForm', 'TwzEQD']);
+        } else {
+          console.log('⏳ Klaviyo script not ready, retrying in 500ms...');
+          setTimeout(initializeKlaviyoForm, 500);
+        }
+      };
+
+      // Start initialization
+      initializeKlaviyoForm();
+
+      // Alternative: Try to embed the form directly if Klaviyo doesn't work
+      const embedFormDirectly = () => {
+        const formContainer = document.querySelector('.klaviyo-form-TwzEQD');
+        if (formContainer && !formContainer.innerHTML.trim()) {
+          console.log('🔄 Embedding Klaviyo form directly...');
+          formContainer.innerHTML = '<div class="klaviyo-form-TwzEQD"></div>';
+          
+          // Try to trigger Klaviyo form embed again
+          if (window._klOnsite) {
+            window._klOnsite.push(['openForm', 'TwzEQD']);
+          }
+        }
+      };
+
+      // Try direct embedding after a delay
+      setTimeout(embedFormDirectly, 1000);
+
       const handleKlaviyoSubmit = (event: any) => {
         console.log('📝 Klaviyo form submission event received:', event);
         // Check if the event is from our Klaviyo form
@@ -216,7 +249,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
           <div className="bg-background rounded-2xl p-6 max-w-md w-full relative">
             <button
               onClick={handleCloseKlaviyoForm}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors z-10"
             >
               ✕
             </button>
@@ -227,7 +260,13 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 <p className="text-sm text-muted-foreground mb-4">
                   Join our exclusive community and be among the first to experience the future of AI-powered document management.
                 </p>
-                <div className="klaviyo-form-TwzEQD"></div>
+                <div className="klaviyo-form-TwzEQD" style={{ minHeight: '300px' }}></div>
+                {/* Fallback if Klaviyo form doesn't load */}
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground">
+                    If the form doesn't appear, please refresh the page and try again.
+                  </p>
+                </div>
               </>
             ) : (
               <div className="text-center py-8">
