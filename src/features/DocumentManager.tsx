@@ -232,7 +232,13 @@ export default function DocumentManager() {
   type DocStatusWithStatus = DocStatusResponse & { status: DocStatus };
 
   const filteredAndSortedDocs = useMemo(() => {
-    if (!docs) return null;
+    if (!docs) {
+      console.log('📊 DocumentManager: No docs available for filtering');
+      return null;
+    }
+
+    console.log('🔄 DocumentManager: Starting to filter and sort documents...');
+    console.log('📊 DocumentManager: Status filter:', statusFilter);
 
     // Create a flat array of documents with status information
     const allDocuments: DocStatusWithStatus[] = [];
@@ -241,6 +247,7 @@ export default function DocumentManager() {
       // When filter is 'all', include documents from all statuses
       Object.entries(docs.statuses).forEach(([status, documents]) => {
         const docsArr = documents as DocStatusResponse[];
+        console.log(`📊 DocumentManager: Processing ${status} documents:`, docsArr.length);
         docsArr.forEach((doc: DocStatusResponse) => {
           allDocuments.push({
             ...doc,
@@ -251,6 +258,7 @@ export default function DocumentManager() {
     } else {
       // When filter is specific status, only include documents from that status
       const documents: DocStatusResponse[] = docs.statuses[statusFilter] || [];
+      console.log(`📊 DocumentManager: Processing ${statusFilter} documents:`, documents.length);
       documents.forEach((doc: DocStatusResponse) => {
         allDocuments.push({
           ...doc,
@@ -259,11 +267,15 @@ export default function DocumentManager() {
       });
     }
 
+    console.log('📊 DocumentManager: Total documents after filtering:', allDocuments.length);
+
     // Sort all documents together if sort field and direction are specified
     if (sortField && sortDirection) {
+      console.log('🔄 DocumentManager: Sorting documents by', sortField, sortDirection);
       return sortDocuments(allDocuments);
     }
 
+    console.log('✅ DocumentManager: Returning filtered documents:', allDocuments.length);
     return allDocuments;
   }, [docs, sortField, sortDirection, statusFilter, sortDocuments]);
 
@@ -367,13 +379,29 @@ export default function DocumentManager() {
 
   const fetchDocuments = useCallback(async () => {
     try {
+      console.log('🔄 DocumentManager: Starting to fetch documents...');
+      
       // Check if component is still mounted before starting the request
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        console.log('⏭️ DocumentManager: Component not mounted, skipping fetch');
+        return;
+      }
 
       const docs = await getDocuments();
+      console.log('📊 DocumentManager: Received documents from API:', docs);
+      console.log('📊 DocumentManager: Document counts by status:', {
+        pending: docs?.statuses?.pending?.length || 0,
+        processing: docs?.statuses?.processing?.length || 0,
+        processed: docs?.statuses?.processed?.length || 0,
+        failed: docs?.statuses?.failed?.length || 0,
+        total: Object.values(docs?.statuses || {}).reduce((acc, status) => acc + status.length, 0)
+      });
 
       // Check again if component is still mounted after the request completes
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        console.log('⏭️ DocumentManager: Component unmounted after fetch, skipping state update');
+        return;
+      }
 
       // Only update state if component is still mounted
       if (isMountedRef.current) {
@@ -383,16 +411,22 @@ export default function DocumentManager() {
             (acc, status) => acc + status.length,
             0
           )
+          console.log('📊 DocumentManager: Total documents found:', numDocuments);
+          
           if (numDocuments > 0) {
+            console.log('✅ DocumentManager: Setting documents in state');
             setDocs(docs)
           } else {
+            console.log('⚠️ DocumentManager: No documents found, setting docs to null');
             setDocs(null)
           }
         } else {
+          console.log('⚠️ DocumentManager: Invalid docs structure, setting docs to null');
           setDocs(null)
         }
       }
     } catch (err) {
+      console.error('❌ DocumentManager: Error fetching documents:', err);
       // Only show error if component is still mounted
       if (isMountedRef.current) {
         toast.error(t('documentPanel.documentManager.errors.loadFailed', { error: errorMessage(err) }))
