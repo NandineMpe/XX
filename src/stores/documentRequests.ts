@@ -172,17 +172,30 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               doc.content_summary.includes('Entity:') ||
               doc.content_summary.includes('Process:') ||
               doc.content_summary.includes('Step:') ||
-              doc.content_summary.includes('Request ID:')
+              doc.content_summary.includes('Request ID:') ||
+              // Add more flexible patterns to catch different document request formats
+              doc.content_summary.includes('documentType:') ||
+              doc.content_summary.includes('parameters:') ||
+              doc.content_summary.includes('source_trigger:') ||
+              // If it has a requestId field, it's likely a document request
+              doc.requestId ||
+              // If it's in a processing status, it's likely a document request
+              status === 'processing' || status === 'processed' || status === 'failed'
             );
             
             // Skip if this is not a document request (i.e., it's an uploaded file)
             if (!isDocumentRequest) {
               console.log('⏭️ Skipping uploaded file (not a document request):', fileName);
-              return;
+              console.log('📄 Document content summary:', doc.content_summary);
+              
+              // TEMPORARY: Include all documents for debugging
+              // Remove this block once the issue is resolved
+              console.log('🔍 TEMPORARY DEBUG: Including document anyway for debugging');
+              // Don't return - continue processing this document
             }
             
             // Parse document request content to extract information
-            const contentLines = doc.content_summary.split('\n');
+            const contentLines = doc.content_summary ? doc.content_summary.split('\n') : [];
             const requestInfo: any = {};
             
             contentLines.forEach((line: string) => {
@@ -191,6 +204,14 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
                 requestInfo[key] = value;
               }
             });
+            
+            // If we don't have structured content, try to extract from the document itself
+            if (!requestInfo['Document Request'] && !requestInfo['Auditor']) {
+              console.log('🔍 No structured content found, using document metadata');
+              // Use the filename as the document name
+              requestInfo['Document Request'] = fileName;
+              requestInfo['Auditor'] = 'Sam Salt'; // Default auditor
+            }
             
             // Create audit trail
             const auditTrail = [];
@@ -255,6 +276,8 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       });
       
       console.log('🔄 Transformed document requests:', transformedRequests);
+      console.log('📊 Total documents processed:', Object.values(data.statuses).flat().length);
+      console.log('📊 Documents that passed filtering:', transformedRequests.length);
       
       set({ 
         requests: transformedRequests,
