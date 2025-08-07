@@ -265,11 +265,44 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
                   requestInfo['Document Request'] = 'Procurement General Ledger / Purchase Journal';
                 } else if (fileName.toLowerCase().includes('qb retrieval')) {
                   requestInfo['Document Request'] = fileName.replace('QB Retrieval n8n_', '').replace('_', ' ');
+                } else if (fileName.toLowerCase().includes('n8n')) {
+                  // For n8n documents, try to extract meaningful name from filename
+                  const cleanFileName = fileName
+                    .replace(/\.txt$/, '') // Remove .txt extension
+                    .replace(/n8n_/g, '') // Remove n8n_ prefix
+                    .replace(/_/g, ' ') // Replace underscores with spaces
+                    .replace(/\b\w/g, (l: string) => l.toUpperCase()); // Capitalize words
+                  
+                  requestInfo['Document Request'] = cleanFileName || 'Document Request';
                 } else {
                   // For uploaded documents, use the filename as the document name
                   requestInfo['Document Request'] = fileName;
                 }
                 requestInfo['Auditor'] = 'Sam Salt'; // Default auditor
+              }
+              
+              // Ensure we have a proper document name
+              if (!requestInfo['Document Request'] || requestInfo['Document Request'] === 'unknown') {
+                console.log('⚠️ No document name found, using fallback');
+                // Try to extract from content_summary if available
+                if (doc.content_summary && doc.content_summary.length > 0) {
+                  // Look for document type in content summary
+                  const contentLines = doc.content_summary.split('\n');
+                  for (const line of contentLines) {
+                    if (line.toLowerCase().includes('document') || line.toLowerCase().includes('type')) {
+                      const match = line.match(/[^:]*$/); // Get everything after the last colon
+                      if (match && match[0].trim()) {
+                        requestInfo['Document Request'] = match[0].trim();
+                        break;
+                      }
+                    }
+                  }
+                }
+                
+                // Final fallback
+                if (!requestInfo['Document Request'] || requestInfo['Document Request'] === 'unknown') {
+                  requestInfo['Document Request'] = 'Document Request';
+                }
               }
             }
             
@@ -279,6 +312,18 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               : (doc.source && doc.source.toLowerCase().includes('n8n')) 
                 ? 'Walkthrough' 
                 : 'Document Upload';
+                
+            // Override source for specific cases
+            let finalSource = documentSource;
+            if (isDocumentRequest && requestInfo['Source Trigger'] === 'Walkthrough') {
+              finalSource = 'Walkthrough';
+            } else if (isDocumentRequest && requestInfo['Process']) {
+              finalSource = 'Walkthrough';
+            } else if (doc.source && doc.source.toLowerCase().includes('n8n')) {
+              finalSource = 'Walkthrough';
+            } else if (doc.source && doc.source !== 'Ornua') {
+              finalSource = doc.source;
+            }
             
             // Create audit trail
             const auditTrail = [];
@@ -315,7 +360,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               auditor: requestInfo['Auditor'] || 'Sam Salt',
               document: requestInfo['Document Request'] || fileName,
               date: doc.created_at ? new Date(doc.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
-              source: documentSource,
+              source: finalSource,
               method: 'Automatic',
               status: mappedStatus,
               lastUpdate: doc.updated_at ? new Date(doc.updated_at).toLocaleString() : new Date().toLocaleString(),
