@@ -167,20 +167,41 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
             }
             
             // Filter: Only include documents that are actual document requests
-            // Document requests typically have specific naming patterns or content
-            const isDocumentRequest = doc.content_summary && (
-              doc.content_summary.includes('Document Request:') ||
-              doc.content_summary.includes('Auditor:') ||
-              doc.content_summary.includes('Entity:') ||
-              doc.content_summary.includes('Process:') ||
-              doc.content_summary.includes('Step:') ||
-              doc.content_summary.includes('Request ID:') ||
-              // Add more flexible patterns to catch different document request formats
-              doc.content_summary.includes('documentType:') ||
-              doc.content_summary.includes('parameters:') ||
-              doc.content_summary.includes('source_trigger:') ||
-              // If it has a requestId field, it's likely a document request
-              doc.requestId
+            // Document requests can be identified by:
+            // 1. Content patterns (for legacy documents)
+            // 2. File naming patterns (for n8n workflow documents)
+            // 3. Processing status (for documents being processed)
+            // 4. n8n webhook specific indicators
+            const isDocumentRequest = (
+              // Check content patterns (legacy documents)
+              (doc.content_summary && (
+                doc.content_summary.includes('Document Request:') ||
+                doc.content_summary.includes('Auditor:') ||
+                doc.content_summary.includes('Entity:') ||
+                doc.content_summary.includes('Process:') ||
+                doc.content_summary.includes('Step:') ||
+                doc.content_summary.includes('Request ID:') ||
+                doc.content_summary.includes('documentType:') ||
+                doc.content_summary.includes('parameters:') ||
+                doc.content_summary.includes('source_trigger:')
+              )) ||
+              // Check for n8n webhook documents specifically
+              (fileName && (
+                fileName.toLowerCase().includes('qb retrieval') ||
+                fileName.toLowerCase().includes('n8n') ||
+                fileName.toLowerCase().includes('procurement') ||
+                fileName.toLowerCase().includes('general ledger') ||
+                fileName.toLowerCase().includes('purchase journal')
+              )) ||
+              // Check if it has a requestId field
+              doc.requestId ||
+              // Check if it's in a processing status (likely a document request)
+              status === 'processing' || status === 'processed' ||
+              // Check if it came from n8n webhook (by source or file path)
+              (doc.source && doc.source.toLowerCase().includes('n8n')) ||
+              (doc.file_path && doc.file_path.toLowerCase().includes('n8n')) ||
+              // Check if it's an n8n upload document
+              (doc.documentType && doc.documentType === 'n8n_upload')
             );
             
             // Additional check: Exclude files that are clearly uploaded documents
@@ -199,11 +220,14 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
                 doc.content_summary.includes('updated_at:')
               )) ||
               // Check if the filename looks like a standard document (not a request)
-              fileName.toLowerCase().includes('ias-') ||
+              // BUT exclude n8n webhook documents
+              ((fileName.toLowerCase().includes('ias-') ||
               fileName.toLowerCase().includes('ifrs-') ||
               fileName.toLowerCase().includes('policy') ||
               fileName.toLowerCase().includes('agreement') ||
-              fileName.toLowerCase().includes('procedure');
+              fileName.toLowerCase().includes('procedure')) &&
+              !fileName.toLowerCase().includes('n8n') &&
+              !fileName.toLowerCase().includes('qb retrieval'));
             
             // Skip if this is not a document request (i.e., it's an uploaded file)
             if (!isDocumentRequest || isUploadedFile) {
@@ -211,6 +235,9 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               console.log('📄 Document content summary:', doc.content_summary);
               console.log('🔍 Is document request:', isDocumentRequest);
               console.log('🔍 Is uploaded file:', isUploadedFile);
+              console.log('🔍 Document source:', doc.source);
+              console.log('🔍 Document file_path:', doc.file_path);
+              console.log('🔍 Document documentType:', doc.documentType);
               return; // Actually skip this document
             }
             
@@ -218,6 +245,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
             const contentLines = doc.content_summary ? doc.content_summary.split('\n') : [];
             const requestInfo: any = {};
             
+            // First try to parse from content_summary (legacy documents)
             contentLines.forEach((line: string) => {
               if (line.includes(':')) {
                 const [key, value] = line.split(':').map((s: string) => s.trim());
@@ -225,12 +253,44 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               }
             });
             
-            // If we don't have structured content, try to extract from the document itself
+            // If we don't have structured content, try to extract from parameters (n8n documents)
             if (!requestInfo['Document Request'] && !requestInfo['Auditor']) {
-              console.log('🔍 No structured content found, using document metadata');
-              // Use the filename as the document name
-              requestInfo['Document Request'] = fileName;
-              requestInfo['Auditor'] = 'Sam Salt'; // Default auditor
+              console.log('🔍 No structured content found, checking parameters for n8n document');
+              
+              // Check if this is an n8n document with parameters
+              if (doc.parameters) {
+                try {
+                  const params = typeof doc.parameters === 'string' 
+                    ? JSON.parse(doc.parameters) 
+                    : doc.parameters;
+                  
+                  requestInfo['Document Request'] = params.documentType || params.document_type;
+                  requestInfo['Auditor'] = params.auditor;
+                  requestInfo['Entity'] = params.entity;
+                  requestInfo['Process'] = params.process;
+                  requestInfo['Step'] = params.step;
+                  requestInfo['Request ID'] = params.requestId;
+                  requestInfo['Source Trigger'] = params.source_trigger;
+                  
+                  console.log('✅ Successfully extracted parameters from n8n document:', requestInfo);
+                } catch (error) {
+                  console.log('❌ Error parsing parameters:', error);
+                }
+              }
+              
+              // Fallback to filename if still no info
+              if (!requestInfo['Document Request']) {
+                console.log('🔍 Using filename as fallback');
+                // For n8n documents, use the filename to extract document type
+                if (fileName.toLowerCase().includes('procurement general ledger')) {
+                  requestInfo['Document Request'] = 'Procurement General Ledger / Purchase Journal';
+                } else if (fileName.toLowerCase().includes('qb retrieval')) {
+                  requestInfo['Document Request'] = fileName.replace('QB Retrieval n8n_', '').replace('_', ' ');
+                } else {
+                  requestInfo['Document Request'] = fileName;
+                }
+                requestInfo['Auditor'] = 'Sam Salt'; // Default auditor
+              }
             }
             
             // Create audit trail
@@ -268,7 +328,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
               auditor: requestInfo['Auditor'] || 'Sam Salt',
               document: requestInfo['Document Request'] || fileName,
               date: doc.created_at ? new Date(doc.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
-              source: requestInfo['Process'] ? 'Walkthrough' : 'LightRAG Upload',
+              source: requestInfo['Source Trigger'] || requestInfo['Process'] ? 'Walkthrough' : 'LightRAG Upload',
               method: 'Automatic',
               status: mappedStatus,
               lastUpdate: doc.updated_at ? new Date(doc.updated_at).toLocaleString() : new Date().toLocaleString(),
@@ -285,7 +345,7 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
                 entity: requestInfo['Entity'],
                 process: requestInfo['Process'],
                 step: requestInfo['Step'],
-                source: 'Walkthrough'
+                source_trigger: requestInfo['Source Trigger'] || 'Walkthrough'
               },
               errorMessage: doc.error,
             });
@@ -347,11 +407,6 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
     // Set up polling for real-time updates
     const pollInterval = setInterval(async () => {
       const { requests } = get();
-      const hasActiveRequests = requests.some(req => 
-        req.status === 'Requested' || 
-        req.status === 'Auto-Retrieval in Progress' ||
-        req.status === 'Waiting for Client Email Approval'
-      );
       
       // Always poll if there are any requests (including new ones that might not have status yet)
       if (requests.length > 0) {
