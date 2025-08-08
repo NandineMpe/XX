@@ -330,6 +330,8 @@ export default function ProcessWalkthroughLibrary() {
     // Create the request data for local state
     const requestData = {
       id: requestId,
+      // Persist requestId separately for reliable merging when webhook delivers
+      requestId: requestId,
       auditor: 'Sam Salt',
       document: doc.name,
       date: now.toISOString().slice(0, 10),
@@ -339,6 +341,14 @@ export default function ProcessWalkthroughLibrary() {
       lastUpdate: now.toISOString(),
       auditTrail: [{ status: 'Requested', at: now.toISOString() }],
       attachments: [],
+      documentType: doc.name,
+      parameters: {
+        auditor: 'Sam Salt',
+        entity: selectedEntity.name,
+        process: process.name,
+        step: step.title,
+        source_trigger: 'Walkthrough'
+      }
     };
 
     // Add to local state immediately for optimistic UI update

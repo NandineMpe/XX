@@ -57,7 +57,16 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
   loading: false,
   error: null,
   
-  addRequest: (req) => set((state) => ({ requests: [req, ...state.requests] })),
+   addRequest: (req) => set((state) => {
+     // Prevent accidental duplicates when the same requestId is added twice
+     const existsIndex = state.requests.findIndex(r => r.requestId && req.requestId && r.requestId === req.requestId);
+     if (existsIndex >= 0) {
+       const updated = [...state.requests];
+       updated[existsIndex] = { ...updated[existsIndex], ...req };
+       return { requests: updated };
+     }
+     return { requests: [req, ...state.requests] };
+   }),
   
   updateRequest: (id, update) =>
     set((state) => ({
@@ -449,14 +458,30 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       
       // Update existing local requests with LightRAG data if they match
       transformedRequests.forEach((lightragRequest) => {
-        const existingIndex = mergedRequests.findIndex(req => 
-          req.requestId === lightragRequest.requestId ||
-          req.document === lightragRequest.document
-        );
-        
+        // Prefer strict match on requestId if present; fall back to document name
+        const existingIndex = mergedRequests.findIndex(req => (
+          req.requestId && lightragRequest.requestId && req.requestId === lightragRequest.requestId
+        ) || (
+          req.document && lightragRequest.document && req.document === lightragRequest.document
+        ));
+
         if (existingIndex >= 0) {
           console.log('🔄 Updating existing local request with LightRAG data:', lightragRequest.document);
-          mergedRequests[existingIndex] = { ...mergedRequests[existingIndex], ...lightragRequest };
+          const existing = mergedRequests[existingIndex];
+          const updated = { ...existing, ...lightragRequest } as DocumentRequest;
+
+          // Preserve the original human-friendly document name if the incoming one is a generic placeholder
+          const genericNames = ['Webhook', 'Document Request', 'Unknown Document'];
+          if (existing.document && updated.document && genericNames.includes(updated.document)) {
+            updated.document = existing.document;
+          }
+
+          // Ensure requestId persists once set locally
+          if (!updated.requestId && existing.requestId) {
+            updated.requestId = existing.requestId;
+          }
+
+          mergedRequests[existingIndex] = updated;
         } else {
           console.log('➕ Adding new LightRAG request:', lightragRequest.document);
           mergedRequests.push(lightragRequest);
@@ -466,7 +491,16 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
       console.log('📊 Final merged requests:', mergedRequests);
       
       set({ 
-        requests: mergedRequests,
+        requests: mergedRequests
+          // Ensure only unique by requestId (when present); otherwise unique by id
+          .filter((req, index, self) => {
+            if (req.requestId) {
+              return index === self.findIndex(r => r.requestId === req.requestId);
+            }
+            return index === self.findIndex(r => r.id === req.id);
+          })
+          // Sort newest first by lastUpdate or date
+          .sort((a, b) => new Date(b.lastUpdate || b.date || '').getTime() - new Date(a.lastUpdate || a.date || '').getTime()),
         loading: false,
         error: null 
       });
