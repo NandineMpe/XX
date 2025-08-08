@@ -349,7 +349,7 @@ export default function DocumentRetrievalDashboard() {
 
         {/* Search/Filter Bar with custom style */}
         <div className="mb-4 flex flex-wrap items-center gap-4">
-          {/* Search input with icon and slash */}
+          {/* Search input with persistent search icon */}
           <label className={`search-label flex items-center relative rounded-[12px] overflow-hidden bg-[#3D3D3D] px-3 py-2 cursor-text border border-transparent focus-within:bg-[#464646] focus-within:border-gray-400 hover:border-gray-400 transition w-64`}
             style={{ minWidth: 220 }}
           >
@@ -362,16 +362,8 @@ export default function DocumentRetrievalDashboard() {
               onBlur={() => setSearchFocused(false)}
               type="text"
             />
-            {/* Slash icon for shortcut hint */}
-            {!search && !searchFocused && (
-              <span className="slash-icon absolute right-2 top-1/2 -translate-y-1/2 border border-[#393838] bg-gradient-to-br from-[#343434] to-[#6d6d6d] rounded text-center shadow-inner text-xs w-[15px] h-[18px] flex items-center justify-center select-none pointer-events-none">
-                /
-              </span>
-            )}
-            {/* Magnifying glass icon */}
-            {(search || searchFocused) && (
-              <Search className="search-icon absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            )}
+            {/* Magnifying glass icon (always visible) */}
+            <Search aria-hidden="true" className="search-icon absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           </label>
           {/* Status filter dropdown */}
           <select
