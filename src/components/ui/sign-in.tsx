@@ -94,29 +94,13 @@ export const SignInPage: React.FC<SignInPageProps> = ({
     if (showKlaviyoForm) {
       console.log('🔄 Klaviyo modal opened, initializing form...');
       
-      // Use the correct embed method for the updated script
+      // With the canonical script, Klaviyo auto-embeds forms matching the container class.
       const embedKlaviyoForm = () => {
         const formContainer = document.querySelector('.klaviyo-form-TwzEQD') as HTMLElement | null;
         if (formContainer) {
-          console.log('🔄 Embedding Klaviyo form with correct API key...');
-
-          // Ensure the container itself is the target (no nested duplicates)
+          console.log('🔄 Klaviyo modal opened, waiting for auto-embed...');
           formContainer.setAttribute('data-klaviyo-form-id', 'TwzEQD');
-          // Clear any previous content to allow a fresh embed
-          formContainer.innerHTML = '';
-
-          // Trigger the form embed into this container
-          if (window._klOnsite) {
-            console.log('✅ Triggering Klaviyo form embed with correct API key...');
-            window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
-          } else {
-            console.log('⏳ Klaviyo script not ready, will retry...');
-            setTimeout(() => {
-              if (window._klOnsite) {
-                window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
-              }
-            }, 1000);
-          }
+          // Do not push embedForm; rely on Klaviyo auto-initialization to avoid race conditions
         }
       };
 
@@ -260,27 +244,25 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 </p>
                 
                 {/* Klaviyo Form Container */}
-                <div className="klaviyo-form-TwzEQD" style={{ minHeight: '300px', position: 'relative' }}>
+                 <div className="klaviyo-form-TwzEQD" data-klaviyo-form-id="TwzEQD" style={{ minHeight: '300px', position: 'relative' }}>
                   {/* The Klaviyo form will be embedded here */}
                 </div>
                 
-                {/* Fallback if Klaviyo form doesn't load */}
-                <div className="text-center py-4 mt-4 border-t border-border">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Having trouble with the form?
-                  </p>
-                  <button
-                    onClick={() => {
-                      // Try to reload the form
-                      if (window._klOnsite) {
-                        window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
-                      }
-                    }}
-                    className="text-sm text-violet-400 hover:text-violet-300 underline"
-                  >
-                    Try again
-                  </button>
-                </div>
+                 {/* Fallback if Klaviyo form doesn't load */}
+                 <div className="text-center py-4 mt-4 border-t border-border">
+                   <p className="text-sm text-muted-foreground mb-3">
+                     Having trouble with the form?
+                   </p>
+                   <button
+                     onClick={() => {
+                       // Hint to user to refresh; we avoid manual embed to prevent race conditions
+                       window.location.reload();
+                     }}
+                     className="text-sm text-violet-400 hover:text-violet-300 underline"
+                   >
+                     Try again
+                   </button>
+                 </div>
               </>
             ) : (
               <div className="text-center py-8">
