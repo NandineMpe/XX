@@ -96,25 +96,18 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       
       // Use the correct embed method for the updated script
       const embedKlaviyoForm = () => {
-        const formContainer = document.querySelector('.klaviyo-form-TwzEQD');
+        const formContainer = document.querySelector('.klaviyo-form-TwzEQD') as HTMLElement | null;
         if (formContainer) {
           console.log('🔄 Embedding Klaviyo form with correct API key...');
-          
-          // Clear the container first
+
+          // Ensure the container itself is the target (no nested duplicates)
+          formContainer.setAttribute('data-klaviyo-form-id', 'TwzEQD');
+          // Clear any previous content to allow a fresh embed
           formContainer.innerHTML = '';
-          
-          // Create the proper embed structure
-          const embedDiv = document.createElement('div');
-          embedDiv.className = 'klaviyo-form-TwzEQD';
-          embedDiv.setAttribute('data-klaviyo-form-id', 'TwzEQD');
-          
-          // Add the embed div to the container
-          formContainer.appendChild(embedDiv);
-          
-          // Try to trigger the form embed with the correct method
+
+          // Trigger the form embed into this container
           if (window._klOnsite) {
             console.log('✅ Triggering Klaviyo form embed with correct API key...');
-            // Use the correct embed method for the updated script
             window._klOnsite.push(['embedForm', 'TwzEQD', '.klaviyo-form-TwzEQD']);
           } else {
             console.log('⏳ Klaviyo script not ready, will retry...');
