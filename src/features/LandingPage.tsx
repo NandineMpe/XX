@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import Spline from '@splinetool/react-spline';
 import { useRive } from '@rive-app/react-canvas';
 import { TubelightNavBar } from '@/components/ui/tubelight-navbar';
-import { Home, User, Layers, LogIn } from 'lucide-react';
+import { Home, User, Layers, LogIn, Linkedin, Twitter } from 'lucide-react';
 import SectionWithMockup from '@/components/ui/section-with-mockup';
 import AuditTimeline from '@/components/ui/AuditTimeline';
 
@@ -457,6 +457,27 @@ const LandingPage = () => {
               <a href="#" className="text-gray-400 hover:text-white transition-colors">Status</a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">Support</a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">Documentation</a>
+              <span className="hidden md:inline-block w-px h-5 bg-gray-800" aria-hidden="true"></span>
+              <a
+                href="https://www.linkedin.com/company/augentik/?viewAsMember=true"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="text-gray-400 hover:text-white transition-colors"
+                title="LinkedIn"
+              >
+                <Linkedin className="w-5 h-5" />
+              </a>
+              <a
+                href="https://x.com/augentik"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="text-gray-400 hover:text-white transition-colors"
+                title="Twitter / X"
+              >
+                <Twitter className="w-5 h-5" />
+              </a>
             </div>
           </div>
         </div>
