@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { loadKlaviyoScript, ensureKlaviyoFormEmbedded } from '@/lib/klaviyo';
 import { Eye, EyeOff } from 'lucide-react';
 
 // TypeScript declaration for Klaviyo
@@ -89,53 +90,53 @@ export const SignInPage: React.FC<SignInPageProps> = ({
     setFormSubmitted(false);
   };
 
-  // Listen for Klaviyo form submission
+  // Load Klaviyo and ensure the form embeds when the modal is opened
   useEffect(() => {
-    if (showKlaviyoForm) {
-      console.log('🔄 Klaviyo modal opened, initializing form...');
-      
-      // With the canonical script, Klaviyo auto-embeds forms matching the container class.
-      const embedKlaviyoForm = () => {
-        const formContainer = document.querySelector('.klaviyo-form-TwzEQD') as HTMLElement | null;
-        if (formContainer) {
-          console.log('🔄 Klaviyo modal opened, waiting for auto-embed...');
-          formContainer.setAttribute('data-klaviyo-form-id', 'TwzEQD');
-          // Do not push embedForm; rely on Klaviyo auto-initialization to avoid race conditions
+    if (!showKlaviyoForm) return;
+
+    let cancel = false;
+    const KLAVIYO_PUBLIC_KEY = import.meta.env.VITE_KLAVIYO_PUBLIC_KEY || 'TwzEQD';
+    const FORM_ID = import.meta.env.VITE_KLAVIYO_FORM_ID || 'TwzEQD';
+
+    loadKlaviyoScript(KLAVIYO_PUBLIC_KEY)
+      .then(() => {
+        if (cancel) return;
+        ensureKlaviyoFormEmbedded(FORM_ID);
+        // In SPAs, explicitly ask Klaviyo to open/scan the form after load
+        try {
+          (window as any)._klOnsite = (window as any)._klOnsite || [];
+          (window as any)._klOnsite.push(['openForm', FORM_ID]);
+        } catch {
+          // no-op
         }
-      };
+      })
+      .catch((err) => {
+        console.error('Failed to load Klaviyo script', err);
+      });
 
-      // Start the embedding process
-      embedKlaviyoForm();
+    const handleKlaviyoSubmit = (event: any) => {
+      if (event?.detail?.formId === FORM_ID) {
+        setFormSubmitted(true);
+      }
+    };
+    document.addEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
 
-      const handleKlaviyoSubmit = (event: any) => {
-        console.log('📝 Klaviyo form submission event received:', event);
-        // Check if the event is from our Klaviyo form
-        if (event.detail && event.detail.formId === 'TwzEQD') {
+    const interval = window.setInterval(() => {
+      const formElement = document.querySelector(`.klaviyo-form-${FORM_ID}`);
+      if (formElement) {
+        const successElements = (formElement as HTMLElement).querySelectorAll('[data-success], .klaviyo-form-success');
+        if (successElements.length > 0) {
           setFormSubmitted(true);
+          window.clearInterval(interval);
         }
-      };
+      }
+    }, 1000);
 
-      // Listen for Klaviyo form submission events
-      document.addEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
-      
-      // Also check for form submission by monitoring the form element
-      const checkFormSubmission = setInterval(() => {
-        const formElement = document.querySelector('.klaviyo-form-TwzEQD');
-        if (formElement) {
-          const successElements = formElement.querySelectorAll('[data-success], .klaviyo-form-success');
-          if (successElements.length > 0) {
-            console.log('✅ Klaviyo form submission detected via DOM monitoring');
-            setFormSubmitted(true);
-            clearInterval(checkFormSubmission);
-          }
-        }
-      }, 1000);
-
-      return () => {
-        document.removeEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
-        clearInterval(checkFormSubmission);
-      };
-    }
+    return () => {
+      cancel = true;
+      document.removeEventListener('klaviyo:form:submit', handleKlaviyoSubmit);
+      window.clearInterval(interval);
+    };
   }, [showKlaviyoForm]);
 
   return (
@@ -227,7 +228,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
       {/* Klaviyo Form Modal */}
       {showKlaviyoForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000] p-4">
           <div className="bg-background rounded-2xl p-6 max-w-md w-full relative">
             <button
               onClick={handleCloseKlaviyoForm}
@@ -244,9 +245,11 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 </p>
                 
                 {/* Klaviyo Form Container */}
-                 <div className="klaviyo-form-TwzEQD" data-klaviyo-form-id="TwzEQD" style={{ minHeight: '300px', position: 'relative' }}>
-                  {/* The Klaviyo form will be embedded here */}
-                </div>
+                <div
+                  className={`klaviyo-form-${import.meta.env.VITE_KLAVIYO_FORM_ID || 'TwzEQD'}`}
+                  data-klaviyo-form-id={import.meta.env.VITE_KLAVIYO_FORM_ID || 'TwzEQD'}
+                  style={{ minHeight: '300px', position: 'relative', zIndex: 10001 }}
+                />
                 
                  {/* Fallback if Klaviyo form doesn't load */}
                  <div className="text-center py-4 mt-4 border-t border-border">
