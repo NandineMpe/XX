@@ -41,6 +41,7 @@ export default function RetrievalTesting() {
   })
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [thinkingEvents, setThinkingEvents] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('') // Search query for chat history
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null) // Track current conversation
   // Removed unused isRecording, setIsRecording, mediaRecorder, setMediaRecorder
@@ -228,6 +229,7 @@ export default function RetrievalTesting() {
 
       // Reset scroll following state for new query
       shouldFollowScrollRef.current = true
+      setThinkingEvents([])
       // Set flag to indicate we're receiving a response
       isReceivingResponseRef.current = true
 
@@ -278,6 +280,13 @@ export default function RetrievalTesting() {
         }
       }
 
+      const handleThinkingEvent = (evt: any) => {
+        setThinkingEvents(prev => {
+          const next = [...prev, { ts: Date.now(), ...evt }]
+          return next.slice(-200)
+        })
+      }
+
       // Prepare query parameters
       const state = useSettingsStore.getState()
       const queryParams = {
@@ -298,7 +307,7 @@ export default function RetrievalTesting() {
           let errorMessage = ''
           await queryTextStream(queryParams, updateAssistantMessage, (error) => {
             errorMessage += error
-          })
+          }, handleThinkingEvent)
           if (errorMessage) {
             if (assistantMessage.content) {
               errorMessage = assistantMessage.content + '\n' + errorMessage
@@ -457,6 +466,12 @@ export default function RetrievalTesting() {
         }, 30);
       }
     };
+    const handleThinkingEvent = (evt: any) => {
+      setThinkingEvents(prev => {
+        const next = [...prev, { ts: Date.now(), ...evt }]
+        return next.slice(-200)
+      })
+    }
     const state = useSettingsStore.getState();
     const queryParams = {
       ...state.querySettings,
@@ -472,7 +487,7 @@ export default function RetrievalTesting() {
         let errorMessage = '';
         await queryTextStream(queryParams, updateAssistantMessage, (error) => {
           errorMessage += error;
-        });
+        }, handleThinkingEvent);
         if (errorMessage) {
           if (assistantMessage.content) {
             errorMessage = assistantMessage.content + '\n' + errorMessage;
@@ -569,6 +584,36 @@ export default function RetrievalTesting() {
                 </div>
               </div>
             </div>
+            {/* Thinking/Progress Panel */}
+            {isLoading || thinkingEvents.length > 0 ? (
+              <div className="mt-2 w-full max-w-4xl mx-auto">
+                <div className="rounded-xl border border-zinc-800 bg-black/70 p-3 text-xs text-zinc-300">
+                  <div className="font-semibold mb-1">Assistant progress</div>
+                  <ul className="space-y-1 max-h-40 overflow-auto pr-1">
+                    {thinkingEvents.map((evt, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-zinc-500">[{new Date(evt.ts).toLocaleTimeString()}]</span>
+                        <span>
+                          {evt.stage && <span className="mr-1">{evt.stage}:</span>}
+                          {evt.event && <span className="mr-1">{evt.event}</span>}
+                          {evt.type && <span className="mr-1">{evt.type}</span>}
+                          {evt.source && <span className="mr-1">Reading {evt.source}</span>}
+                          {evt.citation && <span className="mr-1">Cited {evt.citation}</span>}
+                          {evt.progress !== undefined && <span className="ml-1 text-zinc-400">({evt.progress}%)</span>}
+                          {evt.message && <span className="ml-1">{evt.message}</span>}
+                        </span>
+                      </li>
+                    ))}
+                    {isLoading && (
+                      <li className="flex items-center gap-2 text-zinc-400">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                        Generating answer…
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            ) : null}
             <AIInputField onSend={handleSendMessage} />
           </div>
         </div>

@@ -274,7 +274,8 @@ export const queryText = async (request: QueryRequest): Promise<QueryResponse> =
 export const queryTextStream = async (
   request: QueryRequest,
   onChunk: (chunk: string) => void,
-  onError?: (error: string) => void
+  onError?: (error: string) => void,
+  onEvent?: (event: any) => void
 ) => {
   const apiKey = useSettingsStore.getState().apiKey;
   const token = localStorage.getItem('AUGENTIK-API-TOKEN');
@@ -354,6 +355,9 @@ export const queryTextStream = async (
             const parsed = JSON.parse(line);
             if (parsed.response) {
               onChunk(parsed.response);
+            } else if (onEvent && (parsed.event || parsed.type || parsed.stage || parsed.source || parsed.citation || parsed.progress)) {
+              // Forward any non-response structured events to the UI for transparency logs
+              onEvent(parsed);
             } else if (parsed.error && onError) {
               onError(parsed.error);
             }
