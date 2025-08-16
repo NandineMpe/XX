@@ -451,7 +451,7 @@ export default function DocumentRetrievalDashboard() {
               <DialogHeader>
                 <DialogTitle>Import PBC List</DialogTitle>
                 <DialogDescription>
-                  Drag and drop a CSV file exported from your PBC list. We will create requests using the description and request date. Auditor will be set to {username || 'current user'}, source will be Manual addition, and status will be Requested.
+                  Drag and drop a CSV file exported from your PBC list. We will create requests using the description and request date. Auditor will be set to Sam Salt, source will be Manual addition, and status will be Requested.
                 </DialogDescription>
               </DialogHeader>
               <div className="mt-4">
@@ -469,7 +469,7 @@ export default function DocumentRetrievalDashboard() {
                       const dataRows = rows.slice(1);
                       const colIndex = buildPbcColumnIndex(header);
                       const nowIso = new Date().toISOString();
-                      const auditorName = username || 'Sam Salt';
+                      const auditorName = 'Sam Salt';
                       const newRequests: DocumentRequest[] = [];
                       dataRows.forEach((cells) => {
                         const description = pickCell(cells, colIndex.description);
