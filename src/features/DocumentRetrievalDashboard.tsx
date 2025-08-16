@@ -3,9 +3,13 @@ import DataTable from '@/components/ui/DataTable';
 import Badge from '@/components/ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 import { ColumnDef } from '@tanstack/react-table';
-import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search, Download, RefreshCw, Trash2 } from 'lucide-react';
+import { Mail, Clock, Loader2, Send, AlertTriangle, CheckCircle, Search, Download, RefreshCw, Trash2, Upload, Plus } from 'lucide-react';
 import { format } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
+import Input from '@/components/ui/Input';
+import FileUploader from '@/components/ui/FileUploader';
 import { useDocumentRequestStore, DocumentRequest } from '@/stores/documentRequests';
+import { useAuthStore } from '@/stores/state';
 
 // Status definitions
 const STATUS = {
@@ -81,6 +85,7 @@ export default function DocumentRetrievalDashboard() {
     pollForUpdates,
     deleteRequest
   } = useDocumentRequestStore();
+  const { username } = useAuthStore();
   
   const [selected, setSelected] = useState<DocumentRequest | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<DocumentRequest | null>(null);
@@ -89,6 +94,15 @@ export default function DocumentRetrievalDashboard() {
   const [filterAuditor, setFilterAuditor] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+
+  // PBC import and manual add dialogs
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showManualDialog, setShowManualDialog] = useState(false);
+  const [manualDescription, setManualDescription] = useState('');
+  const [manualDate, setManualDate] = useState<string>(() => {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  });
 
   // Handle delete button click
   const handleDeleteClick = useCallback((request: DocumentRequest) => {
@@ -134,8 +148,8 @@ export default function DocumentRetrievalDashboard() {
     {
       header: 'Source/Trigger',
       id: 'source',
-      accessorFn: (row) => row.source ?? 'Walkthrough',
-      cell: ({ row }) => row.original.source || 'Walkthrough',
+      accessorFn: (row) => row.source ?? 'Manual addition',
+      cell: ({ row }) => row.original.source || 'Manual addition',
     },
     {
       header: 'Current Status',
@@ -261,24 +275,21 @@ export default function DocumentRetrievalDashboard() {
       (filterDate ? r.date === filterDate : true)
     );
     
-    // Then filter to only show document requests (not uploaded documents)
-    // This should be very strict - only n8n webhook documents
+    // Then filter to only show document requests (exclude raw uploads)
     return searchFiltered.filter((r) => {
-      // Show ONLY documents that are document requests from n8n webhook
-      const isDocumentRequest = 
-        // Must have source = 'Walkthrough' (indicates n8n webhook)
+      const isFromN8n =
         r.source === 'Walkthrough' ||
-        // Must have n8n_upload documentType
         (r.documentType && r.documentType === 'n8n_upload') ||
-        // Must have source_trigger = 'Walkthrough' in parameters
-        (r.parameters && r.parameters.source_trigger === 'Walkthrough') ||
-        // Must have specific n8n document patterns
+        (r.parameters && (r.parameters.source_trigger === 'Walkthrough')) ||
         (r.document && (
           r.document.toLowerCase().includes('procurement general ledger') ||
           r.document.toLowerCase().includes('qb retrieval')
         ));
-      
-      return isDocumentRequest;
+
+      const isManualAddition = r.source === 'Manual addition' ||
+        (r.parameters && (r.parameters.source_trigger === 'Manual'));
+
+      return isFromN8n || isManualAddition;
     });
   }, [requests, search, filterStatus, filterAuditor, filterDate]);
 
@@ -325,16 +336,38 @@ export default function DocumentRetrievalDashboard() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Supporting Document Retrieval</h1>
           
-          {/* Refresh button */}
-          <button 
-            onClick={handleRefresh}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            disabled={loading}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-            {loading && <span>Refreshing...</span>}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Import PBC List */}
+            <button
+              onClick={() => setShowImportDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+              disabled={loading}
+              title="Import PBC list to create requests"
+            >
+              <Upload className="w-4 h-4" />
+              Import PBC List
+            </button>
+            {/* Manual Request */}
+            <button
+              onClick={() => setShowManualDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+              disabled={loading}
+              title="Create a manual document request"
+            >
+              <Plus className="w-4 h-4" />
+              New Manual Request
+            </button>
+            {/* Refresh button */}
+            <button 
+              onClick={handleRefresh}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              disabled={loading}
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+              {loading && <span>Refreshing...</span>}
+            </button>
+          </div>
         </div>
 
         {/* Error banner */}
@@ -411,6 +444,134 @@ export default function DocumentRetrievalDashboard() {
           columns={columns}
           data={Array.isArray(filtered) ? filtered : []}
         />
+        {/* PBC Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent>
+            <div>
+              <DialogHeader>
+                <DialogTitle>Import PBC List</DialogTitle>
+                <DialogDescription>
+                  Drag and drop a CSV file exported from your PBC list. We will create requests using the description and request date. Auditor will be set to {username || 'current user'}, source will be Manual addition, and status will be Requested.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4">
+                <FileUploader
+                  accept={{ 'text/csv': ['.csv'] }}
+                  maxFileCount={1}
+                  multiple={false}
+                  onUpload={async (files) => {
+                    if (!files || files.length === 0) return;
+                    const file = files[0];
+                    try {
+                      const text = await file.text();
+                      const rows = parseCsv(text);
+                      const header = rows[0] || [];
+                      const dataRows = rows.slice(1);
+                      const colIndex = buildPbcColumnIndex(header);
+                      const nowIso = new Date().toISOString();
+                      const auditorName = username || 'Sam Salt';
+                      const newRequests: DocumentRequest[] = [];
+                      dataRows.forEach((cells) => {
+                        const description = pickCell(cells, colIndex.description);
+                        if (!description) return;
+                        const dateCell = pickCell(cells, colIndex.requestDate);
+                        const dateVal = normalizeDate(dateCell);
+                        const req: DocumentRequest = {
+                          id: uuidv4(),
+                          auditor: auditorName,
+                          document: description,
+                          date: dateVal || nowIso.slice(0, 10),
+                          source: 'Manual addition',
+                          method: 'Manual',
+                          status: 'Requested',
+                          lastUpdate: nowIso,
+                          auditTrail: [{ status: 'Requested', at: nowIso }],
+                          attachments: [],
+                          requestId: undefined,
+                          documentType: undefined,
+                          parameters: { source_trigger: 'Manual' },
+                        } as DocumentRequest;
+                        newRequests.push(req);
+                      });
+                      // Add to store in a batch
+                      newRequests.forEach((req) => {
+                        // optimistic local add
+                        useDocumentRequestStore.getState().addRequest(req);
+                      });
+                      setShowImportDialog(false);
+                    } catch (e) {
+                      console.error('Error importing PBC CSV:', e);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Manual Request Dialog */}
+        <Dialog open={showManualDialog} onOpenChange={setShowManualDialog}>
+          <DialogContent>
+            <div>
+              <DialogHeader>
+                <DialogTitle>New Manual Request</DialogTitle>
+                <DialogDescription>
+                  Enter a description and optional request date to add a document request.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4 flex flex-col gap-3">
+                <label className="text-sm">Description</label>
+                <Input
+                  placeholder="e.g., Accounts payable aging report"
+                  value={manualDescription}
+                  onChange={(e) => setManualDescription(e.target.value)}
+                />
+                <label className="text-sm">Request date</label>
+                <Input
+                  type="date"
+                  value={manualDate}
+                  onChange={(e) => setManualDate(e.target.value)}
+                />
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    onClick={() => setShowManualDialog(false)}
+                    className="px-4 py-2 text-sm bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const nowIso = new Date().toISOString();
+                      if (!manualDescription.trim()) {
+                        return;
+                      }
+                      const req: DocumentRequest = {
+                        id: uuidv4(),
+                        auditor: username || 'Sam Salt',
+                        document: manualDescription.trim(),
+                        date: manualDate || nowIso.slice(0, 10),
+                        source: 'Manual addition',
+                        method: 'Manual',
+                        status: 'Requested',
+                        lastUpdate: nowIso,
+                        auditTrail: [{ status: 'Requested', at: nowIso }],
+                        attachments: [],
+                        parameters: { source_trigger: 'Manual' },
+                      } as DocumentRequest;
+                      useDocumentRequestStore.getState().addRequest(req);
+                      setManualDescription('');
+                      setManualDate(new Date().toISOString().slice(0, 10));
+                      setShowManualDialog(false);
+                    }}
+                    className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                  >
+                    Add Request
+                  </button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
         {/* Detail Dialog */}
         <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
           <DialogContent>
@@ -513,3 +674,109 @@ export default function DocumentRetrievalDashboard() {
     </div>
   );
 } 
+
+// ---------- Helpers for PBC CSV import ----------
+
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let current: string[] = [];
+  let cell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (inQuotes) {
+      if (char === '"' && next === '"') {
+        cell += '"';
+        i++;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        cell += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        current.push(cell.trim());
+        cell = '';
+      } else if (char === '\n') {
+        current.push(cell.trim());
+        rows.push(current);
+        current = [];
+        cell = '';
+      } else if (char === '\r') {
+        // skip
+      } else {
+        cell += char;
+      }
+    }
+  }
+  if (cell.length > 0 || current.length > 0) {
+    current.push(cell.trim());
+    rows.push(current);
+  }
+  return rows;
+}
+
+function buildPbcColumnIndex(header: string[]): { description: number[]; requestDate: number[] } {
+  const indices = { description: [] as number[], requestDate: [] as number[] };
+  header.forEach((h, idx) => {
+    const key = h?.toLowerCase().trim();
+    if (!key) return;
+    if (
+      key.includes('description') ||
+      key.includes('document request') ||
+      key === 'request' ||
+      key === 'document' ||
+      key.includes('supporting document')
+    ) {
+      indices.description.push(idx);
+    }
+    if (
+      key === 'date' ||
+      key.includes('request date') ||
+      key.includes('requested date') ||
+      key.includes('request_dt') ||
+      key.includes('requested')
+    ) {
+      indices.requestDate.push(idx);
+    }
+  });
+  return indices;
+}
+
+function pickCell(cells: string[], indices: number[] | undefined): string | undefined {
+  if (!indices || indices.length === 0) return undefined;
+  for (const idx of indices) {
+    const v = cells[idx];
+    if (v && v.trim().length > 0) return v.trim();
+  }
+  return undefined;
+}
+
+function normalizeDate(value?: string): string | undefined {
+  if (!value) return undefined;
+  const t = value.trim();
+  // Accept ISO, yyyy-mm-dd, mm/dd/yyyy, dd/mm/yyyy
+  const isoMatch = /^\d{4}-\d{2}-\d{2}$/;
+  if (isoMatch.test(t)) return t;
+  const mdY = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/;
+  const m = t.match(mdY);
+  if (m) {
+    let mm = parseInt(m[1], 10);
+    let dd = parseInt(m[2], 10);
+    let yyyy = parseInt(m[3].length === 2 ? `20${m[3]}` : m[3], 10);
+    if (dd > 31 && mm <= 12) {
+      // maybe dd/mm/yyyy
+      const tmp = dd; dd = mm; mm = tmp;
+    }
+    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    return `${yyyy}-${pad(mm)}-${pad(dd)}`;
+  }
+  // Last resort: Date.parse
+  const d = new Date(t);
+  if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  return undefined;
+}
