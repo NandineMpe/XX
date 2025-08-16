@@ -16,7 +16,8 @@ import { InvalidApiKeyError, RequireApiKeError } from '@/api/lightrag'
 import RetrievalTesting from '@/features/RetrievalTesting'
 import DocumentRetrievalDashboard from '@/features/DocumentRetrievalDashboard';
 import ProcessWalkthroughLibrary from '@/features/ProcessWalkthroughLibrary';
-import AuditCoPilot from '@/features/AuditCoPilot';
+// Audit Co-Pilot temporarily hidden
+// import AuditCoPilot from '@/features/AuditCoPilot';
 
 import { Tabs, TabsContent } from '@/components/ui/Tabs'
 
@@ -207,9 +208,7 @@ function App() {
                 <TabsContent value='audit-queries' className="absolute top-0 right-0 bottom-0 left-0 overflow-hidden">
                   <RetrievalTesting />
                 </TabsContent>
-                <TabsContent value='audit-co-pilot' className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
-                  <AuditCoPilot />
-                </TabsContent>
+                {/* Audit Co-Pilot tab content hidden for now */}
                 <TabsContent value='support' className="absolute top-0 right-0 bottom-0 left-0 overflow-auto">
                   <DocumentRetrievalDashboard />
                 </TabsContent>
