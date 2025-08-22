@@ -498,6 +498,36 @@ export default function DocumentRetrievalDashboard() {
                         // optimistic local add
                         useDocumentRequestStore.getState().addRequest(req);
                       });
+
+                      // Send webhook trigger to n8n with batch details
+                      try {
+                        const webhookUrl = 'https://primary-production-1d298.up.railway.app/webhook/262eafc0-615a-4e6d-b896-689e68b3fcb4';
+                        const batchId = uuidv4();
+                        const payload = {
+                          requestId: batchId,
+                          action: 'pbc_import',
+                          count: newRequests.length,
+                          items: newRequests.map(r => ({
+                            id: r.id,
+                            auditor: r.auditor,
+                            document: r.document,
+                            date: r.date,
+                            source: r.source,
+                            status: r.status
+                          }))
+                        };
+                        await fetch(webhookUrl, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'X-API': 'admin123'
+                          },
+                          body: JSON.stringify(payload)
+                        });
+                        console.log('PBC import webhook sent:', payload);
+                      } catch (we) {
+                        console.error('PBC import webhook failed:', we);
+                      }
                       setShowImportDialog(false);
                     } catch (e) {
                       console.error('Error importing PBC CSV:', e);
