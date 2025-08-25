@@ -2,7 +2,8 @@
   "name": "lightrag-root",
   "private": true,
   "scripts": {
-    "build-frontend-and-stage": "cd lightrag_webui && npm install && npm run build && cd .. && git add lightrag/api/webui"
+    "build-frontend-and-stage": "cd lightrag_webui && npm install && npm run build && cd .. && git add lightrag/api/webui",
+    "build": "vite build"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
