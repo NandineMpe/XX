@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build-frontend-and-stage": "cd lightrag_webui && npm install && npm run build && cd .. && git add lightrag/api/webui",
-    "build": "vite build"
+    "build": "node -e \"console.log('Skip build: using prebuilt dist folder');\""
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
