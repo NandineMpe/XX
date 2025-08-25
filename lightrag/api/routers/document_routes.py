@@ -862,6 +862,47 @@ def create_document_routes(
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
 
+            # Try to auto-link this upload to a pending document request by documentType
+            try:
+                from lightrag.api.routers.document_request_routes import (
+                    document_requests_db,
+                    get_current_timestamp,
+                )
+
+                # Infer documentType from filename prefix (e.g., "Tax Assessments.pdf" -> "tax_assessments")
+                inferred_document_type = file.filename.rsplit(".", 1)[0].strip().lower().replace(" ", "_")
+
+                # Find the most recent pending/requested request with matching documentType
+                matching_id = None
+                newest_ts = None
+                for req_id, req in document_requests_db.items():
+                    if req.get("status") in ("Requested", "Processing") and req.get("documentType"):
+                        dt = str(req.get("documentType")).strip().lower().replace(" ", "_")
+                        if dt == inferred_document_type:
+                            created_ts = req.get("createdAt")
+                            if newest_ts is None or (created_ts and created_ts > newest_ts):
+                                newest_ts = created_ts
+                                matching_id = req_id
+
+                if matching_id:
+                    # Load file content to store in request for download
+                    with open(file_path, "rb") as fbin:
+                        file_bytes = fbin.read()
+
+                    document_requests_db[matching_id].update(
+                        {
+                            "status": "Ready",
+                            "fileName": file.filename,
+                            "fileSize": file_path.stat().st_size,
+                            "updatedAt": get_current_timestamp(),
+                            "downloadUrl": f"/webhook/api/document-requests/{matching_id}/download",
+                            "file_content": file_bytes,
+                        }
+                    )
+            except Exception as _auto_link_err:
+                # Do not fail the upload if linking fails; log and continue
+                logger.debug(f"Auto-link upload to pending request failed: {_auto_link_err}")
+
             # Add to background tasks
             background_tasks.add_task(pipeline_index_file, rag, file_path)
 

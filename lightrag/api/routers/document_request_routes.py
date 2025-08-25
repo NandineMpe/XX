@@ -380,9 +380,13 @@ async def handle_form_completion_notification(
     download_url: str,
     file_name: str,
     file_size: int,
-    error_message: str
+    error_message: str,
+    file: UploadFile | None = None,
 ) -> DocumentRequestResponse:
-    """Handle completion notification via form data"""
+    """Handle completion notification via form data
+
+    Supports optional binary `file` to finalize and store the artifact in one call.
+    """
     try:
         if not request_id:
             raise HTTPException(status_code=400, detail="requestId is required")
@@ -393,14 +397,30 @@ async def handle_form_completion_notification(
                 detail=f"Document request with ID {request_id} not found"
             )
         
+        # Prepare file-related fields
+        stored_file_bytes = None
+        resolved_file_name = file_name
+        resolved_file_size = file_size
+
+        if file is not None:
+            # Read and store uploaded file content
+            stored_file_bytes = await file.read()
+            resolved_file_name = resolved_file_name or file.filename
+            try:
+                # UploadFile may not always expose size; fall back to len(bytes)
+                resolved_file_size = resolved_file_size or getattr(file, "size", None) or len(stored_file_bytes)
+            except Exception:
+                resolved_file_size = resolved_file_size or len(stored_file_bytes)
+
         # Update existing request
         document_requests_db[request_id].update({
             "status": "Ready" if action == "completed" else "Failed",
-            "downloadUrl": download_url,
-            "fileName": file_name,
-            "fileSize": file_size,
+            "downloadUrl": download_url or f"/webhook/api/document-requests/{request_id}/download",
+            "fileName": resolved_file_name,
+            "fileSize": resolved_file_size,
             "errorMessage": error_message,
-            "updatedAt": get_current_timestamp()
+            "updatedAt": get_current_timestamp(),
+            "file_content": stored_file_bytes if stored_file_bytes is not None else document_requests_db[request_id].get("file_content")
         })
         
         status_message = "Document processing completed successfully"
@@ -533,7 +553,7 @@ def create_document_request_routes(api_key: Optional[str] = None):
             # Handle form data with action (completion notification) - CHECK THIS FIRST
             if action is not None:
                 return await handle_form_completion_notification(
-                    requestId, action, downloadUrl, fileName, fileSize, errorMessage
+                    requestId, action, downloadUrl, fileName, fileSize, errorMessage, file
                 )
             
             # Handle multipart/form-data (binary file upload)
