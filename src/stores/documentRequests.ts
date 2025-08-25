@@ -79,11 +79,11 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
         description: requestData.description,
         parameters: requestData.parameters
       });
-      console.log('🌐 Webhook URL:', 'https://lightrag-production-6328.up.railway.app/documents/n8n_webhook');
+      console.log('🌐 Webhook URL:', 'https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf');
       console.log('📦 Request body:', JSON.stringify(requestData, null, 2));
       
-      // Send request to n8n webhook endpoint
-      const webhookResponse = await fetch('https://lightrag-production-6328.up.railway.app/documents/n8n_webhook', {
+      // Send request to backend webhook endpoint
+      const webhookResponse = await fetch('https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
         method: 'POST',
         headers: {
           'X-API-Key': 'admin123',

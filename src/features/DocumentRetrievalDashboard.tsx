@@ -520,7 +520,7 @@ export default function DocumentRetrievalDashboard() {
                           method: 'POST',
                           headers: {
                             'Content-Type': 'application/json',
-                            'X-API': 'admin123'
+                            'X-API-Key': 'admin123'
                           },
                           body: JSON.stringify(payload)
                         });

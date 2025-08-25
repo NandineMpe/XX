@@ -26,7 +26,7 @@ export default function WebhookTest() {
 
       console.log('🧪 Testing webhook with data:', testData);
       
-      const response = await fetch('https://primary-production-1d298.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
+      const response = await fetch('https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf', {
         method: 'POST',
         headers: {
           'X-API-Key': 'admin123',
