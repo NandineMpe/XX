@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input';
 import FileUploader from '@/components/ui/FileUploader';
 import { useDocumentRequestStore, DocumentRequest } from '@/stores/documentRequests';
 import { useAuthStore } from '@/stores/state';
+import { toast } from 'sonner';
 
 // Status definitions
 const STATUS = {
@@ -476,8 +477,9 @@ export default function DocumentRetrievalDashboard() {
                         if (!description) return;
                         const dateCell = pickCell(cells, colIndex.requestDate);
                         const dateVal = normalizeDate(dateCell);
+                        const newId = uuidv4();
                         const req: DocumentRequest = {
-                          id: uuidv4(),
+                          id: newId,
                           auditor: auditorName,
                           document: description,
                           date: dateVal || nowIso.slice(0, 10),
@@ -487,7 +489,7 @@ export default function DocumentRetrievalDashboard() {
                           lastUpdate: nowIso,
                           auditTrail: [{ status: 'Requested', at: nowIso }],
                           attachments: [],
-                          requestId: undefined,
+                          requestId: newId,
                           documentType: undefined,
                           parameters: { source_trigger: 'Manual' },
                         } as DocumentRequest;
@@ -525,8 +527,19 @@ export default function DocumentRetrievalDashboard() {
                           body: JSON.stringify(payload)
                         });
                         console.log('PBC import webhook sent:', payload);
+                        // Mark all newly added requests as In Progress locally
+                        const progressAt = new Date().toISOString();
+                        newRequests.forEach((r) => {
+                          useDocumentRequestStore.getState().updateRequest(r.id, {
+                            status: STATUS.IN_PROGRESS,
+                            lastUpdate: progressAt,
+                            auditTrail: [...(r.auditTrail || []), { status: STATUS.IN_PROGRESS, at: progressAt }],
+                          });
+                        });
+                        toast.success(`Started auto-retrieval for ${newRequests.length} request(s)`);
                       } catch (we) {
                         console.error('PBC import webhook failed:', we);
+                        toast.error('Failed to start auto-retrieval for PBC import.');
                       }
                       setShowImportDialog(false);
                     } catch (e) {
@@ -570,13 +583,14 @@ export default function DocumentRetrievalDashboard() {
                     Cancel
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       const nowIso = new Date().toISOString();
                       if (!manualDescription.trim()) {
                         return;
                       }
+                      const newId = uuidv4();
                       const req: DocumentRequest = {
-                        id: uuidv4(),
+                        id: newId,
                         auditor: username || 'Sam Salt',
                         document: manualDescription.trim(),
                         date: manualDate || nowIso.slice(0, 10),
@@ -586,9 +600,31 @@ export default function DocumentRetrievalDashboard() {
                         lastUpdate: nowIso,
                         auditTrail: [{ status: 'Requested', at: nowIso }],
                         attachments: [],
+                        requestId: newId,
                         parameters: { source_trigger: 'Manual' },
                       } as DocumentRequest;
                       useDocumentRequestStore.getState().addRequest(req);
+                      // Fire webhook to start retrieval pipeline
+                      try {
+                        const ok = await useDocumentRequestStore.getState().sendWebhookRequest({
+                          requestId: newId,
+                          documentType: req.document,
+                          description: req.document,
+                          parameters: { ...(req.parameters || {}), auditor: req.auditor, source_trigger: 'Manual' }
+                        });
+                        if (ok) {
+                          const progressAt = new Date().toISOString();
+                          useDocumentRequestStore.getState().updateRequest(newId, {
+                            status: STATUS.IN_PROGRESS,
+                            lastUpdate: progressAt,
+                            auditTrail: [...(req.auditTrail || []), { status: STATUS.IN_PROGRESS, at: progressAt }],
+                          });
+                          toast.success('Manual request started: Auto-Retrieval in Progress');
+                        }
+                      } catch (err) {
+                        // leave as Requested on failure; error is handled in store
+                        toast.error('Failed to start manual request.');
+                      }
                       setManualDescription('');
                       setManualDate(new Date().toISOString().slice(0, 10));
                       setShowManualDialog(false);

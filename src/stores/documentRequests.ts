@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type DocumentRequest = {
   id: string;
@@ -52,7 +53,9 @@ type DocumentRequestStore = {
 //   'Error': 'Failed / Needs Manual Intervention',
 // };
 
-export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) => ({
+export const useDocumentRequestStore = create<DocumentRequestStore>()(
+  persist(
+    (set, get) => ({
   requests: [],
   loading: false,
   error: null,
@@ -502,4 +505,13 @@ export const useDocumentRequestStore = create<DocumentRequestStore>((set, get) =
     // Return cleanup function
     return () => clearInterval(pollInterval);
   },
-})); 
+    }),
+    {
+      name: 'document-requests-storage',
+      storage: createJSONStorage(() => localStorage),
+      version: 1,
+      // Only persist the requests array; runtime flags will reset on reload
+      partialize: (state) => ({ requests: state.requests }) as Pick<DocumentRequestStore, 'requests'>,
+    }
+  )
+);
