@@ -1111,157 +1111,157 @@ def create_document_routes(
         async def n8n_webhook(
             request: N8nWebhookRequest, background_tasks: BackgroundTasks
         ):
-        """
-        Webhook endpoint for n8n integration.
+            """
+            Webhook endpoint for n8n integration.
 
-        This endpoint is specifically designed for n8n workflows to send content
-        to the LightRAG system. It accepts various content types and processes
-        them in the background.
+            This endpoint is specifically designed for n8n workflows to send content
+            to the LightRAG system. It accepts various content types and processes
+            them in the background.
 
-        Args:
-            request (N8nWebhookRequest): The request body containing:
-                - content: The main content to be inserted
-                - source: Source identifier (optional, defaults to "n8n_webhook")
-                - metadata: Additional metadata from n8n workflow (optional)
-                - content_type: Type of content ("text", "json", "file") (optional)
-            background_tasks: FastAPI BackgroundTasks for async processing
+            Args:
+                request (N8nWebhookRequest): The request body containing:
+                    - content: The main content to be inserted
+                    - source: Source identifier (optional, defaults to "n8n_webhook")
+                    - metadata: Additional metadata from n8n workflow (optional)
+                    - content_type: Type of content ("text", "json", "file") (optional)
+                background_tasks: FastAPI BackgroundTasks for async processing
 
-        Returns:
-            InsertResponse: A response object containing the status of the operation.
+            Returns:
+                InsertResponse: A response object containing the status of the operation.
 
-        Raises:
-            HTTPException: If an error occurs during processing (500).
+            Raises:
+                HTTPException: If an error occurs during processing (500).
 
-        Example n8n webhook payload:
-        {
-            "content": "This is content from n8n workflow",
-            "source": "email_processor",
-            "metadata": {
-                "workflow_id": "12345",
-                "trigger_type": "email",
-                "timestamp": "2024-01-01T00:00:00Z"
-            },
-            "content_type": "text"
-        }
-        """
+            Example n8n webhook payload:
+            {
+                "content": "This is content from n8n workflow",
+                "source": "email_processor",
+                "metadata": {
+                    "workflow_id": "12345",
+                    "trigger_type": "email",
+                    "timestamp": "2024-01-01T00:00:00Z"
+                },
+                "content_type": "text"
+            }
+            """
             try:
-            # Process content based on content_type
-            if request.content_type == "json":
-                # For JSON content, we might want to extract specific fields
-                # or convert to a more readable format
-                import json
-                try:
-                    json_data = json.loads(request.content)
-                    # Convert JSON to a readable string format
-                    processed_content = json.dumps(json_data, indent=2, ensure_ascii=False)
-                except json.JSONDecodeError:
-                    # If JSON parsing fails, treat as regular text
+                # Process content based on content_type
+                if request.content_type == "json":
+                    # For JSON content, we might want to extract specific fields
+                    # or convert to a more readable format
+                    import json
+                    try:
+                        json_data = json.loads(request.content)
+                        # Convert JSON to a readable string format
+                        processed_content = json.dumps(json_data, indent=2, ensure_ascii=False)
+                    except json.JSONDecodeError:
+                        # If JSON parsing fails, treat as regular text
+                        processed_content = request.content
+                else:
+                    # For text and file content types, use as-is
                     processed_content = request.content
-            else:
-                # For text and file content types, use as-is
-                processed_content = request.content
 
-            # Create a source identifier that includes metadata if available
-            source_identifier = request.source
-            if request.metadata:
-                workflow_id = request.metadata.get("workflow_id", "unknown")
-                source_identifier = f"{request.source}_{workflow_id}"
+                # Create a source identifier that includes metadata if available
+                source_identifier = request.source
+                if request.metadata:
+                    workflow_id = request.metadata.get("workflow_id", "unknown")
+                    source_identifier = f"{request.source}_{workflow_id}"
 
-            # Create document request entry for frontend display
-            try:
-                from lightrag.api.routers.document_request_routes import get_current_timestamp
-                from lightrag.kg.shared_storage import get_namespace_data, get_storage_lock
-                import uuid
-                
-                request_id = str(uuid.uuid4())
-                db = await get_namespace_data("document_requests")
-                async with get_storage_lock():
-                    db[request_id] = {
-                        "requestId": request_id,
-                        "status": "Processing",
-                        "documentType": request.metadata.get("document_type", "n8n_upload") if request.metadata else "n8n_upload",
-                        "parameters": request.metadata,
-                        "downloadUrl": None,
-                        "fileName": f"{source_identifier}.{request.content_type}",
-                        "fileSize": len(request.content),
-                        "errorMessage": None,
-                        "createdAt": get_current_timestamp(),
-                        "updatedAt": get_current_timestamp(),
-                        "file_content": request.content.encode('utf-8'),  # Store actual content for download
-                        "lightrag_source_id": source_identifier  # Link to LightRAG document
-                    }
-                
-                # Add background task to monitor LightRAG processing
-                async def monitor_lightrag_processing():
-                    import asyncio
-                    max_attempts = 60  # 5 minutes max (60 * 5 seconds)
-                    attempts = 0
-                    
-                    while attempts < max_attempts:
-                        try:
-                            # Check if document exists in LightRAG and get its status
-                            docs_by_status = await rag.get_docs_by_status("processed")
-                            
-                            # Look for our document by source identifier
-                            for doc_id, doc_status in docs_by_status.items():
-                                if doc_status.file_path == source_identifier:
-                                    # Document is processed successfully
-                                    db_inner = await get_namespace_data("document_requests")
-                                    if request_id in db_inner:
-                                        async with get_storage_lock():
-                                            db_inner[request_id].update({
-                                                "status": "Ready",
-                                                "updatedAt": get_current_timestamp(),
-                                                "downloadUrl": f"/webhook/api/document-requests/{request_id}/download"
-                                            })
-                                    return
-                            
-                            # Check for failed documents
-                            failed_docs = await rag.get_docs_by_status("failed")
-                            for doc_id, doc_status in failed_docs.items():
-                                if doc_status.file_path == source_identifier:
-                                    # Document processing failed
-                                    db_inner = await get_namespace_data("document_requests")
-                                    if request_id in db_inner:
-                                        async with get_storage_lock():
-                                            db_inner[request_id].update({
-                                                "status": "Failed",
-                                                "errorMessage": doc_status.error or "Processing failed",
-                                                "updatedAt": get_current_timestamp()
-                                            })
-                                    return
-                            
-                            # Still processing, wait and try again
-                            await asyncio.sleep(5)
-                            attempts += 1
-                            
-                        except Exception as e:
-                            logger.warning(f"Error monitoring LightRAG processing for {request_id}: {str(e)}")
-                            await asyncio.sleep(5)
-                            attempts += 1
-                    
-                    # Timeout - mark as failed
-                    db_inner = await get_namespace_data("document_requests")
-                    if request_id in db_inner:
-                        async with get_storage_lock():
-                            db_inner[request_id].update({
-                                "status": "Failed",
-                                "errorMessage": "Processing timeout after 5 minutes",
-                                "updatedAt": get_current_timestamp()
-                            })
-                
-                background_tasks.add_task(monitor_lightrag_processing)
-                
-            except Exception as e:
-                logger.warning(f"Failed to create document request entry: {str(e)}")
+                # Create document request entry for frontend display
+                try:
+                    from lightrag.api.routers.document_request_routes import get_current_timestamp
+                    from lightrag.kg.shared_storage import get_namespace_data, get_storage_lock
+                    import uuid
 
-            # Add to background tasks for processing
-            background_tasks.add_task(
-                pipeline_index_texts,
-                rag,
-                [processed_content],
-                file_sources=[source_identifier],
-            )
+                    request_id = str(uuid.uuid4())
+                    db = await get_namespace_data("document_requests")
+                    async with get_storage_lock():
+                        db[request_id] = {
+                            "requestId": request_id,
+                            "status": "Processing",
+                            "documentType": request.metadata.get("document_type", "n8n_upload") if request.metadata else "n8n_upload",
+                            "parameters": request.metadata,
+                            "downloadUrl": None,
+                            "fileName": f"{source_identifier}.{request.content_type}",
+                            "fileSize": len(request.content),
+                            "errorMessage": None,
+                            "createdAt": get_current_timestamp(),
+                            "updatedAt": get_current_timestamp(),
+                            "file_content": request.content.encode('utf-8'),
+                            "lightrag_source_id": source_identifier,
+                        }
+
+                    # Add background task to monitor LightRAG processing
+                    async def monitor_lightrag_processing():
+                        import asyncio
+                        max_attempts = 60  # 5 minutes max (60 * 5 seconds)
+                        attempts = 0
+
+                        while attempts < max_attempts:
+                            try:
+                                # Check if document exists in LightRAG and get its status
+                                docs_by_status = await rag.get_docs_by_status("processed")
+
+                                # Look for our document by source identifier
+                                for doc_id, doc_status in docs_by_status.items():
+                                    if doc_status.file_path == source_identifier:
+                                        # Document is processed successfully
+                                        db_inner = await get_namespace_data("document_requests")
+                                        if request_id in db_inner:
+                                            async with get_storage_lock():
+                                                db_inner[request_id].update({
+                                                    "status": "Ready",
+                                                    "updatedAt": get_current_timestamp(),
+                                                    "downloadUrl": f"/webhook/api/document-requests/{request_id}/download",
+                                                })
+                                        return
+
+                                # Check for failed documents
+                                failed_docs = await rag.get_docs_by_status("failed")
+                                for doc_id, doc_status in failed_docs.items():
+                                    if doc_status.file_path == source_identifier:
+                                        # Document processing failed
+                                        db_inner = await get_namespace_data("document_requests")
+                                        if request_id in db_inner:
+                                            async with get_storage_lock():
+                                                db_inner[request_id].update({
+                                                    "status": "Failed",
+                                                    "errorMessage": doc_status.error or "Processing failed",
+                                                    "updatedAt": get_current_timestamp(),
+                                                })
+                                        return
+
+                                # Still processing, wait and try again
+                                await asyncio.sleep(5)
+                                attempts += 1
+
+                            except Exception as e:
+                                logger.warning(f"Error monitoring LightRAG processing for {request_id}: {str(e)}")
+                                await asyncio.sleep(5)
+                                attempts += 1
+
+                        # Timeout - mark as failed
+                        db_inner = await get_namespace_data("document_requests")
+                        if request_id in db_inner:
+                            async with get_storage_lock():
+                                db_inner[request_id].update({
+                                    "status": "Failed",
+                                    "errorMessage": "Processing timeout after 5 minutes",
+                                    "updatedAt": get_current_timestamp(),
+                                })
+
+                    background_tasks.add_task(monitor_lightrag_processing)
+
+                except Exception as e:
+                    logger.warning(f"Failed to create document request entry: {str(e)}")
+
+                # Add to background tasks for processing
+                background_tasks.add_task(
+                    pipeline_index_texts,
+                    rag,
+                    [processed_content],
+                    file_sources=[source_identifier],
+                )
 
                 return InsertResponse(
                     status="success",
