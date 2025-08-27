@@ -404,6 +404,7 @@ async def handle_form_completion_notification(
                     detail=f"Document request with ID {request_id} not found"
                 )
             
+<<<<<<< HEAD
             # Prepare file-related fields
             stored_file_bytes = None
             resolved_file_name = file_name
@@ -428,6 +429,16 @@ async def handle_form_completion_notification(
                 "errorMessage": error_message,
                 "updatedAt": get_current_timestamp(),
                 "file_content": stored_file_bytes if stored_file_bytes is not None else db[request_id].get("file_content")
+=======
+            # Update existing request
+            db[request_id].update({
+                "status": "Ready" if action == "completed" else "Failed",
+                "downloadUrl": download_url,
+                "fileName": file_name,
+                "fileSize": file_size,
+                "errorMessage": error_message,
+                "updatedAt": get_current_timestamp()
+>>>>>>> origin/feat/shared-document-requests
             })
         
         status_message = "Document processing completed successfully"
