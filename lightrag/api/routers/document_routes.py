@@ -1101,14 +1101,16 @@ def create_document_routes(
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
 
-    @router.post(
-        "/n8n_webhook",
-        response_model=InsertResponse,
-        dependencies=[Depends(combined_auth)],
-    )
-    async def n8n_webhook(
-        request: N8nWebhookRequest, background_tasks: BackgroundTasks
-    ):
+    # Conditionally expose n8n webhook based on feature flag
+    if getattr(global_args, "enable_n8n_integration", False):
+        @router.post(
+            "/n8n_webhook",
+            response_model=InsertResponse,
+            dependencies=[Depends(combined_auth)],
+        )
+        async def n8n_webhook(
+            request: N8nWebhookRequest, background_tasks: BackgroundTasks
+        ):
         """
         Webhook endpoint for n8n integration.
 
@@ -1142,7 +1144,7 @@ def create_document_routes(
             "content_type": "text"
         }
         """
-        try:
+            try:
             # Process content based on content_type
             if request.content_type == "json":
                 # For JSON content, we might want to extract specific fields
@@ -1261,14 +1263,14 @@ def create_document_routes(
                 file_sources=[source_identifier],
             )
 
-            return InsertResponse(
-                status="success",
-                message=f"Content from n8n webhook ({source_identifier}) successfully received. Processing will continue in background.",
-            )
-        except Exception as e:
-            logger.error(f"Error /documents/n8n_webhook: {str(e)}")
-            logger.error(traceback.format_exc())
-            raise HTTPException(status_code=500, detail=str(e))
+                return InsertResponse(
+                    status="success",
+                    message=f"Content from n8n webhook ({source_identifier}) successfully received. Processing will continue in background.",
+                )
+            except Exception as e:
+                logger.error(f"Error /documents/n8n_webhook: {str(e)}")
+                logger.error(traceback.format_exc())
+                raise HTTPException(status_code=500, detail=str(e))
 
     @router.delete(
         "", response_model=ClearDocumentsResponse, dependencies=[Depends(combined_auth)]

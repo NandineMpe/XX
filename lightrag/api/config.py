@@ -197,6 +197,24 @@ def parse_args() -> argparse.Namespace:
         help="Enable automatic scanning when the program starts",
     )
 
+    # Feature flags
+    parser.add_argument(
+        "--enable-n8n-integration",
+        action="store_true",
+        default=get_env_value("ENABLE_N8N_INTEGRATION", False, bool),
+        help="Enable n8n integration endpoints (default: from env or False)",
+    )
+
+    parser.add_argument(
+        "--pbc-import-webhook",
+        type=str,
+        default=get_env_value(
+            "PBC_IMPORT_WEBHOOK_URL",
+            "https://primary-production-1d298.up.railway.app/webhook/pbc/import",
+        ),
+        help="External webhook URL to trigger PBC import workflow",
+    )
+
     # Server workers configuration
     parser.add_argument(
         "--workers",

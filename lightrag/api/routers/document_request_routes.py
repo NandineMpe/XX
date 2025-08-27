@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field, field_validator
 from lightrag.utils import logger
 from lightrag.api.utils_api import get_combined_auth_dependency
 from lightrag.api.config import global_args
+import httpx
 from lightrag.kg.shared_storage import get_namespace_data, get_storage_lock
 
 # Shared storage namespace for document requests
@@ -189,6 +190,14 @@ class DocumentRequestStatus(BaseModel):
     file_content: Optional[bytes] = Field(
         default=None,
         description="Binary content of the file if stored directly"
+    )
+    clientBatchId: Optional[str] = Field(
+        default=None,
+        description="Client-supplied batch identifier for grouping and UI correlation"
+    )
+    callbackUrl: Optional[str] = Field(
+        default=None,
+        description="Callback URL that n8n will use to notify status/links"
     )
     
     class Config:
@@ -488,7 +497,9 @@ async def handle_form_initial_request(
                 "fileSize": None,
                 "errorMessage": None,
                 "createdAt": get_current_timestamp(),
-                "updatedAt": get_current_timestamp()
+                "updatedAt": get_current_timestamp(),
+                "clientBatchId": parsed_parameters.get("clientBatchId") if isinstance(parsed_parameters, dict) else None,
+                "callbackUrl": parsed_parameters.get("callbackUrl") if isinstance(parsed_parameters, dict) else None,
             }
         
         logger.info(f"New document request created via form: {request_id}")
@@ -581,6 +592,155 @@ def create_document_request_routes(api_key: Optional[str] = None):
             raise
         except Exception as e:
             logger.error(f"Error in document request webhook: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @router.post(
+        "/pbc/import",
+        response_model=DocumentRequestResponse,
+        dependencies=[Depends(combined_auth)],
+    )
+    async def pbc_import(
+        request: DocumentRequestWebhookRequest
+    ):
+        """
+        Create a new local workflow entry for PBC import and forward to external webhook.
+        """
+        try:
+            # Always create a new workflow/request locally
+            db = await get_namespace_data(DOCUMENT_REQUESTS_NS)
+            request_id = request.requestId or str(uuid.uuid4())
+            async with get_storage_lock():
+                if request_id in db:
+                    # Ensure uniqueness by regenerating
+                    request_id = str(uuid.uuid4())
+                client_batch_id = (request.parameters or {}).get("clientBatchId") if isinstance(request.parameters, dict) else None
+                callback_url = (request.parameters or {}).get("callbackUrl") if isinstance(request.parameters, dict) else None
+                db[request_id] = {
+                    "requestId": request_id,
+                    "status": "Requested",
+                    "documentType": request.documentType or "pbc_import",
+                    "parameters": request.parameters,
+                    "downloadUrl": None,
+                    "fileName": None,
+                    "fileSize": None,
+                    "errorMessage": None,
+                    "createdAt": get_current_timestamp(),
+                    "updatedAt": get_current_timestamp(),
+                    "clientBatchId": client_batch_id,
+                    "callbackUrl": callback_url,
+                }
+
+            # Extract email parameters
+            params = request.parameters or {}
+            subject = params.get("subject")
+            html_content = params.get("html")
+            to_address = params.get("to")
+
+            if not subject or not html_content or not to_address:
+                raise HTTPException(
+                    status_code=400,
+                    detail="parameters.subject, parameters.html, and parameters.to are required",
+                )
+
+            # Build outbound payload as required by production workflow
+            payload = {
+                "message": {
+                    "subject": subject,
+                    "body": {"contentType": "HTML", "content": html_content},
+                    "toRecipients": [
+                        {"emailAddress": {"address": to_address}}
+                    ],
+                },
+                "saveToSentItems": False,
+            }
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                resp = await client.post(
+                    global_args.pbc_import_webhook, json=payload
+                )
+                # Do not fail local creation on remote error; just log
+                if resp.status_code >= 400:
+                    logger.warning(
+                        f"PBC import forward failed {resp.status_code}: {resp.text}"
+                    )
+
+            return DocumentRequestResponse(
+                status="success",
+                message="PBC import request created and forwarded",
+                requestId=request_id,
+            )
+        except Exception as e:
+            logger.error(f"Error creating PBC import: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(status_code=500, detail=str(e))
+
+    # SDR callback endpoint for n8n to post status updates and links
+    @router.post(
+        "/api/sdr/callback",
+        dependencies=[Depends(combined_auth)],
+    )
+    async def sdr_callback(
+        requestId: Optional[str] = None,
+        clientBatchId: Optional[str] = None,
+        status: Optional[str] = None,
+        downloadUrl: Optional[str] = None,
+        fileName: Optional[str] = None,
+        fileSize: Optional[int] = None,
+        errorMessage: Optional[str] = None,
+        payload: Dict[str, Any] = None,
+    ):
+        try:
+            db = await get_namespace_data(DOCUMENT_REQUESTS_NS)
+            updated_count = 0
+
+            async with get_storage_lock():
+                if requestId:
+                    targets = [requestId] if requestId in db else []
+                elif clientBatchId:
+                    targets = [rid for rid, row in db.items() if row.get("clientBatchId") == clientBatchId]
+                else:
+                    raise HTTPException(status_code=400, detail="requestId or clientBatchId required")
+
+                for rid in targets:
+                    row = db[rid]
+                    if status:
+                        row["status"] = status
+                    if downloadUrl:
+                        row["downloadUrl"] = downloadUrl
+                    if fileName:
+                        row["fileName"] = fileName
+                    if fileSize is not None:
+                        row["fileSize"] = fileSize
+                    if errorMessage is not None:
+                        row["errorMessage"] = errorMessage
+                    row["updatedAt"] = get_current_timestamp()
+                    updated_count += 1
+
+            return {"status": "ok", "updated": updated_count}
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error in SDR callback: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(status_code=500, detail=str(e))
+
+    # Endpoint to query rows by clientBatchId for UI polling
+    @router.get(
+        "/api/document-requests/batch/{client_batch_id}",
+        dependencies=[Depends(combined_auth)],
+    )
+    async def get_batch_status(client_batch_id: str):
+        try:
+            db = await get_namespace_data(DOCUMENT_REQUESTS_NS)
+            rows = [row for row in db.values() if row.get("clientBatchId") == client_batch_id]
+            rows.sort(key=lambda x: x["createdAt"], reverse=False)
+            return {
+                "clientBatchId": client_batch_id,
+                "total": len(rows),
+                "rows": rows,
+            }
+        except Exception as e:
+            logger.error(f"Error getting batch status for {client_batch_id}: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
     
