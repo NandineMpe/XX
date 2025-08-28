@@ -13,6 +13,9 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Literal
 from pathlib import Path
 from io import BytesIO
+import os
+import random
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, File, UploadFile
 from fastapi.responses import StreamingResponse
@@ -671,6 +674,130 @@ def create_document_request_routes(api_key: Optional[str] = None):
             )
         except Exception as e:
             logger.error(f"Error creating PBC import: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(status_code=500, detail=str(e))
+
+    class PBCSimulateRequest(BaseModel):
+        clientBatchId: str
+        callbackUrl: Optional[str] = None
+        rows: List[Dict[str, Any]]
+
+    @router.post(
+        "/pbc/import/simulate",
+        dependencies=[Depends(combined_auth)],
+    )
+    async def pbc_import_simulate(payload: PBCSimulateRequest):
+        """
+        Simulate asynchronous retrieval for a list of PBC rows.
+
+        - Creates a new request for each row with status Processing
+        - Within random delays (5s..60s), marks known doc types as Ready with given URLs
+        - Unknown types remain Processing with no downloadUrl
+        """
+        try:
+            db = await get_namespace_data(DOCUMENT_REQUESTS_NS)
+
+            # Known document mapping to provided download links
+            known_links = {
+                # normalize keys to lowercase
+                "purchase order": "https://ifonjarzvpechegr.public.blob.vercel-storage.com/Purchase%20Order%20GL%20Listing.xlsx",
+                "purchase order listing": "https://ifonjarzvpechegr.public.blob.vercel-storage.com/Purchase%20Order%20GL%20Listing.xlsx",
+                "purchase order gl listing": "https://ifonjarzvpechegr.public.blob.vercel-storage.com/Purchase%20Order%20GL%20Listing.xlsx",
+                "minutes of tariff meetings": "https://ifonjarzvpechegr.public.blob.vercel-storage.com/Minutes%20of%20tariff%20meetings.pdf",
+                "tariff meetings": "https://ifonjarzvpechegr.public.blob.vercel-storage.com/Minutes%20of%20tariff%20meetings.pdf",
+                "final tax assessment": "https://ifonjarzvpechegr.public.blob.vercel-storage.com/Tax%20Assessment.pdf",
+                "tax assessment": "https://ifonjarzvpechegr.public.blob.vercel-storage.com/Tax%20Assessment.pdf",
+            }
+
+            request_ids: List[str] = []
+
+            async with get_storage_lock():
+                for row in payload.rows:
+                    document_type = str(row.get("doc_type") or row.get("documentType") or "Document Request").strip()
+                    rid = str(uuid.uuid4())
+                    db[rid] = {
+                        "requestId": rid,
+                        "status": "Processing",
+                        "documentType": document_type,
+                        "parameters": row,
+                        "downloadUrl": None,
+                        "fileName": None,
+                        "fileSize": None,
+                        "errorMessage": None,
+                        "createdAt": get_current_timestamp(),
+                        "updatedAt": get_current_timestamp(),
+                        "clientBatchId": payload.clientBatchId,
+                        "callbackUrl": payload.callbackUrl,
+                    }
+                    request_ids.append(rid)
+
+            async def simulate_one(rid: str):
+                try:
+                    # random delay up to 60s
+                    delay_sec = random.randint(5, 60)
+                    await asyncio.sleep(delay_sec)
+
+                    db_inner = await get_namespace_data(DOCUMENT_REQUESTS_NS)
+                    row = db_inner.get(rid)
+                    if not row:
+                        return
+                    doc_type = (row.get("documentType") or "").lower()
+
+                    # find best link by simple fuzzy contains
+                    link: Optional[str] = None
+                    for key, url in known_links.items():
+                        if key in doc_type:
+                            link = url
+                            break
+
+                    async with get_storage_lock():
+                        if link:
+                            # derive file name from URL path
+                            path = urlparse(link).path
+                            file_name = os.path.basename(path)
+                            row.update(
+                                {
+                                    "status": "Ready",
+                                    "downloadUrl": link,
+                                    "fileName": file_name,
+                                    "updatedAt": get_current_timestamp(),
+                                }
+                            )
+                        else:
+                            # keep Processing, no link yet
+                            row.update({"updatedAt": get_current_timestamp()})
+
+                    # Optional: call callbackUrl
+                    cb = row.get("callbackUrl")
+                    if cb:
+                        try:
+                            data = {
+                                "requestId": rid,
+                                "status": row.get("status"),
+                                "downloadUrl": row.get("downloadUrl"),
+                                "fileName": row.get("fileName"),
+                                "fileSize": row.get("fileSize"),
+                                "errorMessage": row.get("errorMessage"),
+                            }
+                            async with httpx.AsyncClient(timeout=20.0) as client:
+                                await client.post(cb, json=data)
+                        except Exception as cb_err:
+                            logger.debug(f"Callback failed for {rid}: {cb_err}")
+                except Exception as sim_err:
+                    logger.debug(f"Simulation error for {rid}: {sim_err}")
+
+            # schedule background tasks
+            for rid in request_ids:
+                asyncio.create_task(simulate_one(rid))
+
+            return {
+                "status": "accepted",
+                "accepted": len(request_ids),
+                "clientBatchId": payload.clientBatchId,
+                "requestIds": request_ids,
+            }
+        except Exception as e:
+            logger.error(f"Error in pbc_import_simulate: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
 
