@@ -29,5 +29,40 @@
     </a>
     <div id="root"></div>
 
+    <script>
+      (function () {
+        function replaceStatutoryAudits() {
+          var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          var changed = false;
+          while (walker.nextNode()) {
+            var node = walker.currentNode;
+            var text = node && node.nodeValue ? node.nodeValue : "";
+            if (!text) continue;
+            var replaced = text
+              .replace(/Statutory\s+audits/gi, "Audits")
+              .replace(/Statutory\s+audit/gi, "Audit");
+            if (replaced !== text) {
+              node.nodeValue = replaced;
+              changed = true;
+            }
+          }
+          return changed;
+        }
+
+        // Initial attempt (in case content already rendered)
+        replaceStatutoryAudits();
+
+        // Observe for React render completion
+        var root = document.getElementById("root") || document.body;
+        var observer = new MutationObserver(function () {
+          if (replaceStatutoryAudits()) {
+            observer.disconnect();
+          }
+        });
+        observer.observe(root, { childList: true, subtree: true });
+        setTimeout(function () { observer.disconnect(); }, 5000);
+      })();
+    </script>
+
   </body>
 </html>
