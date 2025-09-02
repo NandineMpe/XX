@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <link rel="icon" type="image/x-icon" href="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augentik</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Klaviyo Onsite Script for form rendering (company_id variant for reliability) -->
+    <script>
+      (function(){
+        var existing = document.querySelector('script[src*="klaviyo"]');
+        if (existing) existing.remove();
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=TwzEQD';
+        s.onload = function(){
+          try { if (window._klOnsite && typeof window._klOnsite.load === 'function') window._klOnsite.load(); } catch(_) {}
+        };
+        document.head.appendChild(s);
+      })();
+    </script>
+    <script type="module" crossorigin src="/webui/assets/index-Bo0kGtUI.js"></script>
+    <link rel="modulepreload" crossorigin href="/webui/assets/react-vendor-B4rOHfEm.js">
+    <link rel="modulepreload" crossorigin href="/webui/assets/ui-vendor-D8S1t7W6.js">
+    <link rel="modulepreload" crossorigin href="/webui/assets/utils-vendor-yYjR-JpY.js">
+    <link rel="modulepreload" crossorigin href="/webui/assets/feature-graph-Wd3Wvzy0.js">
+    <link rel="modulepreload" crossorigin href="/webui/assets/feature-documents-TYFog0It.js">
+    <link rel="modulepreload" crossorigin href="/webui/assets/mermaid-vendor-DRXBiZaJ.js">
+    <link rel="modulepreload" crossorigin href="/webui/assets/markdown-vendor-XNcT6d8I.js">
+    <link rel="modulepreload" crossorigin href="/webui/assets/feature-retrieval-DFJWfhQ-.js">
+    <link rel="stylesheet" crossorigin href="/webui/assets/feature-graph-HI4LhrlC.css">
+    <link rel="stylesheet" crossorigin href="/webui/assets/index-Ujjbvor2.css">
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Dedicated launch button for Early Access (outside React root to avoid interference) -->
+    <button id="exclusive-access-launch" type="button" aria-haspopup="dialog" aria-controls="klaviyo-exclusive-modal" style="position:fixed;bottom:16px;right:16px;z-index:1000;background:linear-gradient(135deg,#111,#000);color:#fff;padding:12px 18px;border-radius:9999px;border:1px solid #333;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);cursor:pointer;">
+      Request Exclusive Access
+    </button>
+
+    <!-- Fallback modal with embedded Klaviyo form (works even if form isn't a popup) -->
+    <div id="klaviyo-exclusive-overlay" hidden style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1000;"></div>
+    <div id="klaviyo-exclusive-modal" hidden role="dialog" aria-modal="true" aria-labelledby="klaviyo-exclusive-title" style="display:none;position:fixed;inset:0;z-index:1001;align-items:center;justify-content:center;">
+      <div style="width:100%;max-width:720px;margin:24px;background:#0b0b0b;border:1px solid #222;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.45);padding:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h2 id="klaviyo-exclusive-title" style="margin:0;color:#fff;font-size:18px;font-weight:600;">Request Exclusive Access</h2>
+          <button id="klaviyo-exclusive-close" aria-label="Close" style="background:#111;border:1px solid #333;color:#bbb;border-radius:8px;padding:6px 10px;cursor:pointer;">✕</button>
+        </div>
+        <div style="border-top:1px solid #222;margin:8px 0 16px 0;"></div>
+        <div>
+          <div class="klaviyo-form-TwzEQD" style="min-height:260px"></div>
+          <div style="margin-top:12px;text-align:center">
+            <a href="#" id="klaviyo-retry" style="color:#8ab4ff;text-decoration:underline;font-size:12px;">Try again</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        function replaceStatutoryAudits() {
+          var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          var changed = false;
+          while (walker.nextNode()) {
+            var node = walker.currentNode;
+            var text = node && node.nodeValue ? node.nodeValue : "";
+            if (!text) continue;
+            var replaced = text
+              .replace(/Statutory(?:\s|\u00a0)+audits/gi, "Financial Statement Audits")
+              .replace(/Statutory(?:\s|\u00a0)+audit/gi, "Financial Statement Audit");
+            if (replaced !== text) {
+              node.nodeValue = replaced;
+              changed = true;
+            }
+            // Fallback: standalone word replacement to handle split spans
+            var replaced2 = node.nodeValue
+              .replace(/\bStatutory\b/gi, "Financial Statement");
+            if (replaced2 !== node.nodeValue) {
+              node.nodeValue = replaced2;
+              changed = true;
+            }
+          }
+
+          // Element-level fallback: fix phrases that span nested tags
+          var rootEl = document.getElementById('root') || document.body;
+          var elements = rootEl.querySelectorAll('*');
+          elements.forEach(function(el){
+            try {
+              var tc = el.textContent || '';
+              var newTc = tc
+                .replace(/Statutory(?:\s|\u00a0)+audits/gi, 'Financial Statement Audits')
+                .replace(/Statutory(?:\s|\u00a0)+audit/gi, 'Financial Statement Audit');
+              if (newTc !== tc) {
+                // Only rewrite when element is mostly text to avoid breaking complex markup
+                if (el.children.length === 0 || el.children.length <= 1) {
+                  el.textContent = newTc;
+                  changed = true;
+                }
+              }
+            } catch(_) {}
+          });
+          return changed;
+        }
+
+        // Initial attempt (in case content already rendered)
+        replaceStatutoryAudits();
+
+        // Observe for React render completion
+        var root = document.getElementById("root") || document.body;
+        var observer = new MutationObserver(function () { replaceStatutoryAudits(); });
+        observer.observe(root, { childList: true, subtree: true });
+        // Keep observing; if needed, we can disconnect later when the app stabilizes
+
+        // Targeted fix for hero tagline if React splits text across spans
+        function fixHeroTagline() {
+          try {
+            var candidates = Array.from(document.querySelectorAll('h1, h2, h3, p, div'));
+            candidates.forEach(function(el){
+              var t = (el.textContent || '').trim();
+              if (!t) return;
+              if (/Statutory\s*audits/i.test(t) && /cost\s*money/i.test(t)) {
+                var newText = t
+                  .replace(/Statutory(?:\s|\u00a0)+audits/gi, 'Financial Statement Audits')
+                  .replace(/Statutory(?:\s|\u00a0)+audit/gi, 'Financial Statement Audit');
+                if (newText !== t) {
+                  el.textContent = newText;
+                }
+              }
+            });
+          } catch(_) {}
+        }
+        fixHeroTagline();
+        new MutationObserver(fixHeroTagline).observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
+
+    <script>
+      // Remove any "Reclaim your time" CTA that might be injected by the app
+      (function () {
+        function removeReclaimCTA() {
+          var removed = false;
+          var el = document.getElementById('cta-signup');
+          if (el) { el.remove(); removed = true; }
+          var candidates = Array.from(document.querySelectorAll('a, button, [role="button"], [class]'));
+          candidates.forEach(function (n) {
+            try {
+              var t = (n.innerText || '').trim();
+              if (/^reclaim\s+your\s+time$/i.test(t)) { n.remove(); removed = true; }
+            } catch (_) {}
+          });
+          return removed;
+        }
+        removeReclaimCTA();
+        var mo = new MutationObserver(function(){ removeReclaimCTA(); });
+        mo.observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
+
+    <script>
+      // Remove any broken in-app (React) "Request Exclusive Access" UI, but keep our custom button/modal
+      (function () {
+        function removeExclusiveAccess() {
+          var removed = false;
+
+          var appRoot = document.getElementById('root');
+          if (!appRoot) return false;
+
+          // Remove any button/link containing the exact text within the React root only
+          var candidates = Array.from(appRoot.querySelectorAll('button, a, [role="button"], [data-testid], [class]'));
+          candidates.forEach(function (el) {
+            try {
+              var text = (el.innerText || '').trim();
+              if (!text) return;
+              if (/^request\s+exclusive\s+access$/i.test(text)) {
+                el.remove();
+                removed = true;
+              }
+            } catch (_) {}
+          });
+
+          // Remove any modal/dialog whose heading matches within the React root only
+          var headings = Array.from(appRoot.querySelectorAll('h1, h2, [role="heading"]'));
+          headings.forEach(function (h) {
+            try {
+              var t = (h.innerText || '').trim();
+              if (/^request\s+exclusive\s+access$/i.test(t)) {
+                var modal = h.closest('[role="dialog"], .modal, .Dialog, .fixed, .inset-0');
+                if (modal) {
+                  modal.remove();
+                  removed = true;
+                }
+              }
+            } catch (_) {}
+          });
+
+          return removed;
+        }
+
+        // Initial attempt
+        removeExclusiveAccess();
+
+        // Observe future renders
+        var mo = new MutationObserver(function () {
+          if (removeExclusiveAccess()) {
+            // keep observing in case React re-renders it again
+          }
+        });
+        mo.observe(document.documentElement, { childList: true, subtree: true });
+      })();
+    </script>
+
+    <script>
+      // Use Klaviyo popup trigger if available; otherwise open our fallback modal with the embedded form
+      (function () {
+        var btn = document.getElementById('exclusive-access-launch');
+        var overlay = document.getElementById('klaviyo-exclusive-overlay');
+        var modal = document.getElementById('klaviyo-exclusive-modal');
+        var closeBtn = document.getElementById('klaviyo-exclusive-close');
+
+        function ensureKlaviyoReady(cb){
+          var attempts = 0;
+          var timer = setInterval(function(){
+            attempts++;
+            if (window._klOnsite) {
+              clearInterval(timer);
+              cb();
+            }
+            if (attempts > 50) { // ~5s
+              clearInterval(timer);
+              cb();
+            }
+          }, 100);
+        }
+
+        function openKlaviyoForm(){
+          var opened = false;
+          try {
+            // Attempt Klaviyo popup
+            window._klOnsite = window._klOnsite || [];
+            window._klOnsite.push(['openForm', 'TwzEQD']);
+            opened = true;
+          } catch(_) {}
+          // If nothing shows in ~500ms, open fallback modal
+          setTimeout(function(){
+            var anyPopup = document.querySelector('[class*="klaviyo"] [role="dialog"], .kl-private-reset-css-Xuajs1');
+            if (!anyPopup) {
+              if (overlay) { overlay.hidden = false; overlay.style.display = 'block'; }
+              if (modal) { modal.hidden = false; modal.style.display = 'flex'; }
+              document.body.style.overflow = 'hidden';
+            }
+          }, 500);
+        }
+
+        if (btn) btn.addEventListener('click', function(){
+          ensureKlaviyoReady(openKlaviyoForm);
+        });
+
+        function closeModal() {
+          if (overlay) { overlay.style.display = 'none'; overlay.hidden = true; }
+          if (modal) { modal.style.display = 'none'; modal.hidden = true; }
+          document.body.style.overflow = '';
+        }
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (overlay) overlay.addEventListener('click', closeModal);
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+        var retry = document.getElementById('klaviyo-retry');
+        if (retry) retry.addEventListener('click', function(e){
+          e.preventDefault();
+          try { if (window._klOnsite && typeof window._klOnsite.load === 'function') window._klOnsite.load(); } catch(_) {}
+        });
+      })();
+    </script>
+
+  </body>
+</html>
