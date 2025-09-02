@@ -16,7 +16,7 @@
         if (existing) existing.remove();
         var s = document.createElement('script');
         s.async = true;
-        s.src = 'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=TwzEQD';
+        s.src = 'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=VdC5UV';
         s.onload = function(){
           try { if (window._klOnsite && typeof window._klOnsite.load === 'function') window._klOnsite.load(); } catch(_) {}
         };
@@ -53,7 +53,7 @@
         </div>
         <div style="border-top:1px solid #222;margin:8px 0 16px 0;"></div>
         <div>
-          <div class="klaviyo-form-TwzEQD" style="min-height:260px"></div>
+          <div class="klaviyo-form-VdC5UV" style="min-height:260px"></div>
           <div style="margin-top:12px;text-align:center">
             <a href="#" id="klaviyo-retry" style="color:#8ab4ff;text-decoration:underline;font-size:12px;">Try again</a>
           </div>
@@ -99,9 +99,9 @@
                 // Only rewrite when element is mostly text to avoid breaking complex markup
                 if (el.children.length === 0 || el.children.length <= 1) {
                   el.textContent = newTc;
-                  changed = true;
-                }
-              }
+              changed = true;
+            }
+          }
             } catch(_) {}
           });
           return changed;
@@ -242,7 +242,7 @@
           try {
             // Attempt Klaviyo popup
             window._klOnsite = window._klOnsite || [];
-            window._klOnsite.push(['openForm', 'TwzEQD']);
+            window._klOnsite.push(['openForm', 'VdC5UV']);
             opened = true;
           } catch(_) {}
           // If nothing shows in ~500ms, open fallback modal
@@ -275,6 +275,12 @@
           try { if (window._klOnsite && typeof window._klOnsite.load === 'function') window._klOnsite.load(); } catch(_) {}
         });
       })();
+    </script>
+
+    <!-- Ensure Klaviyo form opens at least once on initial load (in case modal was hidden) -->
+    <script>
+      window._klOnsite = window._klOnsite || [];
+      window._klOnsite.push(['openForm', 'VdC5UV']);
     </script>
 
   </body>
