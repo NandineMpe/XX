@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
         exclude: ^lightrag/api/webui/
@@ -9,9 +9,8 @@ repos:
       - id: requirements-txt-fixer
         exclude: ^lightrag/api/webui/
 
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.4
+    rev: v0.12.11
     hooks:
       - id: ruff-format
         exclude: ^lightrag/api/webui/
@@ -19,9 +18,8 @@ repos:
         args: [--fix, --ignore=E402]
         exclude: ^lightrag/api/webui/
 
-
   - repo: https://github.com/mgedmin/check-manifest
-    rev: "0.49"
+    rev: "0.50"
     hooks:
       - id: check-manifest
         stages: [manual]
@@ -32,6 +30,13 @@ repos:
     hooks:
       - id: build-frontend-and-stage
         name: Build and Stage Frontend
-        entry: npm run build-frontend-and-stage
+        entry: |
+          bash -c 'cd ../Augentik_FrontEnd && \
+          npm install && \
+          npm run build && \
+          rm -rf ../LightRAG-3/lightrag/api/webui/* && \
+          cp -r dist/* ../LightRAG-3/lightrag/api/webui/ && \
+          cd ../LightRAG-3 && \
+          git add lightrag/api/webui'
         language: system
         pass_filenames: false
