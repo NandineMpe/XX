@@ -46,7 +46,6 @@ from lightrag.api.routers.document_routes import (
 )
 from lightrag.api.routers.query_routes import create_query_routes
 from lightrag.api.routers.graph_routes import create_graph_routes
-from lightrag.api.routers.compliance_routes import create_compliance_routes
 from lightrag.api.routers.ollama_api import OllamaAPI
 from lightrag.api.routers.document_request_routes import create_document_request_routes
 
@@ -382,7 +381,6 @@ def create_app(args):
     app.include_router(create_document_routes(rag, doc_manager, api_key))
     app.include_router(create_query_routes(rag, api_key, args.top_k))
     app.include_router(create_graph_routes(rag, api_key))
-    app.include_router(create_compliance_routes(rag, api_key))
     app.include_router(create_document_request_routes(api_key))
 
     # Add Ollama API routes
