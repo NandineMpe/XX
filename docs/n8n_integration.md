@@ -136,7 +136,7 @@ return [{ json: payload }];
 
 - **URL**: `http://your-lightrag-server:8000/documents/n8n_webhook`
 - **Method**: POST
-- **Headers**: 
+- **Headers**:
   ```
   Content-Type: application/json
   ```
@@ -342,4 +342,4 @@ For issues or questions about the n8n integration:
 3. Test with the provided demo script
 4. Check the pipeline status endpoint for processing issues
 
-The n8n webhook endpoint is designed to be robust and user-friendly, providing a seamless integration between n8n workflows and LightRAG's document processing capabilities. 
+The n8n webhook endpoint is designed to be robust and user-friendly, providing a seamless integration between n8n workflows and LightRAG's document processing capabilities.

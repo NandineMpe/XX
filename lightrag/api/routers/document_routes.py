@@ -167,16 +167,13 @@ class N8nWebhookRequest(BaseModel):
         description="The content to insert (text, JSON string, or file content)",
     )
     source: Optional[str] = Field(
-        default="n8n_webhook", 
-        description="Source identifier for the content"
+        default="n8n_webhook", description="Source identifier for the content"
     )
     metadata: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Additional metadata from n8n workflow"
+        default=None, description="Additional metadata from n8n workflow"
     )
     content_type: Optional[str] = Field(
-        default="text",
-        description="Type of content: 'text', 'json', or 'file'"
+        default="text", description="Type of content: 'text', 'json', or 'file'"
     )
 
     @field_validator("content", mode="after")
@@ -197,9 +194,9 @@ class N8nWebhookRequest(BaseModel):
                 "metadata": {
                     "workflow_id": "12345",
                     "trigger_type": "email",
-                    "timestamp": "2024-01-01T00:00:00Z"
+                    "timestamp": "2024-01-01T00:00:00Z",
                 },
-                "content_type": "text"
+                "content_type": "text",
             }
         }
 
@@ -870,17 +867,28 @@ def create_document_routes(
                 )
 
                 # Infer documentType from filename prefix (e.g., "Tax Assessments.pdf" -> "tax_assessments")
-                inferred_document_type = file.filename.rsplit(".", 1)[0].strip().lower().replace(" ", "_")
+                inferred_document_type = (
+                    file.filename.rsplit(".", 1)[0].strip().lower().replace(" ", "_")
+                )
 
                 # Find the most recent pending/requested request with matching documentType
                 matching_id = None
                 newest_ts = None
                 for req_id, req in document_requests_db.items():
-                    if req.get("status") in ("Requested", "Processing") and req.get("documentType"):
-                        dt = str(req.get("documentType")).strip().lower().replace(" ", "_")
+                    if req.get("status") in ("Requested", "Processing") and req.get(
+                        "documentType"
+                    ):
+                        dt = (
+                            str(req.get("documentType"))
+                            .strip()
+                            .lower()
+                            .replace(" ", "_")
+                        )
                         if dt == inferred_document_type:
                             created_ts = req.get("createdAt")
-                            if newest_ts is None or (created_ts and created_ts > newest_ts):
+                            if newest_ts is None or (
+                                created_ts and created_ts > newest_ts
+                            ):
                                 newest_ts = created_ts
                                 matching_id = req_id
 
@@ -901,7 +909,9 @@ def create_document_routes(
                     )
             except Exception as _auto_link_err:
                 # Do not fail the upload if linking fails; log and continue
-                logger.debug(f"Auto-link upload to pending request failed: {_auto_link_err}")
+                logger.debug(
+                    f"Auto-link upload to pending request failed: {_auto_link_err}"
+                )
 
             # Add to background tasks
             background_tasks.add_task(pipeline_index_file, rag, file_path)
@@ -1103,6 +1113,7 @@ def create_document_routes(
 
     # Conditionally expose n8n webhook based on feature flag
     if getattr(global_args, "enable_n8n_integration", False):
+
         @router.post(
             "/n8n_webhook",
             response_model=InsertResponse,
@@ -1150,10 +1161,13 @@ def create_document_routes(
                     # For JSON content, we might want to extract specific fields
                     # or convert to a more readable format
                     import json
+
                     try:
                         json_data = json.loads(request.content)
                         # Convert JSON to a readable string format
-                        processed_content = json.dumps(json_data, indent=2, ensure_ascii=False)
+                        processed_content = json.dumps(
+                            json_data, indent=2, ensure_ascii=False
+                        )
                     except json.JSONDecodeError:
                         # If JSON parsing fails, treat as regular text
                         processed_content = request.content
@@ -1169,8 +1183,13 @@ def create_document_routes(
 
                 # Create document request entry for frontend display
                 try:
-                    from lightrag.api.routers.document_request_routes import get_current_timestamp
-                    from lightrag.kg.shared_storage import get_namespace_data, get_storage_lock
+                    from lightrag.api.routers.document_request_routes import (
+                        get_current_timestamp,
+                    )
+                    from lightrag.kg.shared_storage import (
+                        get_namespace_data,
+                        get_storage_lock,
+                    )
                     import uuid
 
                     request_id = str(uuid.uuid4())
@@ -1179,7 +1198,11 @@ def create_document_routes(
                         db[request_id] = {
                             "requestId": request_id,
                             "status": "Processing",
-                            "documentType": request.metadata.get("document_type", "n8n_upload") if request.metadata else "n8n_upload",
+                            "documentType": request.metadata.get(
+                                "document_type", "n8n_upload"
+                            )
+                            if request.metadata
+                            else "n8n_upload",
                             "parameters": request.metadata,
                             "downloadUrl": None,
                             "fileName": f"{source_identifier}.{request.content_type}",
@@ -1187,33 +1210,40 @@ def create_document_routes(
                             "errorMessage": None,
                             "createdAt": get_current_timestamp(),
                             "updatedAt": get_current_timestamp(),
-                            "file_content": request.content.encode('utf-8'),
+                            "file_content": request.content.encode("utf-8"),
                             "lightrag_source_id": source_identifier,
                         }
 
                     # Add background task to monitor LightRAG processing
                     async def monitor_lightrag_processing():
                         import asyncio
+
                         max_attempts = 60  # 5 minutes max (60 * 5 seconds)
                         attempts = 0
 
                         while attempts < max_attempts:
                             try:
                                 # Check if document exists in LightRAG and get its status
-                                docs_by_status = await rag.get_docs_by_status("processed")
+                                docs_by_status = await rag.get_docs_by_status(
+                                    "processed"
+                                )
 
                                 # Look for our document by source identifier
                                 for doc_id, doc_status in docs_by_status.items():
                                     if doc_status.file_path == source_identifier:
                                         # Document is processed successfully
-                                        db_inner = await get_namespace_data("document_requests")
+                                        db_inner = await get_namespace_data(
+                                            "document_requests"
+                                        )
                                         if request_id in db_inner:
                                             async with get_storage_lock():
-                                                db_inner[request_id].update({
-                                                    "status": "Ready",
-                                                    "updatedAt": get_current_timestamp(),
-                                                    "downloadUrl": f"/webhook/api/document-requests/{request_id}/download",
-                                                })
+                                                db_inner[request_id].update(
+                                                    {
+                                                        "status": "Ready",
+                                                        "updatedAt": get_current_timestamp(),
+                                                        "downloadUrl": f"/webhook/api/document-requests/{request_id}/download",
+                                                    }
+                                                )
                                         return
 
                                 # Check for failed documents
@@ -1221,14 +1251,19 @@ def create_document_routes(
                                 for doc_id, doc_status in failed_docs.items():
                                     if doc_status.file_path == source_identifier:
                                         # Document processing failed
-                                        db_inner = await get_namespace_data("document_requests")
+                                        db_inner = await get_namespace_data(
+                                            "document_requests"
+                                        )
                                         if request_id in db_inner:
                                             async with get_storage_lock():
-                                                db_inner[request_id].update({
-                                                    "status": "Failed",
-                                                    "errorMessage": doc_status.error or "Processing failed",
-                                                    "updatedAt": get_current_timestamp(),
-                                                })
+                                                db_inner[request_id].update(
+                                                    {
+                                                        "status": "Failed",
+                                                        "errorMessage": doc_status.error
+                                                        or "Processing failed",
+                                                        "updatedAt": get_current_timestamp(),
+                                                    }
+                                                )
                                         return
 
                                 # Still processing, wait and try again
@@ -1236,7 +1271,9 @@ def create_document_routes(
                                 attempts += 1
 
                             except Exception as e:
-                                logger.warning(f"Error monitoring LightRAG processing for {request_id}: {str(e)}")
+                                logger.warning(
+                                    f"Error monitoring LightRAG processing for {request_id}: {str(e)}"
+                                )
                                 await asyncio.sleep(5)
                                 attempts += 1
 
@@ -1244,11 +1281,13 @@ def create_document_routes(
                         db_inner = await get_namespace_data("document_requests")
                         if request_id in db_inner:
                             async with get_storage_lock():
-                                db_inner[request_id].update({
-                                    "status": "Failed",
-                                    "errorMessage": "Processing timeout after 5 minutes",
-                                    "updatedAt": get_current_timestamp(),
-                                })
+                                db_inner[request_id].update(
+                                    {
+                                        "status": "Failed",
+                                        "errorMessage": "Processing timeout after 5 minutes",
+                                        "updatedAt": get_current_timestamp(),
+                                    }
+                                )
 
                     background_tasks.add_task(monitor_lightrag_processing)
 
@@ -1487,8 +1526,11 @@ def create_document_routes(
                 get_namespace_data,
                 get_all_update_flags_status,
             )
+
             # Caching layer to throttle heavy status calculations
-            import os, time
+            import os
+            import time
+
             CACHE_TTL = int(os.getenv("FRONTEND_POLL_TTL_SEC", "20"))
             if not hasattr(get_pipeline_status, "_cache"):
                 get_pipeline_status._cache = {"ts": 0.0, "data": None}  # type: ignore[attr-defined]
@@ -1558,7 +1600,9 @@ def create_document_routes(
         """
         try:
             # Caching layer for frequent polling
-            import os, time
+            import os
+            import time
+
             CACHE_TTL = int(os.getenv("FRONTEND_POLL_TTL_SEC", "20"))
             if not hasattr(documents, "_cache"):
                 documents._cache = {"ts": 0.0, "data": None}  # type: ignore[attr-defined]

@@ -1458,8 +1458,7 @@ async def aexport_data(
 
     else:
         raise ValueError(
-            f"Unsupported file format: {file_format}. "
-            f"Choose from: csv, excel, md, txt"
+            f"Unsupported file format: {file_format}. Choose from: csv, excel, md, txt"
         )
     if file_format is not None:
         print(f"Data exported to: {output_path} with format: {file_format}")
@@ -1700,12 +1699,12 @@ def check_storage_env_vars(storage_name: str) -> None:
 
     required_vars = STORAGE_ENV_REQUIREMENTS.get(storage_name, [])
     missing_vars = []
-    
+
     for var in required_vars:
         # Check if the variable exists directly
         if var in os.environ:
             continue
-            
+
         # For PostgreSQL variables, check Railway equivalents
         if var == "POSTGRES_DATABASE" and "PGDATABASE" in os.environ:
             continue
@@ -1717,7 +1716,7 @@ def check_storage_env_vars(storage_name: str) -> None:
             continue
         if var == "POSTGRES_PORT" and "PGPORT" in os.environ:
             continue
-            
+
         missing_vars.append(var)
 
     if missing_vars:

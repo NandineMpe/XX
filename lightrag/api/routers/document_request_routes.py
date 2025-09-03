@@ -11,13 +11,12 @@ import traceback
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Literal
-from pathlib import Path
 from io import BytesIO
 import os
 import random
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 
@@ -41,46 +40,38 @@ combined_auth = None
 
 class DocumentRequestWebhookRequest(BaseModel):
     """Request model for document request webhook (JSON format)
-    
+
     This handles both initial requests (Type A) and completion notifications (Type B)
     """
-    
+
     # Type A fields (initial request)
     requestId: Optional[str] = Field(
-        default=None,
-        description="Unique request ID (auto-generated if not provided)"
+        default=None, description="Unique request ID (auto-generated if not provided)"
     )
     documentType: Optional[str] = Field(
-        default=None,
-        description="Type of document being requested"
+        default=None, description="Type of document being requested"
     )
     parameters: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Additional parameters for document generation"
+        default=None, description="Additional parameters for document generation"
     )
-    
+
     # Type B fields (completion notification)
     action: Optional[str] = Field(
-        default=None,
-        description="Action type (e.g., 'completed', 'failed')"
+        default=None, description="Action type (e.g., 'completed', 'failed')"
     )
     downloadUrl: Optional[str] = Field(
-        default=None,
-        description="URL where the completed document can be downloaded"
+        default=None, description="URL where the completed document can be downloaded"
     )
     fileName: Optional[str] = Field(
-        default=None,
-        description="Name of the generated file"
+        default=None, description="Name of the generated file"
     )
     fileSize: Optional[int] = Field(
-        default=None,
-        description="Size of the generated file in bytes"
+        default=None, description="Size of the generated file in bytes"
     )
     errorMessage: Optional[str] = Field(
-        default=None,
-        description="Error message if processing failed"
+        default=None, description="Error message if processing failed"
     )
-    
+
     @field_validator("requestId", mode="after")
     @classmethod
     def generate_request_id_if_missing(cls, request_id: Optional[str]) -> str:
@@ -88,39 +79,33 @@ class DocumentRequestWebhookRequest(BaseModel):
         if not request_id:
             return str(uuid.uuid4())
         return request_id
-    
+
     class Config:
         json_schema_extra = {
             "example": {
                 "requestId": "req_12345",
                 "documentType": "financial_report",
-                "parameters": {
-                    "year": 2024,
-                    "quarter": "Q1"
-                }
+                "parameters": {"year": 2024, "quarter": "Q1"},
             }
         }
 
 
 class DocumentRequestWebhookBinaryRequest(BaseModel):
     """Request model for document request webhook with binary file upload
-    
+
     This handles binary file uploads with form data
     """
-    
+
     requestId: Optional[str] = Field(
-        default=None,
-        description="Unique request ID (auto-generated if not provided)"
+        default=None, description="Unique request ID (auto-generated if not provided)"
     )
     documentType: Optional[str] = Field(
-        default=None,
-        description="Type of document being uploaded"
+        default=None, description="Type of document being uploaded"
     )
     parameters: Optional[str] = Field(
-        default=None,
-        description="Additional parameters as JSON string"
+        default=None, description="Additional parameters as JSON string"
     )
-    
+
     @field_validator("requestId", mode="after")
     @classmethod
     def generate_request_id_if_missing(cls, request_id: Optional[str]) -> str:
@@ -132,77 +117,60 @@ class DocumentRequestWebhookBinaryRequest(BaseModel):
 
 class DocumentRequestResponse(BaseModel):
     """Response model for document request webhook"""
-    
-    status: Literal["success", "error"] = Field(
-        description="Status of the operation"
-    )
-    message: str = Field(
-        description="Response message"
-    )
-    requestId: str = Field(
-        description="Request ID for tracking"
-    )
-    
+
+    status: Literal["success", "error"] = Field(description="Status of the operation")
+    message: str = Field(description="Response message")
+    requestId: str = Field(description="Request ID for tracking")
+
     class Config:
         json_schema_extra = {
             "example": {
                 "status": "success",
                 "message": "Document request created successfully",
-                "requestId": "req_12345"
+                "requestId": "req_12345",
             }
         }
 
 
 class DocumentRequestStatus(BaseModel):
     """Model for document request status"""
-    
+
     requestId: str = Field(description="Unique request identifier")
     status: Literal["Requested", "Processing", "Ready", "Failed"] = Field(
         description="Current status of the request"
     )
     documentType: Optional[str] = Field(
-        default=None,
-        description="Type of document requested"
+        default=None, description="Type of document requested"
     )
     parameters: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Parameters used for document generation"
+        default=None, description="Parameters used for document generation"
     )
     downloadUrl: Optional[str] = Field(
-        default=None,
-        description="URL for downloading the completed document"
+        default=None, description="URL for downloading the completed document"
     )
     fileName: Optional[str] = Field(
-        default=None,
-        description="Name of the generated file"
+        default=None, description="Name of the generated file"
     )
     fileSize: Optional[int] = Field(
-        default=None,
-        description="Size of the file in bytes"
+        default=None, description="Size of the file in bytes"
     )
     errorMessage: Optional[str] = Field(
-        default=None,
-        description="Error message if processing failed"
+        default=None, description="Error message if processing failed"
     )
-    createdAt: str = Field(
-        description="Creation timestamp (ISO format)"
-    )
-    updatedAt: str = Field(
-        description="Last update timestamp (ISO format)"
-    )
+    createdAt: str = Field(description="Creation timestamp (ISO format)")
+    updatedAt: str = Field(description="Last update timestamp (ISO format)")
     file_content: Optional[bytes] = Field(
-        default=None,
-        description="Binary content of the file if stored directly"
+        default=None, description="Binary content of the file if stored directly"
     )
     clientBatchId: Optional[str] = Field(
         default=None,
-        description="Client-supplied batch identifier for grouping and UI correlation"
+        description="Client-supplied batch identifier for grouping and UI correlation",
     )
     callbackUrl: Optional[str] = Field(
         default=None,
-        description="Callback URL that n8n will use to notify status/links"
+        description="Callback URL that n8n will use to notify status/links",
     )
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -214,21 +182,19 @@ class DocumentRequestStatus(BaseModel):
                 "fileName": "financial_report_2024_Q1.pdf",
                 "fileSize": 1024000,
                 "createdAt": "2024-01-15T10:30:00Z",
-                "updatedAt": "2024-01-15T10:35:00Z"
+                "updatedAt": "2024-01-15T10:35:00Z",
             }
         }
 
 
 class DocumentRequestsResponse(BaseModel):
     """Response model for document requests list"""
-    
+
     requests: List[DocumentRequestStatus] = Field(
         description="List of document requests"
     )
-    total: int = Field(
-        description="Total number of requests"
-    )
-    
+    total: int = Field(description="Total number of requests")
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -241,10 +207,10 @@ class DocumentRequestsResponse(BaseModel):
                         "fileName": "financial_report_2024_Q1.pdf",
                         "fileSize": 1024000,
                         "createdAt": "2024-01-15T10:30:00Z",
-                        "updatedAt": "2024-01-15T10:35:00Z"
+                        "updatedAt": "2024-01-15T10:35:00Z",
                     }
                 ],
-                "total": 1
+                "total": 1,
             }
         }
 
@@ -255,10 +221,7 @@ def get_current_timestamp() -> str:
 
 
 async def handle_binary_file_upload(
-    file: UploadFile, 
-    request_id: str, 
-    document_type: str, 
-    parameters: str
+    file: UploadFile, request_id: str, document_type: str, parameters: str
 ) -> DocumentRequestResponse:
     """Handle binary file upload via multipart/form-data"""
     try:
@@ -266,7 +229,7 @@ async def handle_binary_file_upload(
         # Generate request ID if not provided
         if not request_id:
             request_id = str(uuid.uuid4())
-        
+
         # Parse parameters if provided
         parsed_parameters = None
         if parameters:
@@ -274,15 +237,15 @@ async def handle_binary_file_upload(
                 parsed_parameters = json.loads(parameters)
             except json.JSONDecodeError:
                 logger.warning(f"Invalid JSON parameters: {parameters}")
-        
+
         # Check if request already exists and create new document request with file info
         async with get_storage_lock():
             if request_id in db:
                 raise HTTPException(
                     status_code=409,
-                    detail=f"Document request with ID {request_id} already exists"
+                    detail=f"Document request with ID {request_id} already exists",
                 )
-            
+
             db[request_id] = {
                 "requestId": request_id,
                 "status": "Ready",  # File is immediately available
@@ -294,17 +257,19 @@ async def handle_binary_file_upload(
                 "errorMessage": None,
                 "createdAt": get_current_timestamp(),
                 "updatedAt": get_current_timestamp(),
-                "file_content": await file.read()  # Store file content
+                "file_content": await file.read(),  # Store file content
             }
-        
-        logger.info(f"Binary file uploaded: {request_id}, filename: {file.filename}, size: {file.size}")
-        
+
+        logger.info(
+            f"Binary file uploaded: {request_id}, filename: {file.filename}, size: {file.size}"
+        )
+
         return DocumentRequestResponse(
             status="success",
             message=f"Binary file uploaded successfully: {file.filename}",
-            requestId=request_id
+            requestId=request_id,
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -313,12 +278,14 @@ async def handle_binary_file_upload(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def handle_json_request(request: DocumentRequestWebhookRequest) -> DocumentRequestResponse:
+async def handle_json_request(
+    request: DocumentRequestWebhookRequest,
+) -> DocumentRequestResponse:
     """Handle JSON format request"""
     try:
         db = await get_namespace_data(DOCUMENT_REQUESTS_NS)
         request_id = request.requestId
-        
+
         # Check if this is a completion notification (Type B)
         if request.action:
             # Type B: Completion notification
@@ -326,31 +293,33 @@ async def handle_json_request(request: DocumentRequestWebhookRequest) -> Documen
                 if request_id not in db:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"Document request with ID {request_id} not found"
+                        detail=f"Document request with ID {request_id} not found",
                     )
-                
+
                 # Update existing request
-                db[request_id].update({
-                    "status": "Ready" if request.action == "completed" else "Failed",
-                    "downloadUrl": request.downloadUrl,
-                    "fileName": request.fileName,
-                    "fileSize": request.fileSize,
-                    "errorMessage": request.errorMessage,
-                    "updatedAt": get_current_timestamp()
-                })
-            
+                db[request_id].update(
+                    {
+                        "status": "Ready"
+                        if request.action == "completed"
+                        else "Failed",
+                        "downloadUrl": request.downloadUrl,
+                        "fileName": request.fileName,
+                        "fileSize": request.fileSize,
+                        "errorMessage": request.errorMessage,
+                        "updatedAt": get_current_timestamp(),
+                    }
+                )
+
             status_message = "Document processing completed successfully"
             if request.action == "failed":
                 status_message = f"Document processing failed: {request.errorMessage or 'Unknown error'}"
-            
+
             logger.info(f"Document request {request_id} updated: {request.action}")
-            
+
             return DocumentRequestResponse(
-                status="success",
-                message=status_message,
-                requestId=request_id
+                status="success", message=status_message, requestId=request_id
             )
-        
+
         else:
             # Type A: Initial request
             async with get_storage_lock():
@@ -358,9 +327,9 @@ async def handle_json_request(request: DocumentRequestWebhookRequest) -> Documen
                 if request_id in db:
                     raise HTTPException(
                         status_code=409,
-                        detail=f"Document request with ID {request_id} already exists"
+                        detail=f"Document request with ID {request_id} already exists",
                     )
-                
+
                 # Create new document request
                 db[request_id] = {
                     "requestId": request_id,
@@ -372,17 +341,17 @@ async def handle_json_request(request: DocumentRequestWebhookRequest) -> Documen
                     "fileSize": None,
                     "errorMessage": None,
                     "createdAt": get_current_timestamp(),
-                    "updatedAt": get_current_timestamp()
+                    "updatedAt": get_current_timestamp(),
                 }
-            
+
             logger.info(f"New document request created: {request_id}")
-            
+
             return DocumentRequestResponse(
                 status="success",
                 message="Document request created successfully",
-                requestId=request_id
+                requestId=request_id,
             )
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -408,14 +377,14 @@ async def handle_form_completion_notification(
         db = await get_namespace_data(DOCUMENT_REQUESTS_NS)
         if not request_id:
             raise HTTPException(status_code=400, detail="requestId is required")
-        
+
         async with get_storage_lock():
             if request_id not in db:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Document request with ID {request_id} not found"
+                    detail=f"Document request with ID {request_id} not found",
                 )
-            
+
             # Prepare file-related fields
             stored_file_bytes = None
             resolved_file_name = file_name
@@ -427,33 +396,42 @@ async def handle_form_completion_notification(
                 resolved_file_name = resolved_file_name or file.filename
                 try:
                     # UploadFile may not always expose size; fall back to len(bytes)
-                    resolved_file_size = resolved_file_size or getattr(file, "size", None) or len(stored_file_bytes)
+                    resolved_file_size = (
+                        resolved_file_size
+                        or getattr(file, "size", None)
+                        or len(stored_file_bytes)
+                    )
                 except Exception:
                     resolved_file_size = resolved_file_size or len(stored_file_bytes)
-            
+
             # Update existing request
-            db[request_id].update({
-                "status": "Ready" if action == "completed" else "Failed",
-                "downloadUrl": download_url or f"/webhook/api/document-requests/{request_id}/download",
-                "fileName": resolved_file_name,
-                "fileSize": resolved_file_size,
-                "errorMessage": error_message,
-                "updatedAt": get_current_timestamp(),
-                "file_content": stored_file_bytes if stored_file_bytes is not None else db[request_id].get("file_content")
-            })
-        
+            db[request_id].update(
+                {
+                    "status": "Ready" if action == "completed" else "Failed",
+                    "downloadUrl": download_url
+                    or f"/webhook/api/document-requests/{request_id}/download",
+                    "fileName": resolved_file_name,
+                    "fileSize": resolved_file_size,
+                    "errorMessage": error_message,
+                    "updatedAt": get_current_timestamp(),
+                    "file_content": stored_file_bytes
+                    if stored_file_bytes is not None
+                    else db[request_id].get("file_content"),
+                }
+            )
+
         status_message = "Document processing completed successfully"
         if action == "failed":
-            status_message = f"Document processing failed: {error_message or 'Unknown error'}"
-        
+            status_message = (
+                f"Document processing failed: {error_message or 'Unknown error'}"
+            )
+
         logger.info(f"Document request {request_id} updated via form: {action}")
-        
+
         return DocumentRequestResponse(
-            status="success",
-            message=status_message,
-            requestId=request_id
+            status="success", message=status_message, requestId=request_id
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -463,9 +441,7 @@ async def handle_form_completion_notification(
 
 
 async def handle_form_initial_request(
-    request_id: str,
-    document_type: str,
-    parameters: str
+    request_id: str, document_type: str, parameters: str
 ) -> DocumentRequestResponse:
     """Handle initial request via form data"""
     try:
@@ -473,7 +449,7 @@ async def handle_form_initial_request(
         # Generate request ID if not provided
         if not request_id:
             request_id = str(uuid.uuid4())
-        
+
         # Parse parameters if provided
         parsed_parameters = None
         if parameters:
@@ -481,15 +457,15 @@ async def handle_form_initial_request(
                 parsed_parameters = json.loads(parameters)
             except json.JSONDecodeError:
                 logger.warning(f"Invalid JSON parameters: {parameters}")
-        
+
         # Check if request already exists and create new document request
         async with get_storage_lock():
             if request_id in db:
                 raise HTTPException(
                     status_code=409,
-                    detail=f"Document request with ID {request_id} already exists"
+                    detail=f"Document request with ID {request_id} already exists",
                 )
-            
+
             db[request_id] = {
                 "requestId": request_id,
                 "status": "Requested",
@@ -501,18 +477,22 @@ async def handle_form_initial_request(
                 "errorMessage": None,
                 "createdAt": get_current_timestamp(),
                 "updatedAt": get_current_timestamp(),
-                "clientBatchId": parsed_parameters.get("clientBatchId") if isinstance(parsed_parameters, dict) else None,
-                "callbackUrl": parsed_parameters.get("callbackUrl") if isinstance(parsed_parameters, dict) else None,
+                "clientBatchId": parsed_parameters.get("clientBatchId")
+                if isinstance(parsed_parameters, dict)
+                else None,
+                "callbackUrl": parsed_parameters.get("callbackUrl")
+                if isinstance(parsed_parameters, dict)
+                else None,
             }
-        
+
         logger.info(f"New document request created via form: {request_id}")
-        
+
         return DocumentRequestResponse(
             status="success",
             message="Document request created successfully",
-            requestId=request_id
+            requestId=request_id,
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -525,7 +505,7 @@ def create_document_request_routes(api_key: Optional[str] = None):
     """Create document request routes"""
     global combined_auth
     combined_auth = get_combined_auth_dependency(api_key)
-    
+
     @router.post(
         "/426951f9-1936-44c3-83ae-8f52f0508acf",
         response_model=DocumentRequestResponse,
@@ -541,21 +521,21 @@ def create_document_request_routes(api_key: Optional[str] = None):
         downloadUrl: str = None,
         fileName: str = None,
         fileSize: int = None,
-        errorMessage: str = None
+        errorMessage: str = None,
     ):
         """
         Webhook endpoint for document requests and completion notifications.
-        
+
         This endpoint handles both JSON and multipart/form-data requests:
-        
+
         JSON Format:
         - Type A (Initial Request): No 'action' field present
         - Type B (Completion Notification): Has 'action' field present
-        
+
         Multipart/Form-Data Format:
         - Binary file upload with form fields
         - Creates document request with uploaded file
-        
+
         Args:
             request: JSON request body (optional)
             file: Uploaded binary file (optional)
@@ -567,7 +547,7 @@ def create_document_request_routes(api_key: Optional[str] = None):
             fileName: File name from form data
             fileSize: File size from form data
             errorMessage: Error message from form data
-        
+
         Returns:
             DocumentRequestResponse: Response with status and request ID
         """
@@ -575,22 +555,30 @@ def create_document_request_routes(api_key: Optional[str] = None):
             # Handle form data with action (completion notification) - CHECK THIS FIRST
             if action is not None:
                 return await handle_form_completion_notification(
-                    requestId, action, downloadUrl, fileName, fileSize, errorMessage, file
+                    requestId,
+                    action,
+                    downloadUrl,
+                    fileName,
+                    fileSize,
+                    errorMessage,
+                    file,
                 )
-            
+
             # Handle multipart/form-data (binary file upload)
             if file is not None:
                 return await handle_binary_file_upload(
                     file, requestId, documentType, parameters
                 )
-            
+
             # Handle JSON request
             if request is not None:
                 return await handle_json_request(request)
-            
+
             # Handle form data without action (initial request)
-            return await handle_form_initial_request(requestId, documentType, parameters)
-                
+            return await handle_form_initial_request(
+                requestId, documentType, parameters
+            )
+
         except HTTPException:
             raise
         except Exception as e:
@@ -603,9 +591,7 @@ def create_document_request_routes(api_key: Optional[str] = None):
         response_model=DocumentRequestResponse,
         dependencies=[Depends(combined_auth)],
     )
-    async def pbc_import(
-        request: DocumentRequestWebhookRequest
-    ):
+    async def pbc_import(request: DocumentRequestWebhookRequest):
         """
         Create a new local workflow entry for PBC import and forward to external webhook.
         """
@@ -617,8 +603,16 @@ def create_document_request_routes(api_key: Optional[str] = None):
                 if request_id in db:
                     # Ensure uniqueness by regenerating
                     request_id = str(uuid.uuid4())
-                client_batch_id = (request.parameters or {}).get("clientBatchId") if isinstance(request.parameters, dict) else None
-                callback_url = (request.parameters or {}).get("callbackUrl") if isinstance(request.parameters, dict) else None
+                client_batch_id = (
+                    (request.parameters or {}).get("clientBatchId")
+                    if isinstance(request.parameters, dict)
+                    else None
+                )
+                callback_url = (
+                    (request.parameters or {}).get("callbackUrl")
+                    if isinstance(request.parameters, dict)
+                    else None
+                )
                 db[request_id] = {
                     "requestId": request_id,
                     "status": "Requested",
@@ -651,16 +645,12 @@ def create_document_request_routes(api_key: Optional[str] = None):
                 "message": {
                     "subject": subject,
                     "body": {"contentType": "HTML", "content": html_content},
-                    "toRecipients": [
-                        {"emailAddress": {"address": to_address}}
-                    ],
+                    "toRecipients": [{"emailAddress": {"address": to_address}}],
                 },
                 "saveToSentItems": False,
             }
             async with httpx.AsyncClient(timeout=20.0) as client:
-                resp = await client.post(
-                    global_args.pbc_import_webhook, json=payload
-                )
+                resp = await client.post(global_args.pbc_import_webhook, json=payload)
                 # Do not fail local creation on remote error; just log
                 if resp.status_code >= 400:
                     logger.warning(
@@ -713,7 +703,11 @@ def create_document_request_routes(api_key: Optional[str] = None):
 
             async with get_storage_lock():
                 for row in payload.rows:
-                    document_type = str(row.get("doc_type") or row.get("documentType") or "Document Request").strip()
+                    document_type = str(
+                        row.get("doc_type")
+                        or row.get("documentType")
+                        or "Document Request"
+                    ).strip()
                     rid = str(uuid.uuid4())
                     db[rid] = {
                         "requestId": rid,
@@ -824,9 +818,15 @@ def create_document_request_routes(api_key: Optional[str] = None):
                 if requestId:
                     targets = [requestId] if requestId in db else []
                 elif clientBatchId:
-                    targets = [rid for rid, row in db.items() if row.get("clientBatchId") == clientBatchId]
+                    targets = [
+                        rid
+                        for rid, row in db.items()
+                        if row.get("clientBatchId") == clientBatchId
+                    ]
                 else:
-                    raise HTTPException(status_code=400, detail="requestId or clientBatchId required")
+                    raise HTTPException(
+                        status_code=400, detail="requestId or clientBatchId required"
+                    )
 
                 for rid in targets:
                     row = db[rid]
@@ -859,7 +859,11 @@ def create_document_request_routes(api_key: Optional[str] = None):
     async def get_batch_status(client_batch_id: str):
         try:
             db = await get_namespace_data(DOCUMENT_REQUESTS_NS)
-            rows = [row for row in db.values() if row.get("clientBatchId") == client_batch_id]
+            rows = [
+                row
+                for row in db.values()
+                if row.get("clientBatchId") == client_batch_id
+            ]
             rows.sort(key=lambda x: x["createdAt"], reverse=False)
             return {
                 "clientBatchId": client_batch_id,
@@ -870,7 +874,7 @@ def create_document_request_routes(api_key: Optional[str] = None):
             logger.error(f"Error getting batch status for {client_batch_id}: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get(
         "/api/document-requests",
         response_model=DocumentRequestsResponse,
@@ -879,7 +883,7 @@ def create_document_request_routes(api_key: Optional[str] = None):
     async def get_document_requests():
         """
         Get all document requests for frontend display.
-        
+
         Returns:
             DocumentRequestsResponse: List of all document requests ordered by creation date
         """
@@ -888,22 +892,21 @@ def create_document_request_routes(api_key: Optional[str] = None):
             # Get all requests and sort by created_at DESC
             requests = list(db.values())
             requests.sort(key=lambda x: x["createdAt"], reverse=True)
-            
+
             # Convert to DocumentRequestStatus objects
             document_requests = [
                 DocumentRequestStatus(**request) for request in requests
             ]
-            
+
             return DocumentRequestsResponse(
-                requests=document_requests,
-                total=len(document_requests)
+                requests=document_requests, total=len(document_requests)
             )
-            
+
         except Exception as e:
             logger.error(f"Error getting document requests: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get(
         "/api/document-requests/{request_id}",
         response_model=DocumentRequestStatus,
@@ -912,10 +915,10 @@ def create_document_request_routes(api_key: Optional[str] = None):
     async def get_document_request(request_id: str):
         """
         Get a specific document request by ID.
-        
+
         Args:
             request_id: The unique request identifier
-        
+
         Returns:
             DocumentRequestStatus: The document request details
         """
@@ -924,18 +927,18 @@ def create_document_request_routes(api_key: Optional[str] = None):
             if request_id not in db:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Document request with ID {request_id} not found"
+                    detail=f"Document request with ID {request_id} not found",
                 )
-            
+
             return DocumentRequestStatus(**db[request_id])
-            
+
         except HTTPException:
             raise
         except Exception as e:
             logger.error(f"Error getting document request {request_id}: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get(
         "/api/document-requests/{request_id}/download",
         dependencies=[Depends(combined_auth)],
@@ -943,10 +946,10 @@ def create_document_request_routes(api_key: Optional[str] = None):
     async def download_document_file(request_id: str):
         """
         Download the binary file content for a specific document request.
-        
+
         Args:
             request_id: The unique request identifier
-        
+
         Returns:
             StreamingResponse: The binary file content with appropriate headers
         """
@@ -955,57 +958,60 @@ def create_document_request_routes(api_key: Optional[str] = None):
             if request_id not in db:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Document request with ID {request_id} not found"
+                    detail=f"Document request with ID {request_id} not found",
                 )
-            
+
             request_data = db[request_id]
-            
+
             # Check if file content exists
-            if "file_content" not in request_data or request_data["file_content"] is None:
+            if (
+                "file_content" not in request_data
+                or request_data["file_content"] is None
+            ):
                 raise HTTPException(
                     status_code=404,
-                    detail=f"No file content available for request {request_id}"
+                    detail=f"No file content available for request {request_id}",
                 )
-            
+
             # Check if status is Ready
             if request_data["status"] != "Ready":
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Document is not ready for download. Current status: {request_data['status']}"
+                    detail=f"Document is not ready for download. Current status: {request_data['status']}",
                 )
-            
+
             file_content = request_data["file_content"]
             file_name = request_data.get("fileName", f"document_{request_id}")
-            
+
             # Determine content type based on file extension
             content_type = "application/octet-stream"
-            if file_name.lower().endswith(('.pdf',)):
+            if file_name.lower().endswith((".pdf",)):
                 content_type = "application/pdf"
-            elif file_name.lower().endswith(('.doc', '.docx')):
+            elif file_name.lower().endswith((".doc", ".docx")):
                 content_type = "application/msword"
-            elif file_name.lower().endswith(('.xls', '.xlsx')):
+            elif file_name.lower().endswith((".xls", ".xlsx")):
                 content_type = "application/vnd.ms-excel"
-            elif file_name.lower().endswith(('.txt',)):
+            elif file_name.lower().endswith((".txt",)):
                 content_type = "text/plain"
-            elif file_name.lower().endswith(('.csv',)):
+            elif file_name.lower().endswith((".csv",)):
                 content_type = "text/csv"
-            
+
             return StreamingResponse(
                 BytesIO(file_content),
                 media_type=content_type,
                 headers={
                     "Content-Disposition": f"attachment; filename={file_name}",
-                    "Content-Length": str(len(file_content))
-                }
+                    "Content-Length": str(len(file_content)),
+                },
             )
-            
+
         except HTTPException:
             raise
         except Exception as e:
             logger.error(f"Error downloading file for request {request_id}: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.delete(
         "/api/document-requests/{request_id}",
         dependencies=[Depends(combined_auth)],
@@ -1013,10 +1019,10 @@ def create_document_request_routes(api_key: Optional[str] = None):
     async def delete_document_request(request_id: str):
         """
         Delete a document request by ID.
-        
+
         Args:
             request_id: The unique request identifier
-        
+
         Returns:
             Success message
         """
@@ -1026,19 +1032,22 @@ def create_document_request_routes(api_key: Optional[str] = None):
                 if request_id not in db:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"Document request with ID {request_id} not found"
+                        detail=f"Document request with ID {request_id} not found",
                     )
-                
+
                 del db[request_id]
             logger.info(f"Document request deleted: {request_id}")
-            
-            return {"status": "success", "message": f"Document request {request_id} deleted successfully"}
-            
+
+            return {
+                "status": "success",
+                "message": f"Document request {request_id} deleted successfully",
+            }
+
         except HTTPException:
             raise
         except Exception as e:
             logger.error(f"Error deleting document request {request_id}: {str(e)}")
             logger.error(traceback.format_exc())
             raise HTTPException(status_code=500, detail=str(e))
-    
-    return router 
+
+    return router

@@ -54,8 +54,8 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     const baseUrl = req.protocol + '://' + req.get('host');
     const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       downloadUrl: fileUrl,
       lightragResponse: webhookResponse.data,
       message: 'File uploaded and forwarded to LightRAG successfully'
@@ -63,13 +63,13 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
   } catch (error) {
     console.error('Error forwarding to LightRAG:', error.response?.data || error.message);
-    
+
     // Still return success for local upload even if LightRAG fails
     const baseUrl = req.protocol + '://' + req.get('host');
     const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       downloadUrl: fileUrl,
       warning: 'File uploaded locally but LightRAG forwarding failed',
       error: error.response?.data || error.message
@@ -98,4 +98,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Purchase Order Uploader running at http://localhost:${PORT}`);
   console.log(`LightRAG webhook URL: ${LIGHTRAG_WEBHOOK_URL}`);
-}); 
+});

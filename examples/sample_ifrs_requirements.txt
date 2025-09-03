@@ -113,4 +113,4 @@
 ## Requirement: An entity shall recognize investment property as an asset when, and only when, it is probable that the future economic benefits that are associated with the investment property will flow to the entity and the cost of the investment property can be measured reliably.
 
 ## IAS 41 - Agriculture
-## Requirement: An entity shall recognize a biological asset or agricultural produce when, and only when, the entity controls the asset as a result of past events, it is probable that future economic benefits associated with the asset will flow to the entity, and the fair value or cost of the asset can be measured reliably. 
+## Requirement: An entity shall recognize a biological asset or agricultural produce when, and only when, the entity controls the asset as a result of past events, it is probable that future economic benefits associated with the asset will flow to the entity, and the fair value or cost of the asset can be measured reliably.

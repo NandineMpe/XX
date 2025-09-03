@@ -148,7 +148,7 @@ VERBOSE=False
    ```
    ERROR: PostgreSQL, Failed to connect database
    ```
-   **Solution**: 
+   **Solution**:
    - Check that Railway PostgreSQL service is running
    - Verify environment variables are correctly set
    - Ensure PostgreSQL extensions are installed
@@ -240,4 +240,4 @@ Railway PostgreSQL may need the `vector` extension for pgvector. You can install
 
 1. **LLM Caching**: Enable `ENABLE_LLM_CACHE=true`
 2. **Database Connections**: Optimize `POSTGRES_MAX_CONNECTIONS`
-3. **Resource Limits**: Monitor and adjust Railway resource allocation 
+3. **Resource Limits**: Monitor and adjust Railway resource allocation

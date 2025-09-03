@@ -208,7 +208,7 @@ def create_app(args):
             "https://lightrag-production-6328.up.railway.app",
         ]
         all_origins = list(set(cors_origins + default_origins))
-        
+
         app.add_middleware(
             CORSMiddleware,
             allow_origins=all_origins,
@@ -472,10 +472,10 @@ def create_app(args):
                 "service": "LightRAG API",
                 "version": __api_version__,
             }
-            
+
             # Try to check database connectivity if RAG is initialized
             try:
-                if hasattr(rag, 'storages_status'):
+                if hasattr(rag, "storages_status"):
                     storage_status = await rag.get_storages_status()
                     health_status["storage_status"] = {
                         "kv_storage": storage_status.kv_storage,
@@ -486,7 +486,7 @@ def create_app(args):
             except Exception as storage_error:
                 logger.warning(f"Storage health check failed: {str(storage_error)}")
                 health_status["storage_status"] = "unavailable"
-            
+
             return health_status
         except Exception as e:
             logger.error(f"Health check failed: {str(e)}")
@@ -498,36 +498,46 @@ def create_app(args):
         try:
             # Check if the application is ready to serve requests
             # This includes checking if databases are connected and initialized
-            
+
             readiness_status = {
                 "status": "ready",
                 "timestamp": datetime.now().isoformat(),
                 "service": "LightRAG API",
             }
-            
+
             # Check storage connectivity
             try:
-                if hasattr(rag, 'storages_status'):
+                if hasattr(rag, "storages_status"):
                     storage_status = await rag.get_storages_status()
-                    all_storages_ready = all([
-                        storage_status.kv_storage,
-                        storage_status.vector_storage,
-                        storage_status.graph_storage,
-                        storage_status.doc_status_storage,
-                    ])
-                    
+                    all_storages_ready = all(
+                        [
+                            storage_status.kv_storage,
+                            storage_status.vector_storage,
+                            storage_status.graph_storage,
+                            storage_status.doc_status_storage,
+                        ]
+                    )
+
                     if not all_storages_ready:
                         readiness_status["status"] = "not_ready"
-                        readiness_status["reason"] = "Storage systems not fully connected"
-                        raise HTTPException(status_code=503, detail="Storage systems not ready")
-                        
+                        readiness_status["reason"] = (
+                            "Storage systems not fully connected"
+                        )
+                        raise HTTPException(
+                            status_code=503, detail="Storage systems not ready"
+                        )
+
             except Exception as storage_error:
                 readiness_status["status"] = "not_ready"
-                readiness_status["reason"] = f"Storage check failed: {str(storage_error)}"
-                raise HTTPException(status_code=503, detail="Storage systems unavailable")
-            
+                readiness_status["reason"] = (
+                    f"Storage check failed: {str(storage_error)}"
+                )
+                raise HTTPException(
+                    status_code=503, detail="Storage systems unavailable"
+                )
+
             return readiness_status
-            
+
         except HTTPException:
             # Re-raise HTTP exceptions as-is
             raise

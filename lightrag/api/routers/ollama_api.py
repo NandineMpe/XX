@@ -253,8 +253,8 @@ class OllamaAPI:
                             family=self.ollama_server_infos.AUGENTIK_NAME,
                             families=[self.ollama_server_infos.AUGENTIK_NAME],
                             parameter_size="13B",
-                            quantization_level="Q4_0"
-                        )
+                            quantization_level="Q4_0",
+                        ),
                     )
                 ]
             )
@@ -275,10 +275,10 @@ class OllamaAPI:
                             family=self.ollama_server_infos.AUGENTIK_NAME,
                             families=[self.ollama_server_infos.AUGENTIK_NAME],
                             parameter_size="13B",
-                            quantization_level="Q4_0"
+                            quantization_level="Q4_0",
                         ),
                         expires_at="2050-12-31T14:38:31.83753-07:00",
-                        size_vram=self.ollama_server_infos.AUGENTIK_SIZE
+                        size_vram=self.ollama_server_infos.AUGENTIK_SIZE,
                     )
                 ]
             )

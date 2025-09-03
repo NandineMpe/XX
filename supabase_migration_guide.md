@@ -193,4 +193,4 @@ After successful migration, you should see:
 2. **Test all functionality**
 3. **Monitor performance**
 4. **Consider enabling RLS** for production security
-5. **Set up monitoring** and alerts 
+5. **Set up monitoring** and alerts

@@ -201,4 +201,4 @@ For Railway deployments, the healthcheck is configured in `railway.json`:
 
 ### Detailed Health Check Requires Authentication
 
-This is expected behavior. The detailed endpoint requires authentication to protect sensitive configuration information. 
+This is expected behavior. The detailed endpoint requires authentication to protect sensitive configuration information.

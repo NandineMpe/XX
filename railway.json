@@ -14,4 +14,4 @@
     "PORT": "8080",
     "CORS_ORIGINS": "https://augentik.com,https://www.augentik.com,https://lightrag-production-6328.up.railway.app"
   }
-} 
+}

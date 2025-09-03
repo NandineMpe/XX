@@ -10,4 +10,4 @@
   "graph_storage": "networkx",
   "working_dir": "./ifrs_assessment_workspace",
   "log_level": "INFO"
-} 
+}

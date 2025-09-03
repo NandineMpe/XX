@@ -140,7 +140,11 @@ def create_sdr_routes(api_key: Optional[str] = None) -> APIRouter:
         )
         return {"status": "ok"}
 
-    @router.get("/api/sdr/requests", response_model=List[SDRRecord], dependencies=[Depends(combined_auth)])
+    @router.get(
+        "/api/sdr/requests",
+        response_model=List[SDRRecord],
+        dependencies=[Depends(combined_auth)],
+    )
     async def list_sdr_requests() -> List[SDRRecord]:
         """
         Return list of SDR records for UI polling.
@@ -151,5 +155,3 @@ def create_sdr_routes(api_key: Optional[str] = None) -> APIRouter:
         return items
 
     return router
-
-

@@ -263,4 +263,4 @@ If you encounter issues:
 3. Ensure your RAG system is properly set up
 4. Test with the sample files provided
 
-The script provides comprehensive logging to help diagnose any issues. 
+The script provides comprehensive logging to help diagnose any issues.

@@ -378,4 +378,4 @@ For questions and support:
 
 ## License
 
-This IFRS compliance functionality is part of LightRAG and follows the same licensing terms. 
+This IFRS compliance functionality is part of LightRAG and follows the same licensing terms.
