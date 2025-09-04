@@ -111,8 +111,8 @@
     <script>
       // Ensure clicking "Sign In" routes to canonical backend web UI login
       (function(){
-        // Keep users on the current origin; API calls target the backend.
-        var TARGET_LOGIN = '/webui/#/login';
+        // Always send users to the frontend login on Vercel
+        var TARGET_LOGIN = 'https://augentik.com/webui/#/login';
 
         function isOnBackendOrLoginRoute(){
           try {
@@ -130,8 +130,10 @@
             try{
               if (el.getAttribute('data-signin-wired') === '1') return;
               var text = (el.innerText || '').trim();
-              if (!text) return;
-              if (/^sign\s*in$/i.test(text) || /^(?:log\s*in|login)$/i.test(text)){
+              var href = (el.getAttribute && el.getAttribute('href')) || '';
+              var looksLikeLoginLink = /#\/?login$/i.test(href) || /\/login(?:[#?].*)?$/i.test(href) || /railway\.app.*\/webui\/.*#\/?login/i.test(href);
+              if (!text && !looksLikeLoginLink) return;
+              if (/^sign\s*in$/i.test(text) || /^(?:log\s*in|login)$/i.test(text) || looksLikeLoginLink){
                 el.setAttribute('data-signin-wired','1');
                 el.addEventListener('click', function(e){
                   e.preventDefault();
