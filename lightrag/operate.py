@@ -290,7 +290,7 @@ async def _merge_nodes_then_upsert(
 
     if num_fragment > 1:
         if num_fragment >= force_llm_summary_on_merge:
-            status_message = f"LLM merge N: {entity_name} | {num_new_fragment}+{num_fragment-num_new_fragment}"
+            status_message = f"LLM merge N: {entity_name} | {num_new_fragment}+{num_fragment - num_new_fragment}"
             logger.info(status_message)
             if pipeline_status is not None and pipeline_status_lock is not None:
                 async with pipeline_status_lock:
@@ -305,7 +305,7 @@ async def _merge_nodes_then_upsert(
                 llm_response_cache,
             )
         else:
-            status_message = f"Merge N: {entity_name} | {num_new_fragment}+{num_fragment-num_new_fragment}"
+            status_message = f"Merge N: {entity_name} | {num_new_fragment}+{num_fragment - num_new_fragment}"
             logger.info(status_message)
             if pipeline_status is not None and pipeline_status_lock is not None:
                 async with pipeline_status_lock:
@@ -454,7 +454,7 @@ async def _merge_edges_then_upsert(
 
     if num_fragment > 1:
         if num_fragment >= force_llm_summary_on_merge:
-            status_message = f"LLM merge E: {src_id} - {tgt_id} | {num_new_fragment}+{num_fragment-num_new_fragment}"
+            status_message = f"LLM merge E: {src_id} - {tgt_id} | {num_new_fragment}+{num_fragment - num_new_fragment}"
             logger.info(status_message)
             if pipeline_status is not None and pipeline_status_lock is not None:
                 async with pipeline_status_lock:
@@ -469,7 +469,7 @@ async def _merge_edges_then_upsert(
                 llm_response_cache,
             )
         else:
-            status_message = f"Merge E: {src_id} - {tgt_id} | {num_new_fragment}+{num_fragment-num_new_fragment}"
+            status_message = f"Merge E: {src_id} - {tgt_id} | {num_new_fragment}+{num_fragment - num_new_fragment}"
             logger.info(status_message)
             if pipeline_status is not None and pipeline_status_lock is not None:
                 async with pipeline_status_lock:

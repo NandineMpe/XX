@@ -173,15 +173,15 @@ async def test_graph_basic(storage):
             print(f"节点类型: {node1_props.get('entity_type', '无类型')}")
             print(f"节点关键词: {node1_props.get('keywords', '无关键词')}")
             # 验证返回的属性是否正确
-            assert (
-                node1_props.get("entity_id") == node1_id
-            ), f"节点ID不匹配: 期望 {node1_id}, 实际 {node1_props.get('entity_id')}"
-            assert (
-                node1_props.get("description") == node1_data["description"]
-            ), "节点描述不匹配"
-            assert (
-                node1_props.get("entity_type") == node1_data["entity_type"]
-            ), "节点类型不匹配"
+            assert node1_props.get("entity_id") == node1_id, (
+                f"节点ID不匹配: 期望 {node1_id}, 实际 {node1_props.get('entity_id')}"
+            )
+            assert node1_props.get("description") == node1_data["description"], (
+                "节点描述不匹配"
+            )
+            assert node1_props.get("entity_type") == node1_data["entity_type"], (
+                "节点类型不匹配"
+            )
         else:
             print(f"读取节点属性失败: {node1_id}")
             assert False, f"未能读取节点属性: {node1_id}"
@@ -195,12 +195,12 @@ async def test_graph_basic(storage):
             print(f"边描述: {edge_props.get('description', '无描述')}")
             print(f"边权重: {edge_props.get('weight', '无权重')}")
             # 验证返回的属性是否正确
-            assert (
-                edge_props.get("relationship") == edge_data["relationship"]
-            ), "边关系不匹配"
-            assert (
-                edge_props.get("description") == edge_data["description"]
-            ), "边描述不匹配"
+            assert edge_props.get("relationship") == edge_data["relationship"], (
+                "边关系不匹配"
+            )
+            assert edge_props.get("description") == edge_data["description"], (
+                "边描述不匹配"
+            )
             assert edge_props.get("weight") == edge_data["weight"], "边权重不匹配"
         else:
             print(f"读取边属性失败: {node1_id} -> {node2_id}")
@@ -215,15 +215,15 @@ async def test_graph_basic(storage):
             print(f"反向边描述: {reverse_edge_props.get('description', '无描述')}")
             print(f"反向边权重: {reverse_edge_props.get('weight', '无权重')}")
             # 验证正向和反向边属性是否相同
-            assert (
-                edge_props == reverse_edge_props
-            ), "正向和反向边属性不一致，无向图特性验证失败"
+            assert edge_props == reverse_edge_props, (
+                "正向和反向边属性不一致，无向图特性验证失败"
+            )
             print("无向图特性验证成功：正向和反向边属性一致")
         else:
             print(f"读取反向边属性失败: {node2_id} -> {node1_id}")
-            assert (
-                False
-            ), f"未能读取反向边属性: {node2_id} -> {node1_id}，无向图特性验证失败"
+            assert False, (
+                f"未能读取反向边属性: {node2_id} -> {node1_id}，无向图特性验证失败"
+            )
 
         print("基本测试完成，数据已保留在数据库中")
         return True
@@ -318,26 +318,26 @@ async def test_graph_advanced(storage):
         print(f"== 测试 edge_degree: {node1_id} -> {node2_id}")
         edge_degree = await storage.edge_degree(node1_id, node2_id)
         print(f"边 {node1_id} -> {node2_id} 的度数: {edge_degree}")
-        assert (
-            edge_degree == 3
-        ), f"边 {node1_id} -> {node2_id} 的度数应为3，实际为 {edge_degree}"
+        assert edge_degree == 3, (
+            f"边 {node1_id} -> {node2_id} 的度数应为3，实际为 {edge_degree}"
+        )
 
         # 3.1 测试反向边的度数 - 验证无向图特性
         print(f"== 测试反向边的度数: {node2_id} -> {node1_id}")
         reverse_edge_degree = await storage.edge_degree(node2_id, node1_id)
         print(f"反向边 {node2_id} -> {node1_id} 的度数: {reverse_edge_degree}")
-        assert (
-            edge_degree == reverse_edge_degree
-        ), "正向边和反向边的度数不一致，无向图特性验证失败"
+        assert edge_degree == reverse_edge_degree, (
+            "正向边和反向边的度数不一致，无向图特性验证失败"
+        )
         print("无向图特性验证成功：正向边和反向边的度数一致")
 
         # 4. 测试 get_node_edges - 获取节点的所有边
         print(f"== 测试 get_node_edges: {node2_id}")
         node2_edges = await storage.get_node_edges(node2_id)
         print(f"节点 {node2_id} 的所有边: {node2_edges}")
-        assert (
-            len(node2_edges) == 2
-        ), f"节点 {node2_id} 应有2条边，实际有 {len(node2_edges)}"
+        assert len(node2_edges) == 2, (
+            f"节点 {node2_id} 应有2条边，实际有 {len(node2_edges)}"
+        )
 
         # 4.1 验证节点边的无向图特性
         print("== 验证节点边的无向图特性")
@@ -356,12 +356,12 @@ async def test_graph_advanced(storage):
             ):
                 has_connection_with_node3 = True
 
-        assert (
-            has_connection_with_node1
-        ), f"节点 {node2_id} 的边列表中应包含与 {node1_id} 的连接"
-        assert (
-            has_connection_with_node3
-        ), f"节点 {node2_id} 的边列表中应包含与 {node3_id} 的连接"
+        assert has_connection_with_node1, (
+            f"节点 {node2_id} 的边列表中应包含与 {node1_id} 的连接"
+        )
+        assert has_connection_with_node3, (
+            f"节点 {node2_id} 的边列表中应包含与 {node3_id} 的连接"
+        )
         print(f"无向图特性验证成功：节点 {node2_id} 的边列表包含所有相关的边")
 
         # 5. 测试 get_all_labels - 获取所有标签
@@ -404,9 +404,9 @@ async def test_graph_advanced(storage):
         print(f"== 验证删除边的无向图特性: {node3_id} -> {node2_id}")
         reverse_edge_props = await storage.get_edge(node3_id, node2_id)
         print(f"删除后查询反向边属性 {node3_id} -> {node2_id}: {reverse_edge_props}")
-        assert (
-            reverse_edge_props is None
-        ), f"反向边 {node3_id} -> {node2_id} 也应被删除，无向图特性验证失败"
+        assert reverse_edge_props is None, (
+            f"反向边 {node3_id} -> {node2_id} 也应被删除，无向图特性验证失败"
+        )
         print("无向图特性验证成功：删除一个方向的边后，反向边也被删除")
 
         # 9. 测试 remove_nodes - 批量删除节点
@@ -556,44 +556,44 @@ async def test_graph_batch_operations(storage):
         assert node1_id in nodes_dict, f"{node1_id} 应在返回结果中"
         assert node2_id in nodes_dict, f"{node2_id} 应在返回结果中"
         assert node3_id in nodes_dict, f"{node3_id} 应在返回结果中"
-        assert (
-            nodes_dict[node1_id]["description"] == node1_data["description"]
-        ), f"{node1_id} 描述不匹配"
-        assert (
-            nodes_dict[node2_id]["description"] == node2_data["description"]
-        ), f"{node2_id} 描述不匹配"
-        assert (
-            nodes_dict[node3_id]["description"] == node3_data["description"]
-        ), f"{node3_id} 描述不匹配"
+        assert nodes_dict[node1_id]["description"] == node1_data["description"], (
+            f"{node1_id} 描述不匹配"
+        )
+        assert nodes_dict[node2_id]["description"] == node2_data["description"], (
+            f"{node2_id} 描述不匹配"
+        )
+        assert nodes_dict[node3_id]["description"] == node3_data["description"], (
+            f"{node3_id} 描述不匹配"
+        )
 
         # 3. 测试 node_degrees_batch - 批量获取多个节点的度数
         print("== 测试 node_degrees_batch")
         node_degrees = await storage.node_degrees_batch(node_ids)
         print(f"批量获取节点度数结果: {node_degrees}")
-        assert (
-            len(node_degrees) == 3
-        ), f"应返回3个节点的度数，实际返回 {len(node_degrees)} 个"
+        assert len(node_degrees) == 3, (
+            f"应返回3个节点的度数，实际返回 {len(node_degrees)} 个"
+        )
         assert node1_id in node_degrees, f"{node1_id} 应在返回结果中"
         assert node2_id in node_degrees, f"{node2_id} 应在返回结果中"
         assert node3_id in node_degrees, f"{node3_id} 应在返回结果中"
-        assert (
-            node_degrees[node1_id] == 3
-        ), f"{node1_id} 度数应为3，实际为 {node_degrees[node1_id]}"
-        assert (
-            node_degrees[node2_id] == 2
-        ), f"{node2_id} 度数应为2，实际为 {node_degrees[node2_id]}"
-        assert (
-            node_degrees[node3_id] == 3
-        ), f"{node3_id} 度数应为3，实际为 {node_degrees[node3_id]}"
+        assert node_degrees[node1_id] == 3, (
+            f"{node1_id} 度数应为3，实际为 {node_degrees[node1_id]}"
+        )
+        assert node_degrees[node2_id] == 2, (
+            f"{node2_id} 度数应为2，实际为 {node_degrees[node2_id]}"
+        )
+        assert node_degrees[node3_id] == 3, (
+            f"{node3_id} 度数应为3，实际为 {node_degrees[node3_id]}"
+        )
 
         # 4. 测试 edge_degrees_batch - 批量获取多个边的度数
         print("== 测试 edge_degrees_batch")
         edges = [(node1_id, node2_id), (node2_id, node3_id), (node3_id, node4_id)]
         edge_degrees = await storage.edge_degrees_batch(edges)
         print(f"批量获取边度数结果: {edge_degrees}")
-        assert (
-            len(edge_degrees) == 3
-        ), f"应返回3条边的度数，实际返回 {len(edge_degrees)} 条"
+        assert len(edge_degrees) == 3, (
+            f"应返回3条边的度数，实际返回 {len(edge_degrees)} 条"
+        )
         assert (
             node1_id,
             node2_id,
@@ -607,15 +607,15 @@ async def test_graph_batch_operations(storage):
             node4_id,
         ) in edge_degrees, f"边 {node3_id} -> {node4_id} 应在返回结果中"
         # 验证边的度数是否正确（源节点度数 + 目标节点度数）
-        assert (
-            edge_degrees[(node1_id, node2_id)] == 5
-        ), f"边 {node1_id} -> {node2_id} 度数应为5，实际为 {edge_degrees[(node1_id, node2_id)]}"
-        assert (
-            edge_degrees[(node2_id, node3_id)] == 5
-        ), f"边 {node2_id} -> {node3_id} 度数应为5，实际为 {edge_degrees[(node2_id, node3_id)]}"
-        assert (
-            edge_degrees[(node3_id, node4_id)] == 5
-        ), f"边 {node3_id} -> {node4_id} 度数应为5，实际为 {edge_degrees[(node3_id, node4_id)]}"
+        assert edge_degrees[(node1_id, node2_id)] == 5, (
+            f"边 {node1_id} -> {node2_id} 度数应为5，实际为 {edge_degrees[(node1_id, node2_id)]}"
+        )
+        assert edge_degrees[(node2_id, node3_id)] == 5, (
+            f"边 {node2_id} -> {node3_id} 度数应为5，实际为 {edge_degrees[(node2_id, node3_id)]}"
+        )
+        assert edge_degrees[(node3_id, node4_id)] == 5, (
+            f"边 {node3_id} -> {node4_id} 度数应为5，实际为 {edge_degrees[(node3_id, node4_id)]}"
+        )
 
         # 5. 测试 get_edges_batch - 批量获取多个边的属性
         print("== 测试 get_edges_batch")
@@ -655,9 +655,9 @@ async def test_graph_batch_operations(storage):
         reverse_edge_dicts = [{"src": tgt, "tgt": src} for src, tgt in edges]
         reverse_edges_dict = await storage.get_edges_batch(reverse_edge_dicts)
         print(f"批量获取反向边属性结果: {reverse_edges_dict.keys()}")
-        assert (
-            len(reverse_edges_dict) == 3
-        ), f"应返回3条反向边的属性，实际返回 {len(reverse_edges_dict)} 条"
+        assert len(reverse_edges_dict) == 3, (
+            f"应返回3条反向边的属性，实际返回 {len(reverse_edges_dict)} 条"
+        )
 
         # 验证正向和反向边的属性是否一致
         for (src, tgt), props in edges_dict.items():
@@ -665,9 +665,9 @@ async def test_graph_batch_operations(storage):
                 tgt,
                 src,
             ) in reverse_edges_dict, f"反向边 {tgt} -> {src} 应在返回结果中"
-            assert (
-                props == reverse_edges_dict[(tgt, src)]
-            ), f"边 {src} -> {tgt} 和反向边 {tgt} -> {src} 的属性不一致"
+            assert props == reverse_edges_dict[(tgt, src)], (
+                f"边 {src} -> {tgt} 和反向边 {tgt} -> {src} 的属性不一致"
+            )
 
         print("无向图特性验证成功：批量获取的正向和反向边属性一致")
 
@@ -675,17 +675,17 @@ async def test_graph_batch_operations(storage):
         print("== 测试 get_nodes_edges_batch")
         nodes_edges = await storage.get_nodes_edges_batch([node1_id, node3_id])
         print(f"批量获取节点边结果: {nodes_edges.keys()}")
-        assert (
-            len(nodes_edges) == 2
-        ), f"应返回2个节点的边，实际返回 {len(nodes_edges)} 个"
+        assert len(nodes_edges) == 2, (
+            f"应返回2个节点的边，实际返回 {len(nodes_edges)} 个"
+        )
         assert node1_id in nodes_edges, f"{node1_id} 应在返回结果中"
         assert node3_id in nodes_edges, f"{node3_id} 应在返回结果中"
-        assert (
-            len(nodes_edges[node1_id]) == 3
-        ), f"{node1_id} 应有3条边，实际有 {len(nodes_edges[node1_id])} 条"
-        assert (
-            len(nodes_edges[node3_id]) == 3
-        ), f"{node3_id} 应有3条边，实际有 {len(nodes_edges[node3_id])} 条"
+        assert len(nodes_edges[node1_id]) == 3, (
+            f"{node1_id} 应有3条边，实际有 {len(nodes_edges[node1_id])} 条"
+        )
+        assert len(nodes_edges[node3_id]) == 3, (
+            f"{node3_id} 应有3条边，实际有 {len(nodes_edges[node3_id])} 条"
+        )
 
         # 6.1 验证批量获取节点边的无向图特性
         print("== 验证批量获取节点边的无向图特性")
@@ -736,15 +736,15 @@ async def test_graph_batch_operations(storage):
             for src, tgt in nodes_edges[node3_id]
         )
 
-        assert (
-            has_connection_with_node2
-        ), f"节点 {node3_id} 的边列表中应包含与 {node2_id} 的连接"
-        assert (
-            has_connection_with_node4
-        ), f"节点 {node3_id} 的边列表中应包含与 {node4_id} 的连接"
-        assert (
-            has_connection_with_node5
-        ), f"节点 {node3_id} 的边列表中应包含与 {node5_id} 的连接"
+        assert has_connection_with_node2, (
+            f"节点 {node3_id} 的边列表中应包含与 {node2_id} 的连接"
+        )
+        assert has_connection_with_node4, (
+            f"节点 {node3_id} 的边列表中应包含与 {node4_id} 的连接"
+        )
+        assert has_connection_with_node5, (
+            f"节点 {node3_id} 的边列表中应包含与 {node5_id} 的连接"
+        )
 
         print("无向图特性验证成功：批量获取的节点边包含所有相关的边（无论方向）")
 
@@ -828,14 +828,14 @@ async def test_graph_special_characters(storage):
                 print(f"节点描述: {node_props.get('description', '无描述')}")
 
                 # 验证节点ID是否正确保存
-                assert (
-                    node_props.get("entity_id") == node_id
-                ), f"节点ID不匹配: 期望 {node_id}, 实际 {node_props.get('entity_id')}"
+                assert node_props.get("entity_id") == node_id, (
+                    f"节点ID不匹配: 期望 {node_id}, 实际 {node_props.get('entity_id')}"
+                )
 
                 # 验证描述是否正确保存
-                assert (
-                    node_props.get("description") == original_data["description"]
-                ), f"节点描述不匹配: 期望 {original_data['description']}, 实际 {node_props.get('description')}"
+                assert node_props.get("description") == original_data["description"], (
+                    f"节点描述不匹配: 期望 {original_data['description']}, 实际 {node_props.get('description')}"
+                )
 
                 print(f"节点 {node_id} 特殊字符验证成功")
             else:
@@ -851,14 +851,14 @@ async def test_graph_special_characters(storage):
             print(f"边描述: {edge1_props.get('description', '无描述')}")
 
             # 验证边关系是否正确保存
-            assert (
-                edge1_props.get("relationship") == edge1_data["relationship"]
-            ), f"边关系不匹配: 期望 {edge1_data['relationship']}, 实际 {edge1_props.get('relationship')}"
+            assert edge1_props.get("relationship") == edge1_data["relationship"], (
+                f"边关系不匹配: 期望 {edge1_data['relationship']}, 实际 {edge1_props.get('relationship')}"
+            )
 
             # 验证边描述是否正确保存
-            assert (
-                edge1_props.get("description") == edge1_data["description"]
-            ), f"边描述不匹配: 期望 {edge1_data['description']}, 实际 {edge1_props.get('description')}"
+            assert edge1_props.get("description") == edge1_data["description"], (
+                f"边描述不匹配: 期望 {edge1_data['description']}, 实际 {edge1_props.get('description')}"
+            )
 
             print(f"边 {node1_id} -> {node2_id} 特殊字符验证成功")
         else:
@@ -872,14 +872,14 @@ async def test_graph_special_characters(storage):
             print(f"边描述: {edge2_props.get('description', '无描述')}")
 
             # 验证边关系是否正确保存
-            assert (
-                edge2_props.get("relationship") == edge2_data["relationship"]
-            ), f"边关系不匹配: 期望 {edge2_data['relationship']}, 实际 {edge2_props.get('relationship')}"
+            assert edge2_props.get("relationship") == edge2_data["relationship"], (
+                f"边关系不匹配: 期望 {edge2_data['relationship']}, 实际 {edge2_props.get('relationship')}"
+            )
 
             # 验证边描述是否正确保存
-            assert (
-                edge2_props.get("description") == edge2_data["description"]
-            ), f"边描述不匹配: 期望 {edge2_data['description']}, 实际 {edge2_props.get('description')}"
+            assert edge2_props.get("description") == edge2_data["description"], (
+                f"边描述不匹配: 期望 {edge2_data['description']}, 实际 {edge2_props.get('description')}"
+            )
 
             print(f"边 {node2_id} -> {node3_id} 特殊字符验证成功")
         else:
@@ -960,9 +960,9 @@ async def test_graph_undirected_property(storage):
         assert reverse_edge is not None, f"未能读取反向边属性: {node2_id} -> {node1_id}"
 
         # 验证正向和反向边属性是否一致
-        assert (
-            forward_edge == reverse_edge
-        ), "正向和反向边属性不一致，无向图特性验证失败"
+        assert forward_edge == reverse_edge, (
+            "正向和反向边属性不一致，无向图特性验证失败"
+        )
         print("无向图特性验证成功：正向和反向边属性一致")
 
         # 3. 测试边的度数的无向图特性
@@ -982,9 +982,9 @@ async def test_graph_undirected_property(storage):
         reverse_degree = await storage.edge_degree(node2_id, node1_id)
         print(f"正向边 {node1_id} -> {node2_id} 的度数: {forward_degree}")
         print(f"反向边 {node2_id} -> {node1_id} 的度数: {reverse_degree}")
-        assert (
-            forward_degree == reverse_degree
-        ), "正向和反向边的度数不一致，无向图特性验证失败"
+        assert forward_degree == reverse_degree, (
+            "正向和反向边的度数不一致，无向图特性验证失败"
+        )
         print("无向图特性验证成功：正向和反向边的度数一致")
 
         # 4. 测试删除边的无向图特性
@@ -1002,9 +1002,9 @@ async def test_graph_undirected_property(storage):
         # 验证反向边是否也被删除
         reverse_edge = await storage.get_edge(node2_id, node1_id)
         print(f"删除后查询反向边属性 {node2_id} -> {node1_id}: {reverse_edge}")
-        assert (
-            reverse_edge is None
-        ), f"反向边 {node2_id} -> {node1_id} 也应被删除，无向图特性验证失败"
+        assert reverse_edge is None, (
+            f"反向边 {node2_id} -> {node1_id} 也应被删除，无向图特性验证失败"
+        )
         print("无向图特性验证成功：删除一个方向的边后，反向边也被删除")
 
         # 5. 测试批量操作中的无向图特性
@@ -1035,9 +1035,9 @@ async def test_graph_undirected_property(storage):
                 tgt,
                 src,
             ) in reverse_edges_dict, f"反向边 {tgt} -> {src} 应在返回结果中"
-            assert (
-                props == reverse_edges_dict[(tgt, src)]
-            ), f"边 {src} -> {tgt} 和反向边 {tgt} -> {src} 的属性不一致"
+            assert props == reverse_edges_dict[(tgt, src)], (
+                f"边 {src} -> {tgt} 和反向边 {tgt} -> {src} 的属性不一致"
+            )
 
         print("无向图特性验证成功：批量获取的正向和反向边属性一致")
 
@@ -1068,9 +1068,9 @@ async def test_graph_undirected_property(storage):
             or (src == node1_id and tgt == node2_id)
             for src, tgt in node2_edges
         )
-        assert (
-            has_edge_to_node1
-        ), f"节点 {node2_id} 的边列表中应包含与 {node1_id} 的连接"
+        assert has_edge_to_node1, (
+            f"节点 {node2_id} 的边列表中应包含与 {node1_id} 的连接"
+        )
 
         print("无向图特性验证成功：批量获取的节点边包含所有相关的边（无论方向）")
 
