@@ -111,8 +111,8 @@
     <script>
       // Ensure clicking "Sign In" routes to canonical backend web UI login
       (function(){
-        // Route user directly to backend web UI login on Railway
-        var TARGET_LOGIN = 'https://lightrag-production-6328.up.railway.app/webui/#/login';
+        // Keep users on the current origin; API calls target the backend.
+        var TARGET_LOGIN = '/webui/#/login';
 
         function isOnBackendOrLoginRoute(){
           try {
