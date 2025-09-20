@@ -52,7 +52,14 @@
           try { window.dispatchEvent(new CustomEvent('augentik:unauthorized')); } catch(_) {}
         }
         function shouldAuth(url){
-          try { var u = new URL(url, location.href); return u.origin === location.origin && u.pathname.startsWith('/api/'); }
+          try {
+            var u = new URL(url, location.href);
+            if (u.origin !== location.origin) return false;
+            return (
+              u.pathname.startsWith('/api/') ||
+              u.pathname === '/auth-status'
+            );
+          }
           catch(_) { return false; }
         }
         // fetch bridge
@@ -153,7 +160,16 @@
         var isLocalDev = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname) && !!location.port;
         if (isLocalDev) return; // avoid 404 noise during vite dev/preview
 
-        // Always load even on /webui/#/login to avoid blank screen before bundle loads
+        function onLoginRoute(){
+          try {
+            var onWebui = location.pathname.indexOf('/webui') === 0;
+            var onAuth = location.pathname.indexOf('/auth') === 0;
+            var h = location.hash || '';
+            var isLogin = /^#\/?login(?:[\/?].*)?$/i.test(h);
+            return (onWebui || onAuth) && isLogin;
+          }
+          catch(_) { return false; }
+        }
         // Helper for path checks
 
         function loadWebUI(){
@@ -171,7 +187,7 @@
           // Inject CSS first for better FOUC control
           ensureCss('/webui/assets/feature-graph-HI4LhrlC.css');
           ensureCss('/webui/assets/index-Ujjbvor2.css');
-          var src = '/webui/assets/index-Bo0kGtUI.js';
+          var src = '/webui/assets/index-CPMWsnpS.js';
           var s = document.createElement('script');
           s.type = 'module';
           s.crossOrigin = '';
@@ -179,11 +195,26 @@
           document.head.appendChild(s);
         }
 
-        // Load the prebuilt WebUI on all /webui routes (including login)
+        // Auth check helper: only load WebUI if /auth-status succeeds
+        function checkAuth(){
+          try {
+            return fetch('/auth-status', { method: 'GET', cache: 'no-store' })
+              .then(function(res){
+                if (res && res.ok) return true;
+                if (res && res.status === 401) onUnauthorized();
+                return false;
+              })
+              .catch(function(){ return false; });
+          } catch(_) { return Promise.resolve(false); }
+        }
+
+        // Load the prebuilt WebUI only on /webui routes when authenticated (and not on the login route)
         function maybeLoad(){
           try {
             var onWebui = location.pathname.indexOf('/webui') === 0;
-            if (onWebui) loadWebUI();
+            if (onWebui && !onLoginRoute()) {
+              checkAuth().then(function(ok){ if (ok) loadWebUI(); });
+            }
           } catch(_) {}
         }
         maybeLoad();
@@ -192,12 +223,12 @@
       })();
     </script>
     <!-- CSS for the prebuilt WebUI will be injected at runtime along with the JS bundle -->
+    <script type="module" crossorigin src="/assets/index-CPMWsnpS.js"></script>
   </head>
   <body>
     <div id="root"></div>
 
-    <!-- Overlay app entry: mounts our login UI at /webui/#/login and wires "Sign In" links -->
-
+    <!-- Overlay app entry: mounts our login UI at /webui/#/login and wires "Sign In" links -->
 
     <!-- Homepage wiring: keep existing landing; only override Spline URL and wire Request Access modal -->
     <button id="exclusive-access-launch" type="button" aria-haspopup="dialog" aria-controls="zoho-exclusive-modal" style="position:fixed;bottom:16px;right:16px;z-index:1000;background:linear-gradient(135deg,#111,#000);color:#fff;padding:12px 18px;border-radius:9999px;border:1px solid #333;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);cursor:pointer;">Request Exclusive Access</button>

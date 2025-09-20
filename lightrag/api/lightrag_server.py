@@ -10,7 +10,7 @@ import logging.config
 import uvicorn
 import pipmaster as pm
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from pathlib import Path
 import configparser
 from ascii_colors import ASCIIColors
@@ -49,6 +49,7 @@ from lightrag.api.routers.graph_routes import create_graph_routes
 from lightrag.api.routers.ollama_api import OllamaAPI
 from lightrag.api.routers.document_request_routes import create_document_request_routes
 
+from lightrag.api.asset_manifest import load_asset_manifest
 from lightrag.utils import logger, set_verbose_debug
 from lightrag.kg.shared_storage import (
     get_namespace_data,
@@ -622,19 +623,20 @@ def create_app(args):
     static_dir = Path(__file__).parent / "webui"
     static_dir.mkdir(exist_ok=True)
 
-    # Ensure missing hashed asset aliases exist to avoid blank screens when
-    # runtime expects a different hashed filename than what is packaged.
+    # Ensure legacy hashed asset aliases continue to resolve using manifest hints.
     try:
         assets_dir = static_dir / "assets"
         assets_dir.mkdir(exist_ok=True)
-        alias_map = {
-            # requested -> existing
-            "index-B1bgEoWF.js": "index-Bo0kGtUI.js",
-        }
+        manifest = load_asset_manifest()
+        alias_map = manifest.alias_map()
         for requested, existing in alias_map.items():
             requested_path = assets_dir / requested
             existing_path = assets_dir / existing
-            if not requested_path.exists() and existing_path.exists():
+            if (
+                existing_path.exists()
+                and requested_path != existing_path
+                and not requested_path.exists()
+            ):
                 requested_path.write_bytes(existing_path.read_bytes())
     except Exception as _asset_alias_err:
         logger.debug(f"Asset aliasing skipped: {_asset_alias_err}")
@@ -645,45 +647,6 @@ def create_app(args):
         SmartStaticFiles(directory=static_dir / "assets", html=False, check_dir=True),
         name="webui-assets",
     )
-
-    # Alias assets also at /assets/* to avoid blank page when index.html references root /assets
-    from fastapi.responses import FileResponse
-
-    @app.get("/assets/index-B1bgEoWF.js")
-    async def serve_fallback_main_js():
-        # Some builds reference this hashed name; serve the present bundle instead
-        target = static_dir / "assets" / "index-Bo0kGtUI.js"
-        if target.exists():
-            return FileResponse(target, media_type="application/javascript")
-        # As a last resort, try the other known bundle name
-        alt = static_dir / "assets" / "index-CDk4mFTF.js"
-        if alt.exists():
-            return FileResponse(alt, media_type="application/javascript")
-        # Fallback to 404 if nothing found
-        raise HTTPException(status_code=404, detail="Main bundle not found")
-
-    @app.get("/webui/assets/index-B1bgEoWF.js")
-    async def serve_fallback_main_js_webui():
-        # Mirror the same fallback under /webui/assets for hashed bundle requests
-        target = static_dir / "assets" / "index-Bo0kGtUI.js"
-        if target.exists():
-            return FileResponse(target, media_type="application/javascript")
-        alt = static_dir / "assets" / "index-CDk4mFTF.js"
-        if alt.exists():
-            return FileResponse(alt, media_type="application/javascript")
-        raise HTTPException(status_code=404, detail="Main bundle not found")
-
-    # ADD THIS NEW ROUTE TO SERVE AMD BUNDLE
-    @app.get("/assets/index-B1bgEoWF.js")
-    async def serve_amd_bundle():
-        """Serve the exact bundle the AMD frontend expects"""
-        bundle_path = static_dir / "assets" / "index-Bo0kGtUI.js"
-        if not bundle_path.exists():
-            # Fallback to any available bundle
-            for f in (static_dir / "assets").glob("index-*.js"):
-                return FileResponse(f, media_type="application/javascript")
-            raise HTTPException(status_code=404, detail="JS bundle not found")
-        return FileResponse(bundle_path, media_type="application/javascript")
 
     app.mount(
         "/assets",
