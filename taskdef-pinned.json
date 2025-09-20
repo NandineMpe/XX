@@ -1,4 +1,4 @@
-﻿{
+{
     "family":  "augentik-amd-taskdef",
     "networkMode":  "awsvpc",
     "requiresCompatibilities":  [
@@ -11,7 +11,7 @@
     "containerDefinitions":  [
                                  {
                                      "name":  "augentik-backend",
-                                     "image":  "778185677217.dkr.ecr.us-east-1.amazonaws.com/augentik-backend@sha256:cb8182ba9f592acc3a20fa7a0840c570f7a4e5372a1e49937d619a76a952929b",
+                                     "image":  "778185677217.dkr.ecr.us-east-1.amazonaws.com/augentik-backend@sha256:6a0787410693f56c90e67e1aca0b8307cfa941806585ca32cc2eaf66d1ba5380",
                                      "essential":  true,
                                      "logConfiguration":  {
                                                               "logDriver":  "awslogs",
