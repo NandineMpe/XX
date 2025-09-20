@@ -178,6 +178,14 @@ def create_app(args):
 
     app = FastAPI(**app_kwargs)
 
+    # Alias /assets/* to the packaged /webui/assets/* via a small router
+    try:
+        from lightrag.api.assets_fix import router as assets_alias_router
+
+        app.include_router(assets_alias_router)
+    except Exception as _alias_err:
+        logger.debug(f"Assets alias router not loaded: {_alias_err}")
+
     def get_cors_origins():
         """Get allowed origins from global_args
         Returns a list of allowed origins, defaults to ["*"] if not set
@@ -614,6 +622,23 @@ def create_app(args):
     static_dir = Path(__file__).parent / "webui"
     static_dir.mkdir(exist_ok=True)
 
+    # Ensure missing hashed asset aliases exist to avoid blank screens when
+    # runtime expects a different hashed filename than what is packaged.
+    try:
+        assets_dir = static_dir / "assets"
+        assets_dir.mkdir(exist_ok=True)
+        alias_map = {
+            # requested -> existing
+            "index-B1bgEoWF.js": "index-Bo0kGtUI.js",
+        }
+        for requested, existing in alias_map.items():
+            requested_path = assets_dir / requested
+            existing_path = assets_dir / existing
+            if not requested_path.exists() and existing_path.exists():
+                requested_path.write_bytes(existing_path.read_bytes())
+    except Exception as _asset_alias_err:
+        logger.debug(f"Asset aliasing skipped: {_asset_alias_err}")
+
     # Serve hashed assets at /webui/assets/*
     app.mount(
         "/webui/assets",
@@ -621,8 +646,52 @@ def create_app(args):
         name="webui-assets",
     )
 
-    # Always return dist/index.html at /webui/
+    # Alias assets also at /assets/* to avoid blank page when index.html references root /assets
     from fastapi.responses import FileResponse
+
+    @app.get("/assets/index-B1bgEoWF.js")
+    async def serve_fallback_main_js():
+        # Some builds reference this hashed name; serve the present bundle instead
+        target = static_dir / "assets" / "index-Bo0kGtUI.js"
+        if target.exists():
+            return FileResponse(target, media_type="application/javascript")
+        # As a last resort, try the other known bundle name
+        alt = static_dir / "assets" / "index-CDk4mFTF.js"
+        if alt.exists():
+            return FileResponse(alt, media_type="application/javascript")
+        # Fallback to 404 if nothing found
+        raise HTTPException(status_code=404, detail="Main bundle not found")
+
+    @app.get("/webui/assets/index-B1bgEoWF.js")
+    async def serve_fallback_main_js_webui():
+        # Mirror the same fallback under /webui/assets for hashed bundle requests
+        target = static_dir / "assets" / "index-Bo0kGtUI.js"
+        if target.exists():
+            return FileResponse(target, media_type="application/javascript")
+        alt = static_dir / "assets" / "index-CDk4mFTF.js"
+        if alt.exists():
+            return FileResponse(alt, media_type="application/javascript")
+        raise HTTPException(status_code=404, detail="Main bundle not found")
+
+    # ADD THIS NEW ROUTE TO SERVE AMD BUNDLE
+    @app.get("/assets/index-B1bgEoWF.js")
+    async def serve_amd_bundle():
+        """Serve the exact bundle the AMD frontend expects"""
+        bundle_path = static_dir / "assets" / "index-Bo0kGtUI.js"
+        if not bundle_path.exists():
+            # Fallback to any available bundle
+            for f in (static_dir / "assets").glob("index-*.js"):
+                return FileResponse(f, media_type="application/javascript")
+            raise HTTPException(status_code=404, detail="JS bundle not found")
+        return FileResponse(bundle_path, media_type="application/javascript")
+
+    app.mount(
+        "/assets",
+        SmartStaticFiles(directory=static_dir / "assets", html=False, check_dir=True),
+        name="assets-root",
+    )
+
+    # Always return dist/index.html at /webui/
 
     @app.get("/webui/")
     async def serve_webui_index():

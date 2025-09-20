@@ -1,0 +1,42 @@
+{
+    "family": "augentik-amd-taskdef",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "1024",
+    "executionRoleArn": "arn:aws:iam::778185677217:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::778185677217:role/AugentikAmdTaskRole",
+    "containerDefinitions": [
+      {
+        "name": "augentik-backend",
+        "image": "778185677217.dkr.ecr.us-east-1.amazonaws.com/augentik-backend:amd-final",
+        "essential": true,
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/augentik-amd",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        },
+        "portMappings": [
+          {
+            "containerPort": 8000,
+            "protocol": "tcp"
+          }
+        ],
+        "environment": [
+          { "name": "HOST", "value": "0.0.0.0" },
+          { "name": "PORT", "value": "8000" },
+          { "name": "CORS_ORIGINS", "value": "https://augentik.com" },
+          { "name": "LLM_BINDING", "value": "openai" },
+          { "name": "EMBEDDING_BINDING", "value": "openai" },
+          { "name": "LLM_MODEL", "value": "gpt-4o-mini" },
+          { "name": "EMBEDDING_MODEL", "value": "text-embedding-3-large" },
+          { "name": "AUTH_ACCOUNTS", "value": "amd.admin@augentik.com:SetStrongPass#2025" },
+          { "name": "TOKEN_SECRET", "value": "amd-demo-jwt-secret-20250917" },
+          { "name": "JWT_ALGORITHM", "value": "HS256" }
+        ]
+      }
+    ]
+  }

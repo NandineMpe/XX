@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Augentik</title>
+    <link rel="icon" type="image/x-icon" href="https://ae7an1f5d2ydi587.public.blob.vercel-storage.com/Augentik/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://use.typekit.net/af/efe4a5/00000000000000007735e609/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3" as="font" type="font/woff2" crossorigin>
+
+    <!-- Force all HTML entry points to land on /webui/#/ -->
+    <script>
+      (function(){
+        try {
+          var onWebui = location.pathname.indexOf('/webui') === 0;
+          // If not already on /webui, go to dashboard hash route
+          if (!onWebui) {
+            location.replace('/webui/#/');
+          } else if (!location.hash || location.hash === '#') {
+            // Normalize /webui to /webui/#/ so the hash router mounts consistently
+            location.replace('/webui/#/');
+          }
+        } catch(_) {}
+      })();
+    </script>
+
+    <!-- Auth bridge: attach Authorization to /api/*, handle 401, support XHR -->
+    <script>
+      (function(){
+        function getToken(){
+          try {
+            return (
+              localStorage.getItem('AUGENTIK-API-TOKEN') ||
+              localStorage.getItem('augentik_token') ||
+              ''
+            );
+          } catch(_) { return ''; }
+        }
+        function clearToken(){
+          try {
+            localStorage.removeItem('AUGENTIK-API-TOKEN');
+            localStorage.removeItem('augentik_token');
+          } catch(_) {}
+        }
+        function onUnauthorized(){
+          // Clear any stale tokens but do not force navigation.
+          // This prevents immediately bouncing to the login page when visiting /webui/#/.
+          clearToken();
+          try { window.dispatchEvent(new CustomEvent('augentik:unauthorized')); } catch(_) {}
+        }
+        function shouldAuth(url){
+          try { var u = new URL(url, location.href); return u.origin === location.origin && u.pathname.startsWith('/api/'); }
+          catch(_) { return false; }
+        }
+        // fetch bridge
+        try {
+          var _fetch = window.fetch.bind(window);
+          window.fetch = function(input, init){
+            var url = (typeof input === 'string') ? input : (input && input.url) || '';
+            if (shouldAuth(url)){
+              init = init || {};
+              var headers = new Headers(init.headers || (typeof input !== 'string' && input && input.headers) || {});
+              if (!headers.has('Authorization')){
+                var t = getToken(); if (t) headers.set('Authorization', 'Bearer ' + t);
+              }
+              init.headers = headers;
+            }
+            return _fetch(input, init).then(function(res){ if (res && res.status === 401) onUnauthorized(); return res; });
+          };
+        } catch(_) {}
+        // XHR bridge
+        try {
+          var OrigXHR = window.XMLHttpRequest;
+          function PatchedXHR(){
+            var xhr = new OrigXHR();
+            var _url = '';
+            var _open = xhr.open;
+            xhr.open = function(method, url){ _url = url; return _open.apply(xhr, arguments); };
+            var _send = xhr.send;
+            xhr.send = function(body){
+              try { if (shouldAuth(_url)) { var t = getToken(); if (t) xhr.setRequestHeader('Authorization', 'Bearer ' + t); } } catch(_) {}
+              xhr.addEventListener('load', function(){ if (xhr.status === 401) onUnauthorized(); });
+              return _send.apply(xhr, arguments);
+            };
+            return xhr;
+          }
+          window.XMLHttpRequest = PatchedXHR;
+          window.AugentikAuth = { logout: function(){ clearToken(); try { location.assign('/webui/#/login'); } catch(_) {} }, token: getToken };
+        } catch(_) {}
+      })();
+    </script>
+
+    <!-- Stay-on-origin guard: keep navigation on this origin and avoid opening extra tabs for login/webui -->
+    <script>
+      (function(){
+        function normalize(url){
+          try {
+            var u = new URL(url, location.href);
+            if (/railway\.app$/i.test(u.hostname) && /\/webui\//.test(u.pathname)){
+              return location.origin + u.pathname + u.search + u.hash;
+            }
+          } catch(_) {}
+          return url;
+        }
+        function isLoginLike(url){
+          try{
+            var u = new URL(url, location.href);
+            if (u.origin !== location.origin) return false;
+            var onWebui = u.pathname.indexOf('/webui') === 0;
+            var onAuth = u.pathname.indexOf('/auth') === 0;
+            var hashIsLogin = /#\/?login$/i.test(u.hash || '');
+            var pathIsLogin = /^\/login(?:[?#].*)?$/i.test(u.pathname);
+            return ((onWebui || onAuth) && hashIsLogin) || pathIsLogin;
+          }catch(_) { return false; }
+        }
+        // Intercept anchor clicks
+        window.addEventListener('click', function(e){
+          try{
+            var a = e.target && (e.target.closest ? e.target.closest('a[href]') : null);
+            if (!a) return;
+            var href = a.getAttribute('href');
+            if (!href) return;
+            var fixed = normalize(href);
+            if (isLoginLike(fixed)){
+              e.preventDefault();
+              location.assign(fixed);
+              return;
+            }
+            if (fixed !== href){
+              e.preventDefault();
+              location.assign(fixed);
+            }
+          }catch(_){}
+        }, true);
+        // Intercept window.open
+        try{
+          var _open = window.open;
+          window.open = function(u, n, f){
+            var fixed = normalize(u);
+            if (isLoginLike(fixed)) return _open.call(window, fixed, '_self', f);
+            return _open.call(window, fixed, n, f);
+          };
+        }catch(_){}
+      })();
+    </script>
+
+    <!-- Load the prebuilt LightRAG WebUI at runtime to avoid Vite resolving it during build -->
+    <script>
+      (function(){
+        var isLocalDev = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname) && !!location.port;
+        if (isLocalDev) return; // avoid 404 noise during vite dev/preview
+
+        function onLoginRoute(){
+          try {
+            var onWebui = location.pathname.indexOf('/webui') === 0;
+            var onAuth = location.pathname.indexOf('/auth') === 0;
+            return (onWebui || onAuth) && /#\/?login$/i.test(location.hash || '');
+          }
+          catch(_) { return false; }
+        }
+        // Helper for path checks
+
+        function loadWebUI(){
+          if (window.__webuiLoaded) return;
+          window.__webuiLoaded = true;
+          function ensureCss(href){
+            if (document.querySelector('link[data-webui-css="'+href+'"]')) return;
+            var l = document.createElement('link');
+            l.rel = 'stylesheet';
+            l.crossOrigin = '';
+            l.href = href;
+            l.setAttribute('data-webui-css', href);
+            document.head.appendChild(l);
+          }
+          // Inject CSS first for better FOUC control
+          ensureCss('/webui/assets/feature-graph-HI4LhrlC.css');
+          ensureCss('/webui/assets/index-Ujjbvor2.css');
+          var src = '/webui/assets/index-Bo0kGtUI.js';
+          var s = document.createElement('script');
+          s.type = 'module';
+          s.crossOrigin = '';
+          s.src = src;
+          document.head.appendChild(s);
+        }
+
+        // Load the prebuilt WebUI only on /webui routes (and not on the login route)
+        function maybeLoad(){
+          try {
+            var onWebui = location.pathname.indexOf('/webui') === 0;
+            if (onWebui && !onLoginRoute()) loadWebUI();
+          } catch(_) {}
+        }
+        maybeLoad();
+        window.addEventListener('hashchange', maybeLoad);
+        document.addEventListener('visibilitychange', maybeLoad);
+      })();
+    </script>
+    <!-- CSS for the prebuilt WebUI will be injected at runtime along with the JS bundle -->
+    <script type="module" crossorigin src="/assets/index-B1bgEoWF.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- Overlay app entry: mounts our login UI at /webui/#/login and wires "Sign In" links -->
+
+    <!-- Homepage wiring: keep existing landing; only override Spline URL and wire Request Access modal -->
+    <button id="exclusive-access-launch" type="button" aria-haspopup="dialog" aria-controls="zoho-exclusive-modal" style="position:fixed;bottom:16px;right:16px;z-index:1000;background:linear-gradient(135deg,#111,#000);color:#fff;padding:12px 18px;border-radius:9999px;border:1px solid #333;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);cursor:pointer;">Request Exclusive Access</button>
+    <div id="zoho-exclusive-overlay" hidden style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1000;"></div>
+    <div id="zoho-exclusive-modal" hidden role="dialog" aria-modal="true" aria-labelledby="zoho-exclusive-title" style="display:none;position:fixed;inset:0;z-index:1001;align-items:center;justify-content:center;">
+      <div style="width:100%;max-width:720px;margin:24px;background:#0b0b0b;border:1px solid #222;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.45);padding:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <h2 id="zoho-exclusive-title" style="margin:0;color:#fff;font-size:18px;font-weight:600;">Request Exclusive Access</h2>
+          <button id="zoho-exclusive-close" aria-label="Close" style="background:#111;border:1px solid #333;color:#bbb;border-radius:8px;padding:6px 10px;cursor:pointer;">&times;</button>
+        </div>
+        <div style="border-top:1px solid #222;margin:8px 0 16px 0;"></div>
+        <div>
+          <iframe aria-label='REQUEST EXCLUSIVE ACCESS' frameborder="0" style="height:500px;width:99%;border:none;" src='https://forms.zohopublic.eu/nandiniauge1/form/Requestafreetrial/formperma/MWU4mCzC_8wGeyhrqD9YtBM7WLeZWjhMXJeSTtBBREM'></iframe>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function(){
+        var isHome = (location.pathname === '/' || location.pathname === '');
+        if (isHome) {
+          var TARGET_URL = 'https://ifonjarzvpechegr.public.blob.vercel-storage.com/Spline%20Landing%20Page.spline';
+          var tries = 0; var t = setInterval(function(){
+            tries++;
+            var v = document.querySelector('spline-viewer');
+            if (v){ try { v.setAttribute('url', TARGET_URL); } catch(_){} clearInterval(t); }
+            if (tries > 40) clearInterval(t);
+          }, 250);
+        }
+        var btn = document.getElementById('exclusive-access-launch');
+        var overlay = document.getElementById('zoho-exclusive-overlay');
+        var modal = document.getElementById('zoho-exclusive-modal');
+        var closeBtn = document.getElementById('zoho-exclusive-close');
+        function openModal(){ if (overlay){ overlay.hidden=false; overlay.style.display='block'; } if (modal){ modal.hidden=false; modal.style.display='flex'; } }
+        function closeModal(){ if (overlay){ overlay.style.display='none'; overlay.hidden=true; } if (modal){ modal.style.display='none'; modal.hidden=true; } }
+        if (btn) btn.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+        if (overlay) overlay.addEventListener('click', closeModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+      })();
+    </script>
+  </body>
+  </html>

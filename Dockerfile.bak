@@ -1,5 +1,5 @@
     # Build stage
-    FROM public.ecr.aws/docker/library/python:3.11-slim AS builder
+    FROM python:3.11-slim AS builder
 
     WORKDIR /app
 
@@ -29,7 +29,7 @@
     RUN pip install --user --no-cache-dir pypdf2 python-docx python-pptx openpyxl
 
     # Final stage
-    FROM public.ecr.aws/docker/library/python:3.11-slim
+    FROM python:3.11-slim
 
     # Install curl for healthcheck
     RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
@@ -45,14 +45,6 @@
     # Make sure scripts in .local are usable
     ENV PATH=/root/.local/bin:$PATH
 
-    # Alias hashed WebUI bundle filenames to avoid 404s when a different
-    # cache-busted name is requested at runtime (e.g., index-B1bgEoWF.js)
-    RUN set -eu; \
-        ASSETS_DIR="/app/lightrag/api/webui/assets"; \
-        if [ -f "$ASSETS_DIR/index-Bo0kGtUI.js" ] && [ ! -f "$ASSETS_DIR/index-B1bgEoWF.js" ]; then \
-          cp "$ASSETS_DIR/index-Bo0kGtUI.js" "$ASSETS_DIR/index-B1bgEoWF.js"; \
-        fi
-
     # Create necessary directories
     RUN mkdir -p /app/data/rag_storage /app/data/inputs
 
@@ -61,11 +53,11 @@
     ENV INPUT_DIR=/app/data/inputs
 
     # Expose the default port
-    EXPOSE 8000
+    EXPOSE 8080
 
     # Add healthcheck
     HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-        CMD curl -f http://localhost:8000/health || exit 1
+        CMD curl -f http://localhost:8080/health || exit 1
 
     # Set entrypoint
     ENTRYPOINT ["python", "-m", "lightrag.api.lightrag_server"]

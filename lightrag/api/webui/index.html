@@ -153,14 +153,7 @@
         var isLocalDev = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname) && !!location.port;
         if (isLocalDev) return; // avoid 404 noise during vite dev/preview
 
-        function onLoginRoute(){
-          try {
-            var onWebui = location.pathname.indexOf('/webui') === 0;
-            var onAuth = location.pathname.indexOf('/auth') === 0;
-            return (onWebui || onAuth) && /#\/?login$/i.test(location.hash || '');
-          }
-          catch(_) { return false; }
-        }
+        // Always load even on /webui/#/login to avoid blank screen before bundle loads
         // Helper for path checks
 
         function loadWebUI(){
@@ -186,11 +179,11 @@
           document.head.appendChild(s);
         }
 
-        // Load the prebuilt WebUI only on /webui routes (and not on the login route)
+        // Load the prebuilt WebUI on all /webui routes (including login)
         function maybeLoad(){
           try {
             var onWebui = location.pathname.indexOf('/webui') === 0;
-            if (onWebui && !onLoginRoute()) loadWebUI();
+            if (onWebui) loadWebUI();
           } catch(_) {}
         }
         maybeLoad();
@@ -199,12 +192,12 @@
       })();
     </script>
     <!-- CSS for the prebuilt WebUI will be injected at runtime along with the JS bundle -->
-    <script type="module" crossorigin src="/assets/index-B1bgEoWF.js"></script>
   </head>
   <body>
     <div id="root"></div>
 
-    <!-- Overlay app entry: mounts our login UI at /webui/#/login and wires "Sign In" links -->
+    <!-- Overlay app entry: mounts our login UI at /webui/#/login and wires "Sign In" links -->
+
 
     <!-- Homepage wiring: keep existing landing; only override Spline URL and wire Request Access modal -->
     <button id="exclusive-access-launch" type="button" aria-haspopup="dialog" aria-controls="zoho-exclusive-modal" style="position:fixed;bottom:16px;right:16px;z-index:1000;background:linear-gradient(135deg,#111,#000);color:#fff;padding:12px 18px;border-radius:9999px;border:1px solid #333;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);cursor:pointer;">Request Exclusive Access</button>

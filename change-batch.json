@@ -1,0 +1,16 @@
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "amd-api.augentik.app",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z35SXDOTRQ7X7K",
+          "DNSName": "<your-alb-dns>",
+          "EvaluateTargetHealth": false
+        }
+      }
+    }
+  ]
+}
