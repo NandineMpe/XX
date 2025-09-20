@@ -121,7 +121,7 @@
       // Ensure clicking "Sign In" routes to canonical backend web UI login
       (function(){
         // Route user directly to backend web UI login on Railway
-        var TARGET_LOGIN = 'https://lightrag-production-6328.up.railway.app/webui/#/login';
+        var TARGET_LOGIN = 'https://augentik.com/webui/#/login';
 
         function isOnBackendOrLoginRoute(){
           try {
@@ -147,9 +147,9 @@
                 el.addEventListener('click', function(e){
                   e.preventDefault();
                   console.log('[Sign In] Navigating to', TARGET_LOGIN);
-                  location.assign(TARGET_LOGIN);
+                  window.location.href = TARGET_LOGIN;
                 }, true);
-                if (el.tagName === 'A') el.setAttribute('href', TARGET_LOGIN);
+                if (el.tagName === 'A') { el.setAttribute('href', TARGET_LOGIN); el.removeAttribute('target'); el.removeAttribute('rel'); }
               }
             }catch(_){ }
           });
