@@ -2,7 +2,7 @@
   "name": "lightrag-root",
   "private": true,
   "scripts": {
-    "build-frontend-and-stage": "cd lightrag_webui && npm install && npm run build && cd .. && git add lightrag/api/webui",
+    "build-frontend-and-stage": "node ./scripts/build-frontend-and-stage.mjs",
     "build": "node -e \"console.log('Skip build: using prebuilt dist folder');\""
   },
   "devDependencies": {

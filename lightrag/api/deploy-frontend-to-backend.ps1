@@ -1,27 +1,29 @@
-# Set these paths to your actual repo locations
-$frontendPath = "C:\Users\nandi\Augentik_FrontEnd"
-$backendWebuiPath = "C:\Users\nandi\LightRAG-3\lightrag\api\webui"
-$backendRepoPath = "C:\Users\nandi\LightRAG-3"
+param(
+    [string]$FrontendPath,
+    [string]$DistPath,
+    [string]$BuildCommand,
+    [switch]$SkipInstall,
+    [switch]$SkipBuild,
+    [switch]$NoStage
+)
 
-# 1. Build the frontend for backend deployment
-Write-Host "Building frontend for backend deployment..."
-Set-Location $frontendPath
-$env:BUILD_TARGET = "railway"
-npm run build
+$repoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+if (-not $FrontendPath) {
+    $FrontendPath = if ($env:FRONTEND_PATH) { $env:FRONTEND_PATH } else { "C:\\Users\\nandi\\Augentik_FrontEnd" }
+}
 
-# 2. Remove old static files from backend
-Write-Host "Removing old static files from backend..."
-Remove-Item -Recurse -Force "$backendWebuiPath\*" -ErrorAction SilentlyContinue
+$nodeScript = Join-Path (Join-Path $repoRoot 'scripts') 'build-frontend-and-stage.mjs'
+if (-not (Test-Path $nodeScript)) {
+    throw "Unable to locate build helper script at $nodeScript"
+}
 
-# 3. Copy new build output to backend webui directory
-Write-Host "Copying new build output to backend webui directory..."
-Copy-Item -Recurse -Force "$frontendPath\dist\*" $backendWebuiPath
+$arguments = @()
+if ($FrontendPath) { $arguments += @('--frontend-path', $FrontendPath) }
+if ($DistPath) { $arguments += @('--dist-path', $DistPath) }
+if ($BuildCommand) { $arguments += @('--build-command', $BuildCommand) }
+if ($SkipInstall.IsPresent) { $arguments += '--skip-install' }
+if ($SkipBuild.IsPresent) { $arguments += '--skip-build' }
+if ($NoStage.IsPresent) { $arguments += '--no-stage' }
 
-# 4. Commit and push changes to backend repo
-Write-Host "Committing and pushing changes to backend repo..."
-Set-Location $backendRepoPath
-git add lightrag/api/webui
-git commit -m "chore: update dashboard UI (automated script)"
-git push
-
-Write-Host "Deployment script complete! Check your Railway dashboard for deployment status."
+Write-Host "Running WebUI build helper..."
+node $nodeScript @arguments

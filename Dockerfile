@@ -45,13 +45,13 @@
     # Make sure scripts in .local are usable
     ENV PATH=/root/.local/bin:$PATH
 
-    # Alias hashed WebUI bundle filenames to avoid 404s when a different
-    # cache-busted name is requested at runtime (e.g., index-B1bgEoWF.js)
-    RUN set -eu; \
-        ASSETS_DIR="/app/lightrag/api/webui/assets"; \
-        if [ -f "$ASSETS_DIR/index-Bo0kGtUI.js" ] && [ ! -f "$ASSETS_DIR/index-B1bgEoWF.js" ]; then \
-          cp "$ASSETS_DIR/index-Bo0kGtUI.js" "$ASSETS_DIR/index-B1bgEoWF.js"; \
-        fi
+    # Materialize legacy asset aliases defined in the manifest for cache-busted filenames
+    RUN python - <<'PY'
+        from pathlib import Path
+        from lightrag.api.asset_manifest import materialize_aliases
+        assets_dir = Path("/app/lightrag/api/webui/assets")
+        materialize_aliases(assets_dir)
+    PY
 
     # Create necessary directories
     RUN mkdir -p /app/data/rag_storage /app/data/inputs
@@ -61,11 +61,11 @@
     ENV INPUT_DIR=/app/data/inputs
 
     # Expose the default port
-    EXPOSE 8000
+    EXPOSE 9621
 
     # Add healthcheck
     HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-        CMD curl -f http://localhost:8000/health || exit 1
+        CMD curl -f http://localhost:9621/health || exit 1
 
     # Set entrypoint
     ENTRYPOINT ["python", "-m", "lightrag.api.lightrag_server"]

@@ -3,18 +3,23 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
+const FormData = require('form-data');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // LightRAG webhook configuration
-const LIGHTRAG_WEBHOOK_URL = 'https://lightrag-production-6328.up.railway.app/webhook/426951f9-1936-44c3-83ae-8f52f0508acf';
-const LIGHTRAG_API_KEY = process.env.LIGHTRAG_API_KEY; // Set this in your environment
+const LIGHTRAG_WEBHOOK_URL = process.env.LIGHTRAG_WEBHOOK_URL;
+if (!LIGHTRAG_WEBHOOK_URL) {
+  console.error('LIGHTRAG_WEBHOOK_URL environment variable is required');
+  process.exit(1);
+}
+const LIGHTRAG_API_KEY = process.env.LIGHTRAG_API_KEY || '';
 
 // Ensure uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir);
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
 }
 
 // Set up Multer storage
@@ -46,7 +51,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     const webhookResponse = await axios.post(LIGHTRAG_WEBHOOK_URL, formData, {
       headers: {
         ...formData.getHeaders(),
-        'Authorization': `Bearer ${LIGHTRAG_API_KEY}`
+        ...(LIGHTRAG_API_KEY ? { Authorization: `Bearer ${LIGHTRAG_API_KEY}` } : {})
       }
     });
 
@@ -60,7 +65,6 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       lightragResponse: webhookResponse.data,
       message: 'File uploaded and forwarded to LightRAG successfully'
     });
-
   } catch (error) {
     console.error('Error forwarding to LightRAG:', error.response?.data || error.message);
 

@@ -49,7 +49,7 @@ from lightrag.api.routers.graph_routes import create_graph_routes
 from lightrag.api.routers.ollama_api import OllamaAPI
 from lightrag.api.routers.document_request_routes import create_document_request_routes
 
-from lightrag.api.asset_manifest import load_asset_manifest
+from lightrag.api.asset_manifest import load_asset_manifest, materialize_aliases
 from lightrag.utils import logger, set_verbose_debug
 from lightrag.kg.shared_storage import (
     get_namespace_data,
@@ -624,20 +624,18 @@ def create_app(args):
     static_dir.mkdir(exist_ok=True)
 
     # Ensure legacy hashed asset aliases continue to resolve using manifest hints.
+    assets_dir = static_dir / "assets"
+    assets_dir.mkdir(exist_ok=True)
+
+    manifest = load_asset_manifest()
+    entry_path = manifest.entry_path(assets_dir)
+    if manifest.entry_js and entry_path and not entry_path.exists():
+        logger.debug(
+            "Asset manifest entry %s not found under %s", manifest.entry_js, assets_dir
+        )
+
     try:
-        assets_dir = static_dir / "assets"
-        assets_dir.mkdir(exist_ok=True)
-        manifest = load_asset_manifest()
-        alias_map = manifest.alias_map()
-        for requested, existing in alias_map.items():
-            requested_path = assets_dir / requested
-            existing_path = assets_dir / existing
-            if (
-                existing_path.exists()
-                and requested_path != existing_path
-                and not requested_path.exists()
-            ):
-                requested_path.write_bytes(existing_path.read_bytes())
+        materialize_aliases(assets_dir)
     except Exception as _asset_alias_err:
         logger.debug(f"Asset aliasing skipped: {_asset_alias_err}")
 
