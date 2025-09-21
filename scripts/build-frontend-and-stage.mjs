@@ -79,7 +79,7 @@ async function writeAssetManifest(webuiDir) {
   }
 
   const html = await fs.readFile(htmlPath, 'utf8');
-  const jsMatches = [...html.matchAll(/\/webui\/assets\/([A-Za-z0-9._-]+\.js)/g)].map((match) => match[1]);
+  const jsMatches = [...html.matchAll(/\/(?:webui\/)?assets\/([A-Za-z0-9._-]+\.js)/g)].map((match) => match[1]);
   if (jsMatches.length === 0) {
     throw new Error('Unable to locate any JS entrypoints in WebUI index.html');
   }
@@ -88,7 +88,7 @@ async function writeAssetManifest(webuiDir) {
     throw new Error('Unable to determine WebUI entry bundle from index.html');
   }
 
-  let cssMatches = [...html.matchAll(/\/webui\/assets\/([A-Za-z0-9._-]+\.css)/g)].map((match) => match[1]);
+  let cssMatches = [...html.matchAll(/\/(?:webui\/)?assets\/([A-Za-z0-9._-]+\.css)/g)].map((match) => match[1]);
   const previousManifest = existsSync(backendManifestPath)
     ? JSON.parse(await fs.readFile(backendManifestPath, 'utf8'))
     : null;
