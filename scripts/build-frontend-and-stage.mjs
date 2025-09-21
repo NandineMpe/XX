@@ -84,8 +84,11 @@ async function writeAssetManifest(webuiDir) {
     throw new Error('Unable to locate any JS entrypoints in WebUI index.html');
   }
   const entryJs = jsMatches.find((name) => name.startsWith('index-')) ?? jsMatches[0];
+  if (!entryJs) {
+    throw new Error('Unable to determine WebUI entry bundle from index.html');
+  }
 
-  const cssMatches = [...html.matchAll(/\/webui\/assets\/([A-Za-z0-9._-]+\.css)/g)].map((match) => match[1]);
+  let cssMatches = [...html.matchAll(/\/webui\/assets\/([A-Za-z0-9._-]+\.css)/g)].map((match) => match[1]);
   const previousManifest = existsSync(backendManifestPath)
     ? JSON.parse(await fs.readFile(backendManifestPath, 'utf8'))
     : null;
@@ -98,12 +101,33 @@ async function writeAssetManifest(webuiDir) {
   }
 
   const assetsDir = path.join(webuiDir, 'assets');
-  if (existsSync(assetsDir) && statSync(assetsDir).isDirectory()) {
-    const assetEntries = await fs.readdir(assetsDir);
-    for (const asset of assetEntries) {
-      if (asset.startsWith('index-') && asset.endsWith('.js') && asset !== entryJs) {
-        legacy.add(asset);
+  if (!existsSync(assetsDir) || !statSync(assetsDir).isDirectory()) {
+    throw new Error(`Expected assets directory at ${assetsDir}`);
+  }
+  const entryPath = path.join(assetsDir, entryJs);
+  if (!existsSync(entryPath)) {
+    throw new Error(`Entry bundle ${entryJs} missing in ${assetsDir}`);
+  }
+
+  const viteManifestPath = path.join(webuiDir, '.vite', 'manifest.json');
+  if (existsSync(viteManifestPath)) {
+    try {
+      const manifestJson = JSON.parse(await fs.readFile(viteManifestPath, 'utf8'));
+      const fromManifest = Object.values(manifestJson)
+        .flatMap((meta) => (meta && typeof meta === 'object' && Array.isArray(meta.css)) ? meta.css : []);
+      if (fromManifest.length) {
+        const normalized = fromManifest.map((cssFile) => cssFile.replace(/^assets\//, ''));
+        cssMatches = Array.from(new Set([...cssMatches, ...normalized]));
       }
+    } catch (err) {
+      console.warn('Unable to enrich CSS list from Vite manifest:', err);
+    }
+  }
+
+  const assetEntries = await fs.readdir(assetsDir);
+  for (const asset of assetEntries) {
+    if (asset.startsWith('index-') && asset.endsWith('.js') && asset !== entryJs) {
+      legacy.add(asset);
     }
   }
 

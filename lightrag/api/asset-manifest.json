@@ -1,9 +1,10 @@
 {
-  "entry_js": "index-Bo0kGtUI.js",
+  "entry_js": "index-DaDDTdBO.js",
   "entry_css": [
-    "feature-graph-HI4LhrlC.css"
+    "main-mPxatcjw.css"
   ],
   "legacy_entry_aliases": [
-    "index-B1bgEoWF.js"
+    "index-B1bgEoWF.js",
+    "index-Bo0kGtUI.js"
   ]
 }
