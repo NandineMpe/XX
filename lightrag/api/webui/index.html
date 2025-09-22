@@ -10,37 +10,16 @@
     <title>Augentik</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preload" href="https://use.typekit.net/af/efe4a5/00000000000000007735e609/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3" as="font" type="font/woff2" crossorigin>
-    <script type="module" crossorigin src="/assets/index-Dw-VtyOZ.js"></script>
+    <script type="module" crossorigin src="/assets/index-5pGX8Ht0.js"></script>
   </head>
   <body>
     <div id="root"></div>
 
-    <!-- Robust redirect to backend WebUI login for /login and #/login -->
+    <!-- Disable legacy hard redirects; frontend handles routing internally -->
     <script>
       (function(){
-        // Always send users to the frontend login on Vercel
-        var TARGET_LOGIN = 'https://augentik.com/webui/#/login';
-
-        function isOnBackend(){
-          try { return /railway\.app$/i.test(location.hostname) && location.pathname.indexOf('/webui') === 0; }
-          catch(_) { return false; }
-        }
-
-        function shouldRedirectNow(){
-          try {
-            var onPathLogin = location.pathname === '/login';
-            var onHashLogin = /#\/?login$/i.test(location.hash || '');
-            return !isOnBackend() && (onPathLogin || onHashLogin);
-          } catch(_) { return false; }
-        }
-
-        function redirectToBackendLogin(){
-          try { sessionStorage.setItem('signinRedirected','1'); } catch(_) {}
-          location.replace(TARGET_LOGIN);
-        }
-
-        if (shouldRedirectNow()) redirectToBackendLogin();
-        window.addEventListener('hashchange', function(){ if (shouldRedirectNow()) redirectToBackendLogin(); });
+        try { sessionStorage.removeItem('signinRedirected'); } catch(_) {}
+        window.AUGENTIK_LOGIN_URL = (window.AUGENTIK_LOGIN_URL || '');
       })();
     </script>
 
@@ -100,51 +79,8 @@
     </script>
 
     <script>
-      // Ensure clicking "Sign In" routes to canonical backend web UI login
-      (function(){
-        // Route user directly to backend web UI login on Railway
-        var TARGET_LOGIN = 'https://augentik.com/webui/#/login';
-
-        function isOnBackendOrLoginRoute(){
-          try {
-            var onBackend = /railway\.app$/i.test(location.hostname) && location.pathname.indexOf('/webui') === 0;
-            var onLoginPath = location.pathname === '/login' || /#\/?login$/i.test(location.hash);
-            return onBackend || onLoginPath;
-          } catch (_) { return false; }
-        }
-
-        function wireSignIn(){
-          if (isOnBackendOrLoginRoute()) return; // avoid loops when already on backend/login
-          var root = document.getElementById('root') || document.body;
-          var candidates = Array.from(root.querySelectorAll('a, button, [role="button"], [class]'));
-          candidates.forEach(function(el){
-            try{
-              if (el.getAttribute('data-signin-wired') === '1') return;
-              var text = (el.innerText || '').trim();
-              var href = (el.getAttribute && el.getAttribute('href')) || '';
-              var looksLikeLoginLink = /#\/?login$/i.test(href) || /\/login(?:[#?].*)?$/i.test(href) || /railway\.app.*\/webui\/.*#\/?login/i.test(href);
-              if (!text && !looksLikeLoginLink) return;
-              if (/^sign\s*in$/i.test(text) || /^(?:log\s*in|login)$/i.test(text) || looksLikeLoginLink){
-                el.setAttribute('data-signin-wired','1');
-                el.addEventListener('click', function(e){
-                  e.preventDefault();
-                  console.log('[Sign In] Navigating to', TARGET_LOGIN);
-                  window.location.href = TARGET_LOGIN;
-                }, true);
-                if (el.tagName === 'A') { el.setAttribute('href', TARGET_LOGIN); el.removeAttribute('target'); el.removeAttribute('rel'); }
-              }
-            }catch(_){ }
-          });
-        }
-
-        // Only wire if we haven't just redirected
-        var recentlyRedirected = false;
-        try { recentlyRedirected = sessionStorage.getItem('signinRedirected') === '1'; sessionStorage.removeItem('signinRedirected'); } catch(_){ }
-        if (!recentlyRedirected) wireSignIn();
-
-        var mo = new MutationObserver(function(){ if (!recentlyRedirected) wireSignIn(); });
-        mo.observe(document.documentElement, { childList:true, subtree:true });
-      })();
+      // Remove legacy click rewiring for Sign In; SPA handles it
+      (function(){ /* no-op */ })();
     </script>
 
     <script>

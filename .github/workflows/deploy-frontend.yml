@@ -1,0 +1,72 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lightrag/api/webui/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment (dev|staging|prod)'
+        required: true
+        default: 'staging'
+
+env:
+  AWS_REGION: us-east-1
+  SITE_BUCKET: augentik-staging-site
+  DISTRIBUTION_ID: ''
+
+jobs:
+  build-and-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+        env:
+          BACKEND_LOGIN_URL: ${{ secrets.BACKEND_LOGIN_URL }}
+          NODE_ENV: production
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync assets to S3
+        run: |
+          aws s3 sync ./dist "s3://${{ env.SITE_BUCKET }}" \
+            --delete \
+            --acl private \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: Invalidate CloudFront cache
+        if: env.DISTRIBUTION_ID != ''
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ env.DISTRIBUTION_ID }}" \
+            --paths '/*'
+
+      - name: Emit deployment summary
+        run: |
+          echo "## Frontend Deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "* Bucket: ${{ env.SITE_BUCKET }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "* Distribution: ${{ env.DISTRIBUTION_ID }}" >> "$GITHUB_STEP_SUMMARY"

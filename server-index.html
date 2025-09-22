@@ -15,7 +15,7 @@
         var script = document.createElement("script");
         script.type = "module";
         script.crossOrigin = "";
-        script.src = "/webui/assets/index-Bo0kGtUI.js";
+        script.src = "/webui/assets/index-5pGX8Ht0.js";
         document.head.appendChild(script);
       })();
     </script>
@@ -32,37 +32,55 @@
   </head>
   <body>
     <div id="root"></div>
-
-    <!-- Robust redirect to backend WebUI login for /login and #/login -->
+    <!-- Handle login routing without legacy Railway redirects -->
     <script>
       (function(){
-        // Always send users to the frontend login on Vercel
-        var TARGET_LOGIN = 'https://augentik.com/webui/#/login';
+        var DEFAULT_LOGIN_URL = 'https://api.augentik.com/webui/#/login';
+        var loginTarget = window.AUGENTIK_LOGIN_URL || DEFAULT_LOGIN_URL;
 
-        function isOnBackend(){
-          try { return /railway\.app$/i.test(location.hostname) && location.pathname.indexOf('/webui') === 0; }
-          catch(_) { return false; }
-        }
-
-        function shouldRedirectNow(){
+        function shouldRedirectToLogin(){
           try {
             var onPathLogin = location.pathname === '/login';
             var onHashLogin = /#\/?login$/i.test(location.hash || '');
-            return !isOnBackend() && (onPathLogin || onHashLogin);
-          } catch(_) { return false; }
+            return onPathLogin || onHashLogin;
+          } catch (_) {
+            return false;
+          }
         }
 
-        function redirectToBackendLogin(){
+        if (shouldRedirectToLogin() && location.href !== loginTarget) {
           try { sessionStorage.setItem('signinRedirected','1'); } catch(_) {}
-          location.replace(TARGET_LOGIN);
+          location.replace(loginTarget);
         }
 
-        if (shouldRedirectNow()) redirectToBackendLogin();
-        window.addEventListener('hashchange', function(){ if (shouldRedirectNow()) redirectToBackendLogin(); });
+        function wireSignInLinks(){
+          var root = document.getElementById('root') || document.body;
+          if (!root) return;
+          var candidates = root.querySelectorAll('a[href], button, [role="button"]');
+          candidates.forEach(function(el){
+            if (el.getAttribute('data-signin-wired') === '1') return;
+            var text = (el.innerText || el.textContent || '').trim().toLowerCase();
+            var href = (el.getAttribute && el.getAttribute('href')) || '';
+            var looksLikeLogin = /#\/?login$/i.test(href) || /\/login(?:[#?].*)?$/i.test(href);
+            if (looksLikeLogin || text === 'sign in' || text === 'signin' || text === 'log in' || text === 'login') {
+              el.setAttribute('data-signin-wired','1');
+              el.addEventListener('click', function(evt){
+                evt.preventDefault();
+                window.location.assign(loginTarget);
+              }, true);
+              if (el.tagName === 'A') {
+                el.setAttribute('href', loginTarget);
+              }
+            }
+          });
+        }
+
+        wireSignInLinks();
+        var observer = new MutationObserver(function(){ wireSignInLinks(); });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
       })();
     </script>
-
-    <!-- Dedicated launch button for Early Access (outside React root to avoid interference) -->
+<!-- Dedicated launch button for Early Access (outside React root to avoid interference) -->
     <button id="exclusive-access-launch" type="button" aria-haspopup="dialog" aria-controls="zoho-exclusive-modal" style="position:fixed;bottom:16px;right:16px;z-index:1000;background:linear-gradient(135deg,#111,#000);color:#fff;padding:12px 18px;border-radius:9999px;border:1px solid #333;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);cursor:pointer;">
       Request Exclusive Access
     </button>
@@ -116,56 +134,7 @@
         setTimeout(function () { observer.disconnect(); }, 5000);
       })();
     </script>
-
-    <script>
-      // Ensure clicking "Sign In" routes to canonical backend web UI login
-      (function(){
-        // Route user directly to backend web UI login on Railway
-        var TARGET_LOGIN = 'https://lightrag-production-6328.up.railway.app/webui/#/login';
-
-        function isOnBackendOrLoginRoute(){
-          try {
-            var onBackend = /railway\.app$/i.test(location.hostname) && location.pathname.indexOf('/webui') === 0;
-            var onLoginPath = location.pathname === '/login' || /#\/?login$/i.test(location.hash);
-            return onBackend || onLoginPath;
-          } catch (_) { return false; }
-        }
-
-        function wireSignIn(){
-          if (isOnBackendOrLoginRoute()) return; // avoid loops when already on backend/login
-          var root = document.getElementById('root') || document.body;
-          var candidates = Array.from(root.querySelectorAll('a, button, [role="button"], [class]'));
-          candidates.forEach(function(el){
-            try{
-              if (el.getAttribute('data-signin-wired') === '1') return;
-              var text = (el.innerText || '').trim();
-              var href = (el.getAttribute && el.getAttribute('href')) || '';
-              var looksLikeLoginLink = /#\/?login$/i.test(href) || /\/login(?:[#?].*)?$/i.test(href) || /railway\.app.*\/webui\/.*#\/?login/i.test(href);
-              if (!text && !looksLikeLoginLink) return;
-              if (/^sign\s*in$/i.test(text) || /^(?:log\s*in|login)$/i.test(text) || looksLikeLoginLink){
-                el.setAttribute('data-signin-wired','1');
-                el.addEventListener('click', function(e){
-                  e.preventDefault();
-                  console.log('[Sign In] Navigating to', TARGET_LOGIN);
-                  location.assign(TARGET_LOGIN);
-                }, true);
-                if (el.tagName === 'A') el.setAttribute('href', TARGET_LOGIN);
-              }
-            }catch(_){ }
-          });
-        }
-
-        // Only wire if we haven't just redirected
-        var recentlyRedirected = false;
-        try { recentlyRedirected = sessionStorage.getItem('signinRedirected') === '1'; sessionStorage.removeItem('signinRedirected'); } catch(_){ }
-        if (!recentlyRedirected) wireSignIn();
-
-        var mo = new MutationObserver(function(){ if (!recentlyRedirected) wireSignIn(); });
-        mo.observe(document.documentElement, { childList:true, subtree:true });
-      })();
-    </script>
-
-    <script>
+<script>
       // Rewire any in-app "Request Exclusive Access" triggers to open our Zoho modal
       (function () {
         function wireExclusiveAccess() {

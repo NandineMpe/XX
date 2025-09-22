@@ -76,3 +76,4 @@ node_modules
 # Allow built frontend in backend webui
 !lightrag/api/webui/index.html
 !lightrag/api/webui/assets/
+taskdef-*.json

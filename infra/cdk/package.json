@@ -1,0 +1,25 @@
+{
+  "name": "augentik-infra",
+  "version": "0.1.0",
+  "bin": {
+    "augentik-infra": "bin/augentik-infra.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "eslint --ext .ts .",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.140.0",
+    "constructs": "^10.3.0",
+    "cdk-ecs-observability": "^0.3.308"
+  }
+}

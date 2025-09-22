@@ -1,0 +1,83 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy (dev|staging|prod)'
+        required: true
+        default: 'staging'
+      require_approval:
+        type: choice
+        description: 'Require manual approval before deploy?'
+        options: ['true', 'false']
+        default: 'true'
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/cdk/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  synth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: infra/cdk
+        run: npm install
+
+      - name: CDK synth (staging)
+        working-directory: infra/cdk
+        run: npm run build && npx cdk synth --context env=staging
+
+  deploy:
+    needs: synth
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+      url: https://console.aws.amazon.com/ecs/home?region=us-east-1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: infra/cdk
+        run: npm install
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Optional approval gate
+        if: github.event.inputs.require_approval == 'true'
+        uses: trstringer/manual-approval@v1
+        with:
+          approvers: ${{ secrets.DEPLOY_APPROVERS }}
+          issue-title: 'Approve Augentik infra deploy'
+          issue-body: 'Approve or deny the pending CDK deployment.'
+
+      - name: CDK deploy
+        working-directory: infra/cdk
+        env:
+          TARGET_ENV: ${{ github.event.inputs.environment }}
+        run: |
+          npm run build
+          npx cdk deploy --all --require-approval never --context env=${TARGET_ENV}
