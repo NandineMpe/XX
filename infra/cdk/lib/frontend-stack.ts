@@ -40,6 +40,11 @@ export class AugentikFrontendStack extends Stack {
       originSslProtocols: [cloudfront.OriginSslPolicy.TLS_V1_2],
     });
 
+    // Support apex domain and www subdomain when certificate is provided
+    const distributionDomainNames = props.certificateArn
+      ? [props.domainName, `www.${props.domainName}`]
+      : undefined;
+
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
         origin: new origins.S3Origin(this.siteBucket, { originAccessIdentity }),
@@ -59,16 +64,34 @@ export class AugentikFrontendStack extends Stack {
       logFilePrefix: 'cloudfront/',
       geoRestriction: cloudfront.GeoRestriction.none(),
       certificate,
-      domainNames: certificate ? [props.domainName] : undefined,
+      domainNames: distributionDomainNames,
     });
 
     if (props.env?.region === 'us-east-1') {
+      // Lookup public hosted zone by apex domain (e.g., augentik.com)
       const zone = route53.HostedZone.fromLookup(this, 'HostedZone', {
         domainName: props.domainName,
       });
-      new route53.ARecord(this, 'AliasRecord', {
+
+      // Apex A and AAAA
+      new route53.ARecord(this, 'AliasRecordRootA', {
         zone,
-        recordName: props.domainName,
+        target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
+      });
+      new route53.AaaaRecord(this, 'AliasRecordRootAAAA', {
+        zone,
+        target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
+      });
+
+      // www A and AAAA
+      new route53.ARecord(this, 'AliasRecordWwwA', {
+        zone,
+        recordName: `www.${props.domainName}`,
+        target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
+      });
+      new route53.AaaaRecord(this, 'AliasRecordWwwAAAA', {
+        zone,
+        recordName: `www.${props.domainName}`,
         target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
       });
     }
