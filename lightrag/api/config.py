@@ -210,7 +210,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=get_env_value(
             "PBC_IMPORT_WEBHOOK_URL",
-            "https://primary-production-1d298.up.railway.app/webhook/pbc/import",
+            "https://api.augentik.com/webhook/pbc/import",
         ),
         help="External webhook URL to trigger PBC import workflow",
     )

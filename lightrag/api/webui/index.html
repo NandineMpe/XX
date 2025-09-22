@@ -9,160 +9,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Augentik</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="preload" href="https://use.typekit.net/af/efe4a5/00000000000000007735e609/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3" as="font" type="font/woff2" crossorigin>
-    <script type="module" crossorigin src="/assets/index-5pGX8Ht0.js"></script>
+    <!-- Klaviyo Form Script - Updated with correct API key format -->
+    <script type="text/javascript" async src="https://static.klaviyo.com/onsite/js/TwzEQD/klaviyo.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-B4rOHfEm-Da6B99s0.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-D8S1t7W6-DHR4uRRW.js">
+    <link rel="modulepreload" crossorigin href="/assets/utils-vendor-yYjR-JpY-ByJxZb2l.js">
+    <link rel="modulepreload" crossorigin href="/assets/feature-graph-Wd3Wvzy0-HMX_quWC.js">
+    <link rel="modulepreload" crossorigin href="/assets/feature-documents-TYFog0It-DQRnp6ov.js">
+    <link rel="modulepreload" crossorigin href="/assets/mermaid-vendor-DRXBiZaJ-BQYmTMhJ.js">
+    <link rel="modulepreload" crossorigin href="/assets/markdown-vendor-XNcT6d8I-Db4GnQXZ.js">
+    <link rel="modulepreload" crossorigin href="/assets/feature-retrieval-DFJWfhQ--DMPCAl-5.js">
+    <script type="module" crossorigin src="/assets/index-r0FiR76D.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BSjYq-Fu.css">
   </head>
   <body>
     <div id="root"></div>
-
-    <!-- Disable legacy hard redirects; frontend handles routing internally -->
-    <script>
-      (function(){
-        try { sessionStorage.removeItem('signinRedirected'); } catch(_) {}
-        window.AUGENTIK_LOGIN_URL = (window.AUGENTIK_LOGIN_URL || '');
-      })();
-    </script>
-
-    <!-- Dedicated launch button for Early Access (outside React root to avoid interference) -->
-    <button id="exclusive-access-launch" type="button" aria-haspopup="dialog" aria-controls="zoho-exclusive-modal" style="position:fixed;bottom:16px;right:16px;z-index:1000;background:linear-gradient(135deg,#111,#000);color:#fff;padding:12px 18px;border-radius:9999px;border:1px solid #333;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.25);cursor:pointer;">
-      Request Exclusive Access
-    </button>
-
-    <!-- Minimal modal with Zoho form embed (outside React to ensure stability) -->
-    <div id="zoho-exclusive-overlay" hidden style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1000;"></div>
-    <div id="zoho-exclusive-modal" hidden role="dialog" aria-modal="true" aria-labelledby="zoho-exclusive-title" style="display:none;position:fixed;inset:0;z-index:1001;align-items:center;justify-content:center;">
-      <div style="width:100%;max-width:720px;margin:24px;background:#0b0b0b;border:1px solid #222;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.45);padding:24px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <h2 id="zoho-exclusive-title" style="margin:0;color:#fff;font-size:18px;font-weight:600;">Request Exclusive Access</h2>
-          <button id="zoho-exclusive-close" aria-label="Close" style="background:#111;border:1px solid #333;color:#bbb;border-radius:8px;padding:6px 10px;cursor:pointer;">✕</button>
-        </div>
-        <div style="border-top:1px solid #222;margin:8px 0 16px 0;"></div>
-        <div>
-          <iframe aria-label='REQUEST EXCLUSIVE ACCESS' frameborder="0" style="height:500px;width:99%;border:none;" src='https://forms.zohopublic.eu/nandiniauge1/form/Requestafreetrial/formperma/MWU4mCzC_8wGeyhrqD9YtBM7WLeZWjhMXJeSTtBBREM'></iframe>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      (function () {
-        function replaceStatutoryAudits() {
-          var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-          var changed = false;
-          while (walker.nextNode()) {
-            var node = walker.currentNode;
-            var text = node && node.nodeValue ? node.nodeValue : "";
-            if (!text) continue;
-            var replaced = text
-              .replace(/Statutory\s+audits/gi, "Audits")
-              .replace(/Statutory\s+audit/gi, "Audit");
-            if (replaced !== text) {
-              node.nodeValue = replaced;
-              changed = true;
-            }
-          }
-          return changed;
-        }
-
-        // Initial attempt (in case content already rendered)
-        replaceStatutoryAudits();
-
-        // Observe for React render completion
-        var root = document.getElementById("root") || document.body;
-        var observer = new MutationObserver(function () {
-          if (replaceStatutoryAudits()) {
-            observer.disconnect();
-          }
-        });
-        observer.observe(root, { childList: true, subtree: true });
-        setTimeout(function () { observer.disconnect(); }, 5000);
-      })();
-    </script>
-
-    <script>
-      // Remove legacy click rewiring for Sign In; SPA handles it
-      (function(){ /* no-op */ })();
-    </script>
-
-    <script>
-      // Rewire any in-app "Request Exclusive Access" triggers to open our Zoho modal
-      (function () {
-        function wireExclusiveAccess() {
-          var wiredAny = false;
-
-          var appRoot = document.getElementById('root');
-          if (!appRoot) return false;
-
-          var openViaLauncher = function(e){
-            if (e) e.preventDefault();
-            var launcher = document.getElementById('exclusive-access-launch');
-            if (launcher && typeof launcher.click === 'function') launcher.click();
-          };
-
-          var candidates = Array.from(appRoot.querySelectorAll('button, a, [role="button"], [data-testid], [class]'));
-          candidates.forEach(function (el) {
-            try {
-              if (el.getAttribute('data-exclusive-wired') === '1') return;
-              var text = (el.innerText || '').trim();
-              if (!text) return;
-              if (/^request\s+exclusive\s+access$/i.test(text)) {
-                el.setAttribute('data-exclusive-wired', '1');
-                el.addEventListener('click', openViaLauncher, true);
-                if (el.tagName === 'A') { el.setAttribute('href', '#'); }
-                wiredAny = true;
-              }
-            } catch (_) {}
-          });
-
-          var headings = Array.from(appRoot.querySelectorAll('h1, h2, [role="heading"]'));
-          headings.forEach(function (h) {
-            try {
-              var t = (h.innerText || '').trim();
-              if (/^request\s+exclusive\s+access$/i.test(t)) {
-                var modal = h.closest('[role="dialog"], .modal, .Dialog, .fixed, .inset-0');
-                if (modal) { modal.remove(); wiredAny = true; }
-              }
-            } catch (_) {}
-          });
-
-          return wiredAny;
-        }
-
-        wireExclusiveAccess();
-
-        var mo = new MutationObserver(function () { wireExclusiveAccess(); });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
-      })();
-    </script>
-
-    <script>
-      // Simple modal controls for the Zoho form
-      (function () {
-        var btn = document.getElementById('exclusive-access-launch');
-        var overlay = document.getElementById('zoho-exclusive-overlay');
-        var modal = document.getElementById('zoho-exclusive-modal');
-        var closeBtn = document.getElementById('zoho-exclusive-close');
-
-        function openModal() {
-          if (overlay) { overlay.hidden = false; overlay.style.display = 'block'; }
-          if (modal) { modal.hidden = false; modal.style.display = 'flex'; }
-          document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
-          if (overlay) { overlay.style.display = 'none'; overlay.hidden = true; }
-          if (modal) { modal.style.display = 'none'; modal.hidden = true; }
-          document.body.style.overflow = '';
-        }
-
-        if (btn) btn.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (overlay) overlay.addEventListener('click', closeModal);
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
-
-        // Force closed on load in case any CSS/script toggled it
-        window.addEventListener('DOMContentLoaded', function(){ closeModal(); });
-      })();
-    </script>
-
   </body>
 </html>

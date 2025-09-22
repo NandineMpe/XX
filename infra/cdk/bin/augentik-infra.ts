@@ -10,7 +10,10 @@ import { AugentikCiCdStack } from '../lib/cicd-stack';
 
 interface EnvironmentConfig {
   domain: string;
-  certificateArn?: string;
+  /** CloudFront (global) certificate in us-east-1 for apex+www */
+  frontendCertificateArn?: string;
+  /** Regional certificate (stack region) for ALB HTTPS */
+  backendCertificateArn?: string;
   githubOwner: string;
   githubRepo: string;
   githubOidcProviderArn: string;
@@ -64,7 +67,7 @@ const ecsStack = new AugentikEcsStack(app, `Augentik-${contextKey}-Ecs`, {
   applicationSecret: dataStack.applicationSecret,
   rdsInstance: dataStack.databaseInstance,
   domainName: envConfig.domain,
-  certificateArn: envConfig.certificateArn,
+  backendCertificateArn: envConfig.backendCertificateArn,
 });
 
 ecsStack.addDependency(dataStack);
@@ -73,8 +76,9 @@ const frontendStack = new AugentikFrontendStack(app, `Augentik-${contextKey}-Fro
   env,
   description: 'Static frontend hosting via S3 + CloudFront',
   domainName: envConfig.domain,
-  certificateArn: envConfig.certificateArn,
+  certificateArn: envConfig.frontendCertificateArn,
   backendLoadBalancer: ecsStack.loadBalancer,
+  enableWww: process.env.AUGENTIK_ENABLE_WWW !== '0',
 });
 
 frontendStack.addDependency(ecsStack);

@@ -15,7 +15,7 @@ import uuid
 from typing import Dict, Any
 
 # Configuration
-LIGHTRAG_BASE_URL = "https://lightrag-production-6328.up.railway.app"  # Production URL
+LIGHTRAG_BASE_URL = "https://api.augentik.com"  # Production URL
 API_KEY = None  # Set this if you have API key authentication enabled
 
 # Headers for requests

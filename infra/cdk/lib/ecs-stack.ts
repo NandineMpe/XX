@@ -9,7 +9,11 @@ interface AugentikEcsStackProps extends StackProps {
   applicationSecret: secretsmanager.ISecret;
   rdsInstance: rds.IDatabaseInstance;
   domainName: string;
-  certificateArn?: string;
+  /**
+   * ACM certificate ARN for the ALB HTTPS listener (regional cert, same region as the stack).
+   * Optional: if omitted, service will expose only HTTP:80 and redirect cannot be enabled.
+   */
+  backendCertificateArn?: string;
 }
 
 export class AugentikEcsStack extends Stack {
@@ -82,8 +86,8 @@ export class AugentikEcsStack extends Stack {
 
     let listenerForTargets: elbv2.ApplicationListener = httpListener;
 
-    if (props.certificateArn) {
-      const certificate = elbv2.ListenerCertificate.fromArn(props.certificateArn);
+    if (props.backendCertificateArn) {
+      const certificate = elbv2.ListenerCertificate.fromArn(props.backendCertificateArn);
       httpListener.addAction('RedirectToHttps', {
         action: elbv2.ListenerAction.redirect({ protocol: 'HTTPS', port: '443' }),
       });
