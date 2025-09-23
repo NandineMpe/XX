@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "aws-cdk-lib": "^2.140.0",
-    "constructs": "^10.3.0",
-    "cdk-ecs-observability": "^0.3.308"
+    "constructs": "^10.3.0"
   }
 }

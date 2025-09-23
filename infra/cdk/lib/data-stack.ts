@@ -33,7 +33,7 @@ export class AugentikDataStack extends Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       allocatedStorage: 100,
       maxAllocatedStorage: 500,
-      engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.V16_1 }),
+      engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_16_1 }),
       credentials: rds.Credentials.fromSecret(this.databaseSecret, props.databaseUsername),
       multiAz: props.enableMultiAz,
       storageEncrypted: true,

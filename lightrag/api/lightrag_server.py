@@ -212,8 +212,8 @@ def create_app(args):
         default_origins = [
             "https://augentik.com",
             "https://www.augentik.com",
+            "https://api.augentik.com",
             "http://localhost:5173",
-            "https://lightrag-production-6328.up.railway.app",
         ]
         all_origins = list(set(cors_origins + default_origins))
 

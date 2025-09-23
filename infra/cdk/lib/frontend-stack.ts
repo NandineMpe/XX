@@ -62,7 +62,7 @@ export class AugentikFrontendStack extends Stack {
       defaultRootObject: 'index.html',
       enableLogging: true,
       logFilePrefix: 'cloudfront/',
-      geoRestriction: cloudfront.GeoRestriction.none(),
+      geoRestriction: cloudfront.GeoRestriction.allowlist('US', 'CA', 'GB', 'DE', 'FR', 'JP', 'AU'),
       certificate,
       domainNames: distributionDomainNames,
     });

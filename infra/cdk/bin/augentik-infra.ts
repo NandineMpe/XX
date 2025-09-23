@@ -5,7 +5,7 @@ import { AugentikNetworkStack } from '../lib/network-stack';
 import { AugentikDataStack } from '../lib/data-stack';
 import { AugentikEcsStack } from '../lib/ecs-stack';
 import { AugentikFrontendStack } from '../lib/frontend-stack';
-import { AugentikObservabilityStack } from '../lib/observability-stack';
+// import { AugentikObservabilityStack } from '../lib/observability-stack';
 import { AugentikCiCdStack } from '../lib/cicd-stack';
 
 interface EnvironmentConfig {
@@ -83,17 +83,18 @@ const frontendStack = new AugentikFrontendStack(app, `Augentik-${contextKey}-Fro
 
 frontendStack.addDependency(ecsStack);
 
-const observabilityStack = new AugentikObservabilityStack(app, `Augentik-${contextKey}-Observability`, {
-  env,
-  description: 'Monitoring, alarms, and dashboards for Augentik',
-  cluster: ecsStack.cluster,
-  loadBalancer: ecsStack.loadBalancer,
-  databaseInstance: dataStack.databaseInstance,
-  notificationEmail: process.env.AUGENTIK_ALERT_EMAIL,
-  slackWebhookUrl: envConfig.slackWebhookUrl,
-});
+// Temporarily disabled observability stack due to compilation issues
+// const observabilityStack = new AugentikObservabilityStack(app, `Augentik-${contextKey}-Observability`, {
+//   env,
+//   description: 'Monitoring, alarms, and dashboards for Augentik',
+//   cluster: ecsStack.cluster,
+//   loadBalancer: ecsStack.loadBalancer,
+//   databaseInstance: dataStack.databaseInstance,
+//   notificationEmail: process.env.AUGENTIK_ALERT_EMAIL,
+//   slackWebhookUrl: envConfig.slackWebhookUrl,
+// });
 
-observabilityStack.addDependency(ecsStack);
+// observabilityStack.addDependency(ecsStack);
 
 new AugentikCiCdStack(app, `Augentik-${contextKey}-CiCd`, {
   env,

@@ -35,7 +35,7 @@ export class AugentikEcsStack extends Stack {
 
     const logGroup = new logs.LogGroup(this, 'BackendLogGroup', {
       logGroupName: `/ecs/${id.toLowerCase()}-backend`,
-      retention: logs.RetentionDays.THIRTY_DAYS,
+      retention: logs.RetentionDays.ONE_MONTH,
     });
 
     const repository = ecr.Repository.fromRepositoryName(this, 'BackendRepository', 'augentik-backend');
@@ -110,7 +110,7 @@ export class AugentikEcsStack extends Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
     });
 
-    const targetGroup = listenerForTargets.addTargets('BackendTargets', {
+    listenerForTargets.addTargets('BackendTargets', {
       port: 8000,
       protocol: elbv2.ApplicationProtocol.HTTP,
       healthCheck: {
@@ -121,12 +121,6 @@ export class AugentikEcsStack extends Stack {
       targets: [this.service],
     });
 
-    this.service.registerLoadBalancerTargets({
-      containerName: 'augentik-backend',
-      containerPort: 8000,
-      newTargetGroupId: 'AlbTargetGroup',
-      listener: ecs.ListenerConfig.applicationTargetGroup(targetGroup),
-    });
 
     this.service.autoScaleTaskCount({
       minCapacity: 2,
