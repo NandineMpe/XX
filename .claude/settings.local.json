@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(aws s3 sync:*)",
+      "Bash(aws cloudfront create-distribution:*)",
+      "Bash(aws route53 list-hosted-zones:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

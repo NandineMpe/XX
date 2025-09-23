@@ -5,11 +5,6 @@ interface AugentikFrontendStackProps extends StackProps {
   domainName: string;
   certificateArn?: string;
   backendLoadBalancer: elbv2.IApplicationLoadBalancer;
-  /**
-   * Whether to provision DNS and aliases for www.<domain> in addition to the apex.
-   * Defaults to true; set to false to proceed with apex-only while www is pending.
-   */
-  enableWww?: boolean;
 }
 
 export class AugentikFrontendStack extends Stack {
@@ -45,10 +40,9 @@ export class AugentikFrontendStack extends Stack {
       originSslProtocols: [cloudfront.OriginSslPolicy.TLS_V1_2],
     });
 
-    // Support apex domain and optional www subdomain when certificate is provided
-    const includeWww = props.enableWww !== false;
+    // Support apex domain and www subdomain when certificate is provided
     const distributionDomainNames = props.certificateArn
-      ? [props.domainName, ...(includeWww ? [`www.${props.domainName}`] : [])]
+      ? [props.domainName, `www.${props.domainName}`]
       : undefined;
 
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
@@ -73,22 +67,22 @@ export class AugentikFrontendStack extends Stack {
       domainNames: distributionDomainNames,
     });
 
-    // Always create Route53 records for apex; optionally create www
-    const zone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-      domainName: props.domainName,
-    });
+    if (props.env?.region === 'us-east-1') {
+      // Lookup public hosted zone by apex domain (e.g., augentik.com)
+      const zone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+        domainName: props.domainName,
+      });
 
-    // Apex A and AAAA
-    new route53.ARecord(this, 'AliasRecordRootA', {
-      zone,
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
-    });
-    new route53.AaaaRecord(this, 'AliasRecordRootAAAA', {
-      zone,
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
-    });
+      // Apex A and AAAA
+      new route53.ARecord(this, 'AliasRecordRootA', {
+        zone,
+        target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
+      });
+      new route53.AaaaRecord(this, 'AliasRecordRootAAAA', {
+        zone,
+        target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(this.distribution)),
+      });
 
-    if (includeWww) {
       // www A and AAAA
       new route53.ARecord(this, 'AliasRecordWwwA', {
         zone,
