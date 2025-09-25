@@ -78,7 +78,6 @@ const frontendStack = new AugentikFrontendStack(app, `Augentik-${contextKey}-Fro
   domainName: envConfig.domain,
   certificateArn: envConfig.frontendCertificateArn,
   backendLoadBalancer: ecsStack.loadBalancer,
-  enableWww: process.env.AUGENTIK_ENABLE_WWW !== '0',
 });
 
 frontendStack.addDependency(ecsStack);

@@ -6,16 +6,16 @@
       "dev": {
         "domain": "dev.augentik.com",
         "certificateArn": "",
-        "githubOwner": "augentik",
-        "githubRepo": "Augentik",
+        "githubOwner": "NandineMpe",
+        "githubRepo": "XX",
         "githubOidcProviderArn": "arn:aws:iam::778185677217:oidc-provider/token.actions.githubusercontent.com",
         "slackWebhookUrl": ""
       },
       "staging": {
         "domain": "staging.augentik.com",
         "certificateArn": "",
-        "githubOwner": "augentik",
-        "githubRepo": "Augentik",
+        "githubOwner": "NandineMpe",
+        "githubRepo": "XX",
         "githubOidcProviderArn": "arn:aws:iam::778185677217:oidc-provider/token.actions.githubusercontent.com",
         "slackWebhookUrl": ""
       },
@@ -23,8 +23,8 @@
         "domain": "augentik.com",
         "frontendCertificateArn": "arn:aws:acm:us-east-1:778185677217:certificate/6a6828ba-2763-4eb2-945d-f9673fa569b2",
         "backendCertificateArn": "arn:aws:acm:eu-north-1:778185677217:certificate/c36c3611-c1fd-49cc-87cf-fce1ade88379",
-        "githubOwner": "augentik",
-        "githubRepo": "Augentik",
+        "githubOwner": "NandineMpe",
+        "githubRepo": "XX",
         "githubOidcProviderArn": "arn:aws:iam::778185677217:oidc-provider/token.actions.githubusercontent.com",
         "slackWebhookUrl": ""
       }
