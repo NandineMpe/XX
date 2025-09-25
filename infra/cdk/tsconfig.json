@@ -10,9 +10,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "rootDir": "lib",
     "outDir": "dist"
   },
   "include": ["lib/**/*.ts", "bin/**/*.ts"],
-  "exclude": ["dist", "cdk.out", "node_modules"]
+  "exclude": ["dist", "cdk.out", "node_modules", "lib/observability-stack.ts"]
 }
