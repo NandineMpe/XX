@@ -1,1 +1,2 @@
 - Does this work - if i direct the login to this, will it work? Also, what UI will be rendered and how do i have to set that up?
+- we did this before, what did we do? How were we able to see it previously?
