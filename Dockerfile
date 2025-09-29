@@ -46,12 +46,7 @@
     ENV PATH=/root/.local/bin:$PATH
 
     # Materialize legacy asset aliases defined in the manifest for cache-busted filenames
-    RUN python - <<'PY'
-        from pathlib import Path
-        from lightrag.api.asset_manifest import materialize_aliases
-        assets_dir = Path("/app/lightrag/api/webui/assets")
-        materialize_aliases(assets_dir)
-    PY
+    RUN python -c "from pathlib import Path; from lightrag.api.asset_manifest import materialize_aliases; assets_dir = Path('/app/lightrag/api/webui/assets'); materialize_aliases(assets_dir)"
 
     # Create necessary directories
     RUN mkdir -p /app/data/rag_storage /app/data/inputs

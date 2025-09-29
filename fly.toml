@@ -1,0 +1,100 @@
+app = "lightrag-standalone"
+primary_region = "ord"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # Networking / runtime
+  HOST = "0.0.0.0"
+  PORT = "9621"
+  WORKING_DIR = "/app/data/rag_storage"
+  INPUT_DIR = "/app/data/inputs"
+
+  # Authentication (username:password pairs)
+  AUTH_ACCOUNTS = "admin:lightrag2024"
+  # TOKEN_SECRET now set as secret
+
+  # LLM configuration
+  LLM_BINDING = "openai"
+  EMBEDDING_BINDING = "openai"
+  LLM_MODEL = "gpt-4o-mini"
+  EMBEDDING_MODEL = "text-embedding-3-small"
+  EMBEDDING_DIM = "1536"
+  LLM_BINDING_HOST = "https://api.openai.com/v1"
+
+  # Server configuration
+  CORS_ORIGINS = "*"
+  LOG_LEVEL = "INFO"
+  LOG_BACKUP_COUNT = "5"
+  LOG_MAX_BYTES = "10485760"
+  MAX_ASYNC = "4"
+  MAX_TOKENS = "32768"
+  TIMEOUT = "300"
+
+  # Storage configuration
+  LIGHTRAG_KV_STORAGE = "JsonKVStorage"
+  LIGHTRAG_VECTOR_STORAGE = "NanoVectorDBStorage"
+  LIGHTRAG_GRAPH_STORAGE = "NetworkXStorage"
+  LIGHTRAG_DOC_STATUS_STORAGE = "JsonDocStatusStorage"
+
+  # Chunking / embedding settings
+  CHUNK_SIZE = "1200"
+  CHUNK_OVERLAP_SIZE = "100"
+  EMBEDDING_BATCH_NUM = "16"
+  EMBEDDING_FUNC_MAX_ASYNC = "4"
+  COSINE_THRESHOLD = "0.2"
+
+  # Caching and summarization
+  ENABLE_LLM_CACHE = "true"
+  ENABLE_LLM_CACHE_FOR_EXTRACT = "true"
+  FORCE_LLM_SUMMARY_ON_MERGE = "6"
+
+  # RAG and summarization limits
+  MAX_GRAPH_NODES = "1000"
+  MAX_PARALLEL_INSERT = "1"
+  MAX_TOKEN_ENTITY_DESC = "4000"
+  MAX_TOKEN_RELATION_DESC = "4000"
+  MAX_TOKEN_SUMMARY = "500"
+  MAX_TOKEN_TEXT_CHUNK = "4000"
+
+  # Authentication token settings
+  JWT_ALGORITHM = "HS256"
+  GUEST_TOKEN_EXPIRE_HOURS = "24"
+  TOKEN_EXPIRE_HOURS = "48"
+
+  # Retrieval and query behaviour
+  HISTORY_TURNS = "3"
+  TOP_K = "60"
+  SUMMARY_LANGUAGE = "English"
+  TEMPERATURE = "0"
+
+  # Other UI and logging flags
+  VERBOSE = "False"
+  WEBUI_TITLE = "Augentik"
+  WEBUI_DESCRIPTION = "Augentik"
+  WORKERS = "1"
+  OLLAMA_EMULATING_MODEL_TAG = "latest"
+
+[http_service]
+  internal_port = 9621
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[http_service.checks]]
+  method = "get"
+  path = "/health"
+  interval = "10s"
+  timeout = "2s"
+  grace_period = "5s"
+
+[mounts]
+  source = "lightrag_data"
+  destination = "/app/data"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024
