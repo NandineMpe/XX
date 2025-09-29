@@ -1,0 +1,1 @@
+import{g as e}from"./index-CnQ5AggB.js";function o(l,t){var c,i,a;l.accDescr&&((c=t.setAccDescription)==null||c.call(t,l.accDescr)),l.accTitle&&((i=t.setAccTitle)==null||i.call(t,l.accTitle)),l.title&&((a=t.setDiagramTitle)==null||a.call(t,l.title))}e(o,"populateCommonDb");export{o as m};
