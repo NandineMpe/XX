@@ -19,14 +19,14 @@
     <link rel="modulepreload" crossorigin href="/assets/mermaid-vendor-DRXBiZaJ-BQYmTMhJ.js">
     <link rel="modulepreload" crossorigin href="/assets/markdown-vendor-XNcT6d8I-Db4GnQXZ.js">
     <link rel="modulepreload" crossorigin href="/assets/feature-retrieval-DFJWfhQ--DMPCAl-5.js">
-    <script type="module" crossorigin src="/assets/index-r0FiR76D.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BSjYq-Fu.css">
+    <script type="module" crossorigin src="/assets/index-CZRndaym.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CR3Yy6RD.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
 
     <script>
-      // DIRECT OVERLAY MOUNT: Bypass broken entry.ts logic entirely
+      // DIRECT OVERLAY MOUNT: Login form UI
       let overlayRoot = null;
 
       function createOverlayRoot() {
@@ -93,7 +93,7 @@
           </div>
         `;
 
-        // REAL LOGIN HANDLER - Same as demo.tsx
+        // REAL LOGIN HANDLER
         document.getElementById('direct-login-form').onsubmit = async function(e) {
           e.preventDefault();
           const username = e.target.username.value;
@@ -130,7 +130,7 @@
             const json = await res.json();
             if (!json.access_token) throw new Error('No access_token in response');
 
-            console.log('DIRECT: Login successful, staying on current domain');
+            console.log('DIRECT: Login successful, storing token and clearing hash');
             localStorage.setItem('augentik_token', String(json.access_token));
             window.location.hash = '';
           } catch (err) {
