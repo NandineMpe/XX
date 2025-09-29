@@ -130,9 +130,9 @@
             const json = await res.json();
             if (!json.access_token) throw new Error('No access_token in response');
 
-            console.log('DIRECT: Login successful, redirecting to backend WebUI');
+            console.log('DIRECT: Login successful, staying on current domain');
             localStorage.setItem('augentik_token', String(json.access_token));
-            window.location.href = 'https://api.augentik.com/webui/#/';
+            window.location.hash = '';
           } catch (err) {
             console.error('DIRECT: Login error', err);
             alert('Login failed. Please check your credentials and try again.');
