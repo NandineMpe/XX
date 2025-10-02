@@ -40,8 +40,12 @@
 
       function mountDirectLoginOverlay() {
         if (!window.location.hash.match(/#\/?login/i)) {
+          // Cleanup: Remove overlay when not on login route
           if (overlayRoot) {
             overlayRoot.style.display = 'none';
+            // Ensure form handler is removed to prevent memory leaks
+            const form = document.getElementById('direct-login-form');
+            if (form) form.onsubmit = null;
             overlayRoot.remove();
             overlayRoot = null;
           }
@@ -134,9 +138,23 @@
             const json = await res.json();
             if (!json.access_token) throw new Error('No access_token in response');
 
-            console.log('DIRECT: Login successful, storing token and reloading');
+            console.log('DIRECT: Login successful, storing token');
             localStorage.setItem('augentik_token', String(json.access_token));
-            window.location.href = '/webui/#/';
+
+            // Cleanup overlay before reload to prevent flash
+            if (overlayRoot) {
+              overlayRoot.style.display = 'none';
+              const form = document.getElementById('direct-login-form');
+              if (form) form.onsubmit = null;
+            }
+
+            // Clear login hash before reload to prevent overlay re-mount
+            window.location.hash = '';
+
+            console.log('DIRECT: Reloading page to initialize authenticated session');
+            // Force full page reload to remount React with token available
+            // This ensures React app reads token from localStorage on mount
+            window.location.reload();
           } catch (err) {
             console.error('DIRECT: Login error', err);
             alert('Login failed. Please check your credentials and try again.');
