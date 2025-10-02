@@ -19,14 +19,14 @@
     <link rel="modulepreload" crossorigin href="/assets/mermaid-vendor-DRXBiZaJ-BQYmTMhJ.js">
     <link rel="modulepreload" crossorigin href="/assets/markdown-vendor-XNcT6d8I-Db4GnQXZ.js">
     <link rel="modulepreload" crossorigin href="/assets/feature-retrieval-DFJWfhQ--DMPCAl-5.js">
-    <script type="module" crossorigin src="/assets/index-CnQ5AggB.js"></script>
+    <script type="module" crossorigin src="/assets/index-CfMGOf3b.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-CR3Yy6RD.css">
   </head>
   <body>
     <div id="root"></div>
 
     <script>
-      // DIRECT OVERLAY MOUNT: Login form UI
+      // DIRECT OVERLAY MOUNT: Login form UI with hero section
       let overlayRoot = null;
 
       function createOverlayRoot() {
@@ -40,7 +40,11 @@
 
       function mountDirectLoginOverlay() {
         if (!window.location.hash.match(/#\/?login/i)) {
-          if (overlayRoot) overlayRoot.style.display = 'none';
+          if (overlayRoot) {
+            overlayRoot.style.display = 'none';
+            overlayRoot.remove();
+            overlayRoot = null;
+          }
           return;
         }
 
@@ -130,9 +134,9 @@
             const json = await res.json();
             if (!json.access_token) throw new Error('No access_token in response');
 
-            console.log('DIRECT: Login successful, storing token and clearing hash');
+            console.log('DIRECT: Login successful, storing token and reloading');
             localStorage.setItem('augentik_token', String(json.access_token));
-            window.location.hash = '';
+            window.location.href = '/webui/#/';
           } catch (err) {
             console.error('DIRECT: Login error', err);
             alert('Login failed. Please check your credentials and try again.');

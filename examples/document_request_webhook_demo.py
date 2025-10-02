@@ -15,7 +15,7 @@ import uuid
 from typing import Dict, Any
 
 # Configuration
-LIGHTRAG_BASE_URL = "https://api.augentik.com"  # Production URL
+LIGHTRAG_BASE_URL = "http://localhost:9621"  # Change this to your LightRAG server URL
 API_KEY = None  # Set this if you have API key authentication enabled
 
 # Headers for requests

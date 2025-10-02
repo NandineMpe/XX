@@ -209,11 +209,8 @@ def create_app(args):
             allow_headers=["*"],
         )
     else:
-        # Use configured origins plus defaults
+        # Use configured origins plus localhost for development
         default_origins = [
-            "https://augentik.com",
-            "https://www.augentik.com",
-            "https://api.augentik.com",
             "http://localhost:5173",
         ]
         all_origins = list(set(cors_origins + default_origins))

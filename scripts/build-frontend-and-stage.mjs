@@ -79,7 +79,8 @@ async function writeAssetManifest(webuiDir) {
   }
 
   const html = await fs.readFile(htmlPath, 'utf8');
-  const jsMatches = [...html.matchAll(/\/(?:webui\/)?assets\/([A-Za-z0-9._-]+\.js)/g)].map((match) => match[1]);
+  // Support absolute "/assets/..." and relative "assets/..." or "./assets/..."
+  const jsMatches = [...html.matchAll(/(?:\.|)?\/?(?:webui\/)?assets\/([A-Za-z0-9._-]+\.js)/g)].map((match) => match[1]);
   if (jsMatches.length === 0) {
     throw new Error('Unable to locate any JS entrypoints in WebUI index.html');
   }
@@ -88,7 +89,7 @@ async function writeAssetManifest(webuiDir) {
     throw new Error('Unable to determine WebUI entry bundle from index.html');
   }
 
-  let cssMatches = [...html.matchAll(/\/(?:webui\/)?assets\/([A-Za-z0-9._-]+\.css)/g)].map((match) => match[1]);
+  let cssMatches = [...html.matchAll(/(?:\.|)?\/?(?:webui\/)?assets\/([A-Za-z0-9._-]+\.css)/g)].map((match) => match[1]);
   const previousManifest = existsSync(backendManifestPath)
     ? JSON.parse(await fs.readFile(backendManifestPath, 'utf8'))
     : null;
@@ -152,6 +153,19 @@ async function copyViteManifest(distPath, targetDir) {
   }
 }
 
+async function ensureRelativeAssetPaths(webuiDir) {
+  const indexPath = path.join(webuiDir, 'index.html');
+  if (!existsSync(indexPath)) return;
+  let html = await fs.readFile(indexPath, 'utf8');
+
+  // Rewrite absolute asset URLs to relative
+  html = html.replace(/(href|src)=["']\/(?:webui\/)?assets\//g, '$1="./assets/');
+  // Also handle bare "assets/" (no leading slash) to ensure it stays relative with ./ prefix
+  html = html.replace(/(href|src)=["']assets\//g, '$1="./assets/');
+
+  await fs.writeFile(indexPath, html, 'utf8');
+}
+
 function run(command, options) {
   execSync(command, { stdio: 'inherit', ...options });
 }
@@ -194,6 +208,7 @@ async function main() {
   await flattenWebui(backendWebuiPath);
   await copyViteManifest(distPath, backendWebuiPath);
   await writeAssetManifest(backendWebuiPath);
+  await ensureRelativeAssetPaths(backendWebuiPath);
 
   if (shouldStage) {
     run('git add lightrag/api/webui lightrag/api/asset-manifest.json', { cwd });
