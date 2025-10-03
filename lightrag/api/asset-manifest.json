@@ -1,9 +1,12 @@
 {
-  "entry_js": "index-CfMGOf3b.js",
+  "entry_js": "index-r0FiR76D.js",
   "entry_css": [
-    "index-CR3Yy6RD.css"
+    "index-BSjYq-Fu.css"
   ],
   "legacy_entry_aliases": [
+    "index-7mFjo7s4.js",
+    "index-Cug7FGcn.js",
+    "index-In-xFqsI.js",
     "index-B1bgEoWF.js",
     "index-B78kgXQi.js",
     "index-BiysuAFs.js",
@@ -15,6 +18,7 @@
     "index-CnQ5AggB.js",
     "index-DaDDTdBO.js",
     "index-Dw-VtyOZ.js",
-    "index-r0FiR76D.js"
+    "index-CfMGOf3b.js",
+    "index-BaLmhcsU.js"
   ]
 }

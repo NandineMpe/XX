@@ -2,7 +2,7 @@
 LightRAG FastAPI Server
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, Request, status
 import asyncio
 import os
 import logging
@@ -10,7 +10,7 @@ import logging.config
 import uvicorn
 import pipmaster as pm
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.responses import RedirectResponse, FileResponse, JSONResponse
 from pathlib import Path
 import configparser
 from ascii_colors import ASCIIColors
@@ -76,6 +76,15 @@ config.read("config.ini")
 
 # Global authentication configuration
 auth_configured = bool(auth_handler.accounts)
+
+SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "AUGENTIK-API-TOKEN")
+SESSION_COOKIE_PATH = os.getenv("SESSION_COOKIE_PATH", "/")
+SESSION_COOKIE_DOMAIN = os.getenv("SESSION_COOKIE_DOMAIN") or None
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "true").lower() != "false"
+SESSION_COOKIE_HTTP_ONLY = (
+    os.getenv("SESSION_COOKIE_HTTP_ONLY", "true").lower() != "false"
+)
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "lax")
 
 
 def create_app(args):
@@ -225,6 +234,26 @@ def create_app(args):
 
     # Create combined auth dependency for all endpoints
     combined_auth = get_combined_auth_dependency(api_key)
+
+    def build_auth_response(payload: dict, max_age: int | None = None) -> JSONResponse:
+        response = JSONResponse(content=payload)
+        token_value = payload.get("access_token")
+        if token_value:
+            cookie_max_age = max_age
+            if cookie_max_age is None:
+                cookie_max_age = auth_handler.expire_hours * 3600
+            response.set_cookie(
+                key=SESSION_COOKIE_NAME,
+                value=token_value,
+                max_age=cookie_max_age,
+                expires=cookie_max_age,
+                httponly=SESSION_COOKIE_HTTP_ONLY,
+                secure=SESSION_COOKIE_SECURE,
+                samesite=SESSION_COOKIE_SAMESITE,
+                path=SESSION_COOKIE_PATH,
+                domain=SESSION_COOKIE_DOMAIN,
+            )
+        return response
 
     # Create working directory if it doesn't exist
     Path(args.working_dir).mkdir(parents=True, exist_ok=True)
@@ -400,35 +429,53 @@ def create_app(args):
         """Redirect root path to /webui"""
         return RedirectResponse(url="/webui")
 
-    @app.get("/auth-status")
-    async def get_auth_status():
-        """Get authentication status and guest token if auth is not configured"""
+    @app.get("/auth/status")
+    async def get_auth_status(
+        request: Request, _: None = Depends(combined_auth)
+    ) -> dict[str, Any]:
+        """Validate the current authentication session and return status details."""
 
         if not auth_handler.accounts:
-            # Authentication not configured, return guest token
             guest_token = auth_handler.create_token(
                 username="guest", role="guest", metadata={"auth_mode": "disabled"}
             )
             return {
+                "authenticated": True,
                 "auth_configured": False,
+                "auth_mode": "disabled",
+                "username": "guest",
+                "role": "guest",
+                "token_source": "generated",
                 "access_token": guest_token,
                 "token_type": "bearer",
-                "auth_mode": "disabled",
-                "message": "Authentication is disabled. Using guest access.",
                 "core_version": core_version,
                 "api_version": __api_version__,
                 "webui_title": webui_title,
                 "webui_description": webui_description,
             }
 
-        return {
+        user_info = getattr(request.state, "auth_user", None) or {}
+        auth_source = getattr(request.state, "auth_source", None)
+        raw_token = getattr(request.state, "auth_token", None)
+
+        response: dict[str, Any] = {
+            "authenticated": True,
             "auth_configured": True,
             "auth_mode": "enabled",
+            "username": user_info.get("username"),
+            "role": user_info.get("role"),
+            "token_source": auth_source or "unknown",
             "core_version": core_version,
             "api_version": __api_version__,
             "webui_title": webui_title,
             "webui_description": webui_description,
         }
+
+        if raw_token:
+            response["access_token"] = raw_token
+            response["token_type"] = "bearer"
+
+        return response
 
     @app.post("/login")
     async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -437,7 +484,7 @@ def create_app(args):
             guest_token = auth_handler.create_token(
                 username="guest", role="guest", metadata={"auth_mode": "disabled"}
             )
-            return {
+            payload = {
                 "access_token": guest_token,
                 "token_type": "bearer",
                 "auth_mode": "disabled",
@@ -447,6 +494,7 @@ def create_app(args):
                 "webui_title": webui_title,
                 "webui_description": webui_description,
             }
+            return build_auth_response(payload, auth_handler.guest_expire_hours * 3600)
         username = form_data.username
         if auth_handler.accounts.get(username) != form_data.password:
             raise HTTPException(
@@ -457,7 +505,7 @@ def create_app(args):
         user_token = auth_handler.create_token(
             username=username, role="user", metadata={"auth_mode": "enabled"}
         )
-        return {
+        payload = {
             "access_token": user_token,
             "token_type": "bearer",
             "auth_mode": "enabled",
@@ -466,6 +514,7 @@ def create_app(args):
             "webui_title": webui_title,
             "webui_description": webui_description,
         }
+        return build_auth_response(payload, auth_handler.expire_hours * 3600)
 
     @app.get("/health")
     async def health_check():

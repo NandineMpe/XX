@@ -56,6 +56,13 @@ for path in whitelist_paths:
 # Global authentication configuration
 auth_configured = bool(auth_handler.accounts)
 
+SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "AUGENTIK-API-TOKEN")
+FALLBACK_COOKIE_NAMES = [
+    SESSION_COOKIE_NAME,
+    "AUGENTIK-API-TOKEN",
+    "augentik_token",
+]
+
 
 def get_combined_auth_dependency(api_key: Optional[str] = None):
     """
@@ -107,9 +114,15 @@ def get_combined_auth_dependency(api_key: Optional[str] = None):
                 token_info = auth_handler.validate_token(token)
                 # Accept guest token if no auth is configured
                 if not auth_configured and token_info.get("role") == "guest":
+                    request.state.auth_user = token_info
+                    request.state.auth_source = "header"
+                    request.state.auth_token = token
                     return
                 # Accept non-guest token if auth is configured
                 if auth_configured and token_info.get("role") != "guest":
+                    request.state.auth_user = token_info
+                    request.state.auth_source = "header"
+                    request.state.auth_token = token
                     return
 
                 # Token validation failed, immediately return 401 error
@@ -122,6 +135,32 @@ def get_combined_auth_dependency(api_key: Optional[str] = None):
                 if e.status_code == status.HTTP_401_UNAUTHORIZED:
                     raise
                 # For other exceptions, continue processing
+
+        # 2b. Attempt to validate session cookies when no bearer token was supplied
+        cookie_token = None
+        for cookie_name in FALLBACK_COOKIE_NAMES:
+            value = request.cookies.get(cookie_name)
+            if value:
+                cookie_token = value
+                break
+
+        if not token and cookie_token:
+            try:
+                token_info = auth_handler.validate_token(cookie_token)
+                if not auth_configured and token_info.get("role") == "guest":
+                    request.state.auth_user = token_info
+                    request.state.auth_source = "cookie"
+                    request.state.auth_token = cookie_token
+                    return
+                if auth_configured and token_info.get("role") != "guest":
+                    request.state.auth_user = token_info
+                    request.state.auth_source = "cookie"
+                    request.state.auth_token = cookie_token
+                    return
+            except HTTPException as e:
+                if e.status_code == status.HTTP_401_UNAUTHORIZED:
+                    # Invalid cookie token; proceed to standard credential handling
+                    pass
 
         # 3. Acept all request if no API protection needed
         if not auth_configured and not api_key_configured:
