@@ -26,38 +26,40 @@
     <div id="root"></div>
 
     <script>
-      // DIRECT OVERLAY MOUNT: Login form UI with hero section
-      let overlayRoot = null;
+      const isBackendSurface = /^\/(webui|auth)(\/|$)/i.test(window.location.pathname);
+      if (!isBackendSurface) {
+        // DIRECT OVERLAY MOUNT: Login form UI with hero section
+        let overlayRoot = null;
 
-      function createOverlayRoot() {
-        if (overlayRoot) return overlayRoot;
-        overlayRoot = document.createElement('div');
-        overlayRoot.id = 'login-overlay-direct';
-        overlayRoot.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;display:none;';
-        document.body.appendChild(overlayRoot);
-        return overlayRoot;
-      }
-
-      function mountDirectLoginOverlay() {
-        if (!window.location.hash.match(/#\/?login/i)) {
-          // Cleanup: Remove overlay when not on login route
-          if (overlayRoot) {
-            overlayRoot.style.display = 'none';
-            // Ensure form handler is removed to prevent memory leaks
-            const form = document.getElementById('direct-login-form');
-            if (form) form.onsubmit = null;
-            overlayRoot.remove();
-            overlayRoot = null;
-          }
-          return;
+        function createOverlayRoot() {
+          if (overlayRoot) return overlayRoot;
+          overlayRoot = document.createElement('div');
+          overlayRoot.id = 'login-overlay-direct';
+          overlayRoot.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;display:none;';
+          document.body.appendChild(overlayRoot);
+          return overlayRoot;
         }
 
-        console.log('DIRECT: Mounting login overlay for hash:', window.location.hash);
-        const root = createOverlayRoot();
-        root.style.display = 'block';
+        function mountDirectLoginOverlay() {
+          if (!window.location.hash.match(/#\/?login/i)) {
+            // Cleanup: Remove overlay when not on login route
+            if (overlayRoot) {
+              overlayRoot.style.display = 'none';
+              // Ensure form handler is removed to prevent memory leaks
+              const form = document.getElementById('direct-login-form');
+              if (form) form.onsubmit = null;
+              overlayRoot.remove();
+              overlayRoot = null;
+            }
+            return;
+          }
 
-        // HARDCODED RICH SIGNIN COMPONENT
-        root.innerHTML = `
+          console.log('DIRECT: Mounting login overlay for hash:', window.location.hash);
+          const root = createOverlayRoot();
+          root.style.display = 'block';
+
+          // HARDCODED RICH SIGNIN COMPONENT
+          root.innerHTML = `
           <div style="height:100vh;display:flex;font-family:system-ui;background:#000;color:#fff;">
             <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;">
               <div style="width:100%;max-width:400px;">
@@ -101,69 +103,70 @@
           </div>
         `;
 
-        // REAL LOGIN HANDLER
-        document.getElementById('direct-login-form').onsubmit = async function(e) {
-          e.preventDefault();
-          const username = e.target.username.value;
-          const password = e.target.password.value;
+          // REAL LOGIN HANDLER
+          document.getElementById('direct-login-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const username = e.target.username.value;
+            const password = e.target.password.value;
 
-          if (!username || !password) {
-            alert('Please enter both username and password');
-            return;
-          }
-
-          console.log('DIRECT: Real login attempt with endpoint /login');
-
-          const params = new URLSearchParams();
-          params.append('username', username);
-          params.append('password', password);
-
-          try {
-            const res = await fetch('/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              body: params.toString(),
-            });
-
-            console.log('DIRECT: Login response status:', res.status);
-
-            if (!res.ok) {
-              const txt = await res.text();
-              console.log('DIRECT: Login failed with response:', txt);
-              throw new Error(txt || `Login failed: ${res.status}`);
+            if (!username || !password) {
+              alert('Please enter both username and password');
+              return;
             }
 
-            const json = await res.json();
-            if (!json.access_token) throw new Error('No access_token in response');
+            console.log('DIRECT: Real login attempt with endpoint /login');
 
-            console.log('DIRECT: Login successful, storing token');
-            localStorage.setItem('augentik_token', String(json.access_token));
+            const params = new URLSearchParams();
+            params.append('username', username);
+            params.append('password', password);
 
-            // Cleanup overlay before reload to prevent flash
-            if (overlayRoot) {
-              overlayRoot.style.display = 'none';
-              const form = document.getElementById('direct-login-form');
-              if (form) form.onsubmit = null;
+            try {
+              const res = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString(),
+              });
+
+              console.log('DIRECT: Login response status:', res.status);
+
+              if (!res.ok) {
+                const txt = await res.text();
+                console.log('DIRECT: Login failed with response:', txt);
+                throw new Error(txt || `Login failed: ${res.status}`);
+              }
+
+              const json = await res.json();
+              if (!json.access_token) throw new Error('No access_token in response');
+
+              console.log('DIRECT: Login successful, storing token');
+              localStorage.setItem('augentik_token', String(json.access_token));
+
+              // Cleanup overlay before reload to prevent flash
+              if (overlayRoot) {
+                overlayRoot.style.display = 'none';
+                const form = document.getElementById('direct-login-form');
+                if (form) form.onsubmit = null;
+              }
+
+              // Clear login hash before reload to prevent overlay re-mount
+              window.location.hash = '';
+
+              console.log('DIRECT: Reloading page to initialize authenticated session');
+              // Force full page reload to remount React with token available
+              // This ensures React app reads token from localStorage on mount
+              window.location.reload();
+            } catch (err) {
+              console.error('DIRECT: Login error', err);
+              alert('Login failed. Please check your credentials and try again.');
             }
+          };
+        }
 
-            // Clear login hash before reload to prevent overlay re-mount
-            window.location.hash = '';
-
-            console.log('DIRECT: Reloading page to initialize authenticated session');
-            // Force full page reload to remount React with token available
-            // This ensures React app reads token from localStorage on mount
-            window.location.reload();
-          } catch (err) {
-            console.error('DIRECT: Login error', err);
-            alert('Login failed. Please check your credentials and try again.');
-          }
-        };
+        window.addEventListener('DOMContentLoaded', mountDirectLoginOverlay);
+        window.addEventListener('hashchange', mountDirectLoginOverlay);
       }
-
-      window.addEventListener('DOMContentLoaded', mountDirectLoginOverlay);
-      window.addEventListener('hashchange', mountDirectLoginOverlay);
     </script>
 
     <!-- Zoho Form Modal -->
@@ -185,33 +188,35 @@
     </div>
 
     <script>
-      // Zoho modal controls
-      document.addEventListener('DOMContentLoaded', function() {
-        var btn = document.getElementById('exclusive-access-launch');
-        var overlay = document.getElementById('zoho-exclusive-overlay');
-        var modal = document.getElementById('zoho-exclusive-modal');
-        var closeBtn = document.getElementById('zoho-exclusive-close');
+      if (!isBackendSurface) {
+        // Zoho modal controls
+        document.addEventListener('DOMContentLoaded', function() {
+          var btn = document.getElementById('exclusive-access-launch');
+          var overlay = document.getElementById('zoho-exclusive-overlay');
+          var modal = document.getElementById('zoho-exclusive-modal');
+          var closeBtn = document.getElementById('zoho-exclusive-close');
 
-        function openModal() {
-          overlay.hidden = false;
-          modal.hidden = false;
-          overlay.style.display = 'block';
-          modal.style.display = 'flex';
-          document.body.style.overflow = 'hidden';
-        }
+          function openModal() {
+            overlay.hidden = false;
+            modal.hidden = false;
+            overlay.style.display = 'block';
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+          }
 
-        function closeModal() {
-          overlay.hidden = true;
-          modal.hidden = true;
-          overlay.style.display = 'none';
-          modal.style.display = 'none';
-          document.body.style.overflow = '';
-        }
+          function closeModal() {
+            overlay.hidden = true;
+            modal.hidden = true;
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+          }
 
-        if (btn) btn.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (overlay) overlay.addEventListener('click', closeModal);
-      });
+          if (btn) btn.addEventListener('click', openModal);
+          if (closeBtn) closeBtn.addEventListener('click', closeModal);
+          if (overlay) overlay.addEventListener('click', closeModal);
+        });
+      }
     </script>
   </body>
 </html>
