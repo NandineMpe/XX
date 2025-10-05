@@ -98,6 +98,15 @@ class QueryParam:
     If proivded, this will be use instead of the default vaulue from prompt template.
     """
 
+    lens_mode: str = "auto"
+    """Guidance lens mode controlling source routing (auto/manual/custom)."""
+
+    include_document_types: list[str] = field(default_factory=list)
+    """Document types that must be included during retrieval (e.g., ['ifrs_ias'])."""
+
+    lens_sources: list[str] = field(default_factory=list)
+    """Human-friendly list of enabled sources (ifrs, gaap, firm) for downstream telemetry."""
+
 
 @dataclass
 class StorageNameSpace(ABC):

@@ -461,6 +461,7 @@ class DocumentManager:
             ".css",  # Cascading Style Sheets
             ".scss",  # Sassy CSS
             ".less",  # LESS CSS
+            ".mermaid",  # Mermaid diagrams
         ),
     ):
         self.input_dir = Path(input_dir)
@@ -541,6 +542,7 @@ async def pipeline_enqueue_file(rag: LightRAG, file_path: Path) -> bool:
                 | ".css"
                 | ".scss"
                 | ".less"
+                | ".mermaid"
             ):
                 try:
                     # Try to decode as UTF-8

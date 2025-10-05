@@ -1,10 +1,10 @@
-"""
-This module contains all query-related routes for the LightRAG API.
-"""
+"""Query routing endpoints with guidance lens support."""
 
 import json
 import logging
-from typing import Any, Dict, List, Literal, Optional
+import re
+from dataclasses import dataclass
+from typing import Any, Dict, List, Literal, Optional, Set
 
 from fastapi import APIRouter, Depends, HTTPException
 from lightrag.base import QueryParam
@@ -14,6 +14,20 @@ from pydantic import BaseModel, Field, field_validator
 from ascii_colors import trace_exception
 
 router = APIRouter(tags=["query"])
+
+
+class LensConfig(BaseModel):
+    """Connector-style lens configuration provided by the UI."""
+
+    smart_routing: bool = Field(
+        default=True,
+        description="Enable automatic source routing based on query intent",
+    )
+    include_ifrs: bool = Field(default=True, description="Include IFRS / IAS documents")
+    include_gaap: bool = Field(default=True, description="Include US GAAP documents")
+    include_firm_guidance: bool = Field(
+        default=True, description="Include firm guidance and procedures"
+    )
 
 
 class QueryRequest(BaseModel):
@@ -87,6 +101,11 @@ class QueryRequest(BaseModel):
         description="User-provided prompt for the query. If provided, this will be used instead of the default value from prompt template.",
     )
 
+    lens: Optional[LensConfig] = Field(
+        default=None,
+        description="Guidance lens configuration mirroring connector toggles.",
+    )
+
     @field_validator("query", mode="after")
     @classmethod
     def query_strip_after(cls, query: str) -> str:
@@ -109,7 +128,7 @@ class QueryRequest(BaseModel):
     def to_query_params(self, is_stream: bool) -> "QueryParam":
         """Converts a QueryRequest instance into a QueryParam instance."""
         # Use Pydantic's `.model_dump(exclude_none=True)` to remove None values automatically
-        request_data = self.model_dump(exclude_none=True, exclude={"query"})
+        request_data = self.model_dump(exclude_none=True, exclude={"query", "lens"})
 
         # Ensure `mode` and `stream` are set explicitly
         param = QueryParam(**request_data)
@@ -120,6 +139,112 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     response: str = Field(
         description="The generated response",
+    )
+    lens_mode: Optional[str] = Field(
+        default=None, description="Lens mode that was applied for this answer"
+    )
+    document_types: Optional[List[str]] = Field(
+        default=None, description="Document types retrieved for the answer"
+    )
+    sources_used: Optional[List[str]] = Field(
+        default=None, description="Enabled source connectors during retrieval"
+    )
+
+
+DOCUMENT_TYPE_ALIASES: Dict[str, List[str]] = {
+    "ifrs": ["ifrs_ias"],
+    "gaap": ["us_gaap"],
+    "standards": ["ifrs_ias", "us_gaap"],
+    "firm": ["firm_guidance"],
+    "pipeline": ["standards_pipeline"],
+}
+
+ALL_KNOWN_SOURCES = ["ifrs", "gaap", "firm"]
+
+IFRS_KEYWORDS = (
+    "ifrs",
+    "ias",
+    "iasb",
+    "international accounting standard",
+)
+
+GAAP_KEYWORDS = (
+    "us gaap",
+    "gaap",
+    "fasb",
+)
+
+FIRM_KEYWORDS = (
+    "audit procedure",
+    "testing steps",
+    "how do we audit",
+    "workpaper",
+    "firm guidance",
+    "methodology",
+    "internal control testing",
+)
+
+
+@dataclass
+class LensResolution:
+    mode: str
+    document_types: List[str]
+    enabled_sources: List[str]
+
+
+def _auto_detect_sources(query: str) -> Set[str]:
+    lowered = query.lower()
+    include: Set[str] = set()
+
+    if any(keyword in lowered for keyword in IFRS_KEYWORDS) or re.search(
+        r"ias\s*\d+", lowered
+    ):
+        include.add("ifrs")
+
+    if any(keyword in lowered for keyword in GAAP_KEYWORDS) or re.search(
+        r"asc\s*\d{3}(?:-\d{2})*", lowered
+    ):
+        include.add("gaap")
+
+    if any(keyword in lowered for keyword in FIRM_KEYWORDS):
+        include.add("firm")
+
+    if "pipeline" in lowered or "mermaid" in lowered:
+        include.add("pipeline")
+
+    if not include:
+        include.update(ALL_KNOWN_SOURCES)
+
+    return include
+
+
+def resolve_lens_settings(query: str, lens: Optional[LensConfig]) -> LensResolution:
+    if lens and not lens.smart_routing:
+        enabled = []
+        if lens.include_ifrs:
+            enabled.append("ifrs")
+        if lens.include_gaap:
+            enabled.append("gaap")
+        if lens.include_firm_guidance:
+            enabled.append("firm")
+
+        if not enabled:
+            enabled = list(ALL_KNOWN_SOURCES)
+
+        mode = "manual"
+    else:
+        enabled = sorted(_auto_detect_sources(query))
+        mode = "auto"
+
+    # Map enabled sources to document types
+    doc_types: Set[str] = set()
+    for source in enabled:
+        doc_types.update(DOCUMENT_TYPE_ALIASES.get(source, []))
+
+    return LensResolution(
+        mode=mode,
+        document_types=sorted(doc_types),
+        enabled_sources=enabled,
     )
 
 
@@ -145,18 +270,37 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
                        with status code 500 and detail containing the exception message.
         """
         try:
+            lens_resolution = resolve_lens_settings(request.query, request.lens)
             param = request.to_query_params(False)
+            param.lens_mode = lens_resolution.mode
+            param.include_document_types = lens_resolution.document_types
+            param.lens_sources = lens_resolution.enabled_sources
             response = await rag.aquery(request.query, param=param)
 
             # If response is a string (e.g. cache hit), return directly
             if isinstance(response, str):
-                return QueryResponse(response=response)
+                return QueryResponse(
+                    response=response,
+                    lens_mode=param.lens_mode,
+                    document_types=param.include_document_types or None,
+                    sources_used=lens_resolution.enabled_sources,
+                )
 
             if isinstance(response, dict):
                 result = json.dumps(response, indent=2)
-                return QueryResponse(response=result)
+                return QueryResponse(
+                    response=result,
+                    lens_mode=param.lens_mode,
+                    document_types=param.include_document_types or None,
+                    sources_used=lens_resolution.enabled_sources,
+                )
             else:
-                return QueryResponse(response=str(response))
+                return QueryResponse(
+                    response=str(response),
+                    lens_mode=param.lens_mode,
+                    document_types=param.include_document_types or None,
+                    sources_used=lens_resolution.enabled_sources,
+                )
         except Exception as e:
             trace_exception(e)
             raise HTTPException(status_code=500, detail=str(e))
@@ -174,7 +318,11 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
             StreamingResponse: A streaming response containing the RAG query results.
         """
         try:
+            lens_resolution = resolve_lens_settings(request.query, request.lens)
             param = request.to_query_params(True)
+            param.lens_mode = lens_resolution.mode
+            param.include_document_types = lens_resolution.document_types
+            param.lens_sources = lens_resolution.enabled_sources
             response = await rag.aquery(request.query, param=param)
 
             from fastapi.responses import StreamingResponse
@@ -201,6 +349,8 @@ def create_query_routes(rag, api_key: Optional[str] = None, top_k: int = 60):
                     "Connection": "keep-alive",
                     "Content-Type": "application/x-ndjson",
                     "X-Accel-Buffering": "no",  # Ensure proper handling of streaming response when proxied by Nginx
+                    "X-Lens-Mode": param.lens_mode,
+                    "X-Lens-Sources": ",".join(lens_resolution.enabled_sources),
                 },
             )
         except Exception as e:

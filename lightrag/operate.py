@@ -1159,6 +1159,18 @@ async def _get_vector_context(
         if not results:
             return [], [], []
 
+        allowed_types = {
+            doc_type
+            for doc_type in (query_param.include_document_types or [])
+            if doc_type
+        }
+        if allowed_types:
+            filtered_results = [
+                dp for dp in results if dp.get("document_type") in allowed_types
+            ]
+            if filtered_results:
+                results = filtered_results
+
         valid_chunks = []
         for result in results:
             if "content" in result:
@@ -1167,6 +1179,22 @@ async def _get_vector_context(
                     "content": result["content"],
                     "created_at": result.get("created_at", None),
                     "file_path": result.get("file_path", "unknown_source"),
+                    "document_type": result.get("document_type"),
+                    "metadata": {
+                        key: result.get(key)
+                        for key in (
+                            "document_type",
+                            "section_id",
+                            "section_title",
+                            "section_path",
+                            "section_level",
+                            "chunk_labels",
+                            "topics",
+                            "keywords",
+                            "references",
+                        )
+                        if result.get(key) is not None
+                    },
                 }
                 valid_chunks.append(chunk_with_time)
 

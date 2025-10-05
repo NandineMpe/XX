@@ -1,0 +1,41 @@
+graph TB
+    Start[Document Upload] --> Classify{Document Type?}
+
+    Classify -->|IFRS/IAS| ParseIFRS[IFRS Parser]
+    Classify -->|US GAAP| ParseGAAP[GAAP Parser]
+    Classify -->|Firm Guidance| ParseFirm[Firm Parser]
+
+    ParseIFRS --> Structure1[Extract Structure<br/>Section numbers<br/>Headings<br/>Hierarchies]
+    ParseGAAP --> Structure2[Extract Structure<br/>ASC references<br/>Topic-Subtopic-Section]
+    ParseFirm --> Structure3[Extract Structure<br/>Procedures<br/>Steps<br/>Guidelines]
+
+    Structure1 --> Chunk1[Smart Chunking<br/>Preserve paragraphs<br/>Keep context intact]
+    Structure2 --> Chunk1
+    Structure3 --> Chunk1
+
+    Chunk1 --> Classify2[Classify Chunks<br/>- Principle<br/>- Requirement<br/>- Guidance<br/>- Example<br/>- Disclosure<br/>- Procedure]
+
+    Classify2 --> Extract[Extract Metadata<br/>Topics<br/>Keywords<br/>Entities<br/>Requirements]
+
+    Extract --> References[Build Reference Graph<br/>Cross-references<br/>Related standards<br/>Superseded standards]
+
+    References --> Enrich[Enrich Content<br/>Add section context<br/>Link parent sections<br/>Tag applicability]
+
+    Enrich --> Embed[Generate Embeddings<br/>Content + Context<br/>Dense vectors]
+
+    Embed --> Semantic[Compute Relationships<br/>Semantic similarity<br/>Related chunks<br/>Topic clustering]
+
+    Semantic --> Quality{Quality Check}
+
+    Quality -->|Pass| Store[Store in Vector DB<br/>Embeddings<br/>Metadata<br/>References]
+    Quality -->|Fail| Error[Log Error<br/>Manual Review]
+
+    Store --> Index[Update Indices<br/>Topic index<br/>Standard reference index<br/>Requirement index]
+
+    Index --> Complete[Ingestion Complete<br/>Ready for Retrieval]
+
+    style Start fill:#e1f5e1
+    style Complete fill:#e1f5e1
+    style Store fill:#fff4e1
+    style Embed fill:#e1f0ff
+    style Quality fill:#ffe1e1
